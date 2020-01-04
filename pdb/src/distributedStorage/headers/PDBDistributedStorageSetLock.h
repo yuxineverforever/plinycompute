@@ -12,7 +12,6 @@ using PDBDistributedStoragePtr = std::shared_ptr<PDBDistributedStorage>;
  * This enum indicates what state the set currently is
  */
 enum class PDBDistributedStorageSetState {
-
   NONE,
   WRITING_DATA,
   READING_DATA,

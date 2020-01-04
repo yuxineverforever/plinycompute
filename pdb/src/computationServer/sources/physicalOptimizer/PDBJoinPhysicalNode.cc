@@ -139,7 +139,7 @@ pdb::PDBPlanningResult pdb::PDBJoinPhysicalNode::generateAlgorithm(PDBAbstractPh
 }
 
 // set this value to some reasonable value // TODO this needs to be smarter
-size_t pdb::PDBJoinPhysicalNode::SHUFFLE_JOIN_THRASHOLD = 0;
+size_t pdb::PDBJoinPhysicalNode::SHUFFLE_JOIN_THRASHOLD = std::numeric_limits<int>::max();
 
 size_t pdb::PDBJoinPhysicalNode::getPrimarySourcesSize(pdb::PDBPageSetCosts &pageSetCosts) {
 

@@ -70,6 +70,7 @@ public:
 
     // get a particular node in the computational plan
     pdb::ComputationNode& getNode(const std::string& whichComputationNode) {
+        std::cout<<"whichComputationNode: " << whichComputationNode << std::endl;
         if (allConstituentComputations.count(whichComputationNode) == 0) {
             std::cout << "This is bad. I did not find a node corresponding to "
                       << whichComputationNode << "\n";

@@ -16,7 +16,7 @@
 
 namespace pdb {
 
-// this class is used to encapsulte the computation that is responsible for probing a hash table
+// this class is used to encapsulate the computation that is responsible for probing a hash table
 template<typename RHSType>
 class JoinProbeExecution : public ComputeExecutor {
 
@@ -147,8 +147,7 @@ class JoinProbeExecution : public ComputeExecutor {
 
     // truncate if we have extra
     eraseEnd<RHSType>(overallCounter, 0, columns);
-
-    // and finally, we need to relpicate the input data
+    // and finally, we need to replicate the input data
     myMachine.replicate(input, output, counts, offset);
 
     // outta here!

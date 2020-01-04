@@ -55,6 +55,8 @@ std::pair<bool, std::string> pdb::PDBStorageManagerFrontend::handleGetPageReques
     string error;
     sendUsingMe->sendObject(response, error);
 
+    std::cout << "This happened" << "\n";
+
     // This is an issue we simply return false only a manager can serve pages
     return make_pair(false, error);
   }

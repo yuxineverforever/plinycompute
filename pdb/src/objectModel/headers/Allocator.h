@@ -399,7 +399,7 @@ template <class ObjType>
 class Handle;
 
 
-// this is the Allocator class.  There is one allocator per thread.  The allocator
+// This is the Allocator class.  There is one allocator per thread.  The allocator
 // is responsible for managing the RAM that is used to allocate everything that
 // is descended from object.  Most programmers (even PDB engineers) will never touch
 // the allocator class directly.

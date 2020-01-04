@@ -10,9 +10,9 @@ using namespace pdb;
 using namespace pdb::matrix;
 
 // some constants for the test
-const size_t blockSize = 2048;
-const uint32_t matrixRows = 10000;
-const uint32_t matrixColumns = 10000;
+const size_t blockSize = 1024;
+const uint32_t matrixRows = 10;
+const uint32_t matrixColumns = 10;
 const uint32_t numRows = 2;
 const uint32_t numCols = 2;
 
@@ -114,11 +114,14 @@ int main(int argc, char* argv[]) {
     // grab the record
     auto r = it->getNextRecord();
 
+    int32_t  outputCount = 0;
     // write out the values
     float *values = r->data.data->c_ptr();
     for(int i = 0; i < r->data.numRows; ++i) {
       for(int j = 0; j < r->data.numCols; ++j) {
-            std::cout << values[i * r->data.numCols + j] << ", ";
+          if (++outputCount <= 100){
+              std::cout << values[i * r->data.numCols + j] << ", ";
+          }
       }
       std::cout << "\n";
     }

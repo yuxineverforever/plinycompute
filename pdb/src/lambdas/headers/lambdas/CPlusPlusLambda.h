@@ -21,6 +21,9 @@
 #include <memory>
 #include <iostream>
 #include <vector>
+#include "/usr/local/cuda-10.0/include/thrust/device_vector.h"
+#include "/usr/local/cuda-10.0/include/thrust/host_vector.h"
+
 
 #define CAST(TYPENAME, WHICH) ((*(((std :: vector <Handle <TYPENAME>> **) args)[WHICH]))[which])
 
@@ -160,7 +163,6 @@ class CPlusPlusLambda : public TypedLambdaObject<ReturnType> {
   ComputeExecutorPtr getExecutor(TupleSpec &inputSchema,
                                  TupleSpec &attsToOperateOn,
                                  TupleSpec &attsToIncludeInOutput) override {
-
     // create the output tuple set
     TupleSetPtr output = std::make_shared<TupleSet>();
 
@@ -204,6 +206,11 @@ class CPlusPlusLambda : public TypedLambdaObject<ReturnType> {
           // loop down the columns, setting the output
           auto numTuples = ((std::vector<Handle<ParamOne>> *) inAtts[0])->size();
           outColumn.resize(numTuples);
+
+          std::vector<Handle<ParamOne>> &b;
+
+          memcpy(gpu, &(*b), sizeof(ParamOne));
+
           for (int i = 0; i < numTuples; i++) {
             callLambda<F, ReturnType, ParamOne, ParamTwo, ParamThree, ParamFour, ParamFive>(myFunc, outColumn, i, inAtts);
           }

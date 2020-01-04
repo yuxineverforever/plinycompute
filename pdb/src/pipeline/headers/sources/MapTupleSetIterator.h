@@ -86,10 +86,8 @@ class MapTupleSetIterator : public ComputeSource {
 
     // see if there are no more items in the vector to iterate over
     if (!(begin != end)) {
-
       // unpin the page
       page->unpin();
-
       // finish
       return nullptr;
     }

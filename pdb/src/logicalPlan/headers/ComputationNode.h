@@ -66,6 +66,7 @@ public:
 
     // get the particular lambda
     LambdaObjectPtr getLambda(std::string me) {
+
         if (allLambdas.count(me) == 0) {
             std::cout << "This is bad.  Didn't find a lambda corresponding to " << me << "\n";
             exit(1);

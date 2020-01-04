@@ -12,14 +12,14 @@ using PDBAbstractPhysicalNodeWeakPtr = std::weak_ptr<PDBAbstractPhysicalNode>;
 using PDBPageSetIdentifier = std::pair<size_t, std::string>;
 
 using OptimizerSource = std::pair<size_t, PDBAbstractPhysicalNodePtr>;
+
 class OptimizerSourceComparator
 {
  public:
   bool operator() (const OptimizerSource &lhs, const OptimizerSource &rhs);
 };
 
-class PageSetIdentifierComparator
-{
+class PageSetIdentifierComparator{
  public:
   bool operator() (const PDBPageSetIdentifier &lhs, const PDBPageSetIdentifier &rhs);
 };

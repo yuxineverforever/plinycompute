@@ -20,6 +20,7 @@
 #define FILTER_QUERY_EXEC_H
 
 #include "QueryExecutor.h"
+#include "executors/ComputeExecutor.h"
 #include "TupleSetMachine.h"
 #include "TupleSet.h"
 #include <vector>

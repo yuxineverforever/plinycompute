@@ -86,10 +86,12 @@ bool pdb::PDBBroadcastForJoinAlgorithm::setup(std::shared_ptr<pdb::PDBStorageMan
     // get the source computation
     auto srcNode = logicalPlan->getComputations().getProducingAtomicComputation(firstTupleSet);
 
-    // if this is a scan set get the page set from a real set
-    PDBAbstractPageSetPtr sourcePageSet = getSourcePageSet(storage, pipelineIndex);
 
-    // did we manage to get a source page set? if not the setup failed
+    PDBAbstractPageSetPtr sourcePageSet = sourcePageSets[pipelineSource];
+
+    // did we manage to get a source page set? if not the set
+    //
+    // up failed
     if (sourcePageSet == nullptr) {
       return false;
     }
@@ -111,7 +113,7 @@ bool pdb::PDBBroadcastForJoinAlgorithm::setup(std::shared_ptr<pdb::PDBStorageMan
     std::map<ComputeInfoType, ComputeInfoPtr> params = {{ComputeInfoType::PAGE_PROCESSOR,std::make_shared<BroadcastJoinProcessor>(job->numberOfNodes,job->numberOfProcessingThreads,*pageQueues,myMgr)},
                                                         {ComputeInfoType::JOIN_ARGS, joinArguments},
                                                         {ComputeInfoType::SHUFFLE_JOIN_ARG, std::make_shared<ShuffleJoinArg>(swapLHSandRHS)},
-                                                        {ComputeInfoType::SOURCE_SET_INFO, getSourceSetArg(catalogClient, pipelineIndex)}};
+                                                        {ComputeInfoType::SOURCE_SET_INFO, getSourceSetArg(catalogClient, pipelineSource)}};
 
     /// 3.2. create the prebroadcastjoin pipelines
 

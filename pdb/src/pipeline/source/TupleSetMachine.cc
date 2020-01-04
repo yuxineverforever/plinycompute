@@ -28,6 +28,9 @@ pdb::TupleSetSetupMachine::TupleSetSetupMachine (TupleSpec& inputSchema, TupleSp
 // gets a vector that tells us where all of the attributes match
 std::vector<int> pdb::TupleSetSetupMachine:: match(TupleSpec & attsToMatch) {
     // find the positions of all of the matches
+    std::cout << "Atts to match was: " << attsToMatch << "\n";
+    std::cout << "Input schema was: " << inputSchema << "\n";
+
     std::vector<int> matches;
     for (auto &s : attsToMatch.getAtts()) {
         int counter = 0;

@@ -50,19 +50,15 @@ class JoinSink : public ComputeSink {
   }
 
   Handle<Object> createNewOutputContainer() override {
-
     // we simply create a new vector of join maps to store the output
     Handle<Vector<Handle<JoinMap<RHSType>>>> returnVal = makeObject<Vector<Handle<JoinMap<RHSType>>>>();
-
     // create the maps
     for(auto i = 0; i < numPartitions; ++i) {
-
       // add the map
       Handle<JoinMap<RHSType>> myJoinMap = makeObject<JoinMap<RHSType>>();
       myJoinMap->setHashValue(i);
       returnVal->push_back(myJoinMap);
     }
-
     return returnVal;
   }
 

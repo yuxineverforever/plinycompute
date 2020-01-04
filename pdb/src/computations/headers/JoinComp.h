@@ -200,6 +200,7 @@ public:
 
     // figure out the types
     vector<string> typeList;
+
     for (auto &a : recordSchema.getAtts()) {
 
       // find the identity of the producing computation
@@ -208,7 +209,6 @@ public:
       if (res.second.empty()) {
         typeList.push_back("pdb::Handle<" + plan->getNode(res.first).getComputation().getOutputType() + ">");
       } else {
-
         std::string myType = plan->getNode(res.first).getLambda(res.second)->getOutputType();
         if (myType.find_first_of("pdb::Handle<") == 0) {
           typeList.push_back(myType);
@@ -216,7 +216,6 @@ public:
           typeList.push_back("pdb::Handle<" + myType + ">");
         }
       }
-
       std::cout << "Type found : " << typeList.back() << std::endl;
     }
 

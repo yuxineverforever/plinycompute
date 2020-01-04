@@ -33,6 +33,8 @@ foreach(file ${files})
     target_compile_definitions(${fileName} PRIVATE -DGTEST_LINKED_AS_SHARED_LIBRARY )
 
     # add the test as a dependency of the unit test target
+
+
     add_dependencies(unit-tests ${fileName})
 
 endforeach()

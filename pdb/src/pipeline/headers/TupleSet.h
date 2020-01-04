@@ -137,7 +137,6 @@ struct MaintenanceFuncs {
       typeContained(typeContained),
       mustDelete(mustDelete),
       serializedSize(serializedSize) {}
-
 };
 
 // this is the basic type that it pushed through the system during query processing
@@ -174,6 +173,9 @@ class TupleSet {
     std::vector<std::string> output;
     for (int i = 0; columns.count(i) != 0; i++) {
       output.push_back(columns[i].second.typeContained);
+    }
+    for (auto & a: output){
+        std::cout << " output: " << a << "\n";
     }
     return output;
   }
@@ -215,6 +217,7 @@ class TupleSet {
     if (columns.count(whichColumn) == 0) {
       std::cout << "This is bad. Tried to get column " << whichColumn << " but could not find it.\n";
     }
+    std::string MyColType = pdb::getTypeName<ColType>();
     return *((std::vector<ColType> *) columns[whichColumn].first);
   }
 
@@ -340,7 +343,7 @@ class TupleSet {
 
   // creates a new column, adding it to the tuple set
   template<typename ColType>
-  void addColumn(int where, std::vector<ColType> *addMe, bool needToDelete) {
+  void addColumn(int where, std::vector<ColType>* addMe, bool needToDelete) {
 
     // delete the old one, if needed
     if (columns.count(where) != 0) {
@@ -362,6 +365,7 @@ class TupleSet {
     // and the second lambda filters the column, again correctly taking into account
     // the type of the column
     std::function<void *(void *, std::vector<bool> &)> filter;
+
     filter = [](void *filter, std::vector<bool> &whichAreValid) {
       std::vector<ColType> &filterMe = *((std::vector<ColType> *) filter);
 
@@ -382,6 +386,7 @@ class TupleSet {
       // and return the result
       return (void *) newVec;
     };
+
     std::function<void *(void *, std::vector<uint32_t> &)> replicate;
     replicate = [](void *replicate, std::vector<uint32_t> &timesToReplicate) {
 
@@ -401,7 +406,6 @@ class TupleSet {
           counter++;
         }
       }
-
       // and return the result
       return (void *) newVec;
     };
@@ -449,7 +453,6 @@ class TupleSet {
 
       // serialize everyone
       for (int i = 0; i < numToWrite; i++) {
-
         // tryDereference will return either (a) the pointed-to object if this is a Ptr <> type, or (b) the object
         ColType *temp = nullptr;
         typename std::remove_reference<decltype(tryDereference<std::is_base_of<PtrBase, ColType>::value>(*temp))>::type

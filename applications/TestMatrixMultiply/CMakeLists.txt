@@ -8,7 +8,7 @@ set(CMAKE_CUDA_FLAGS "-arch=sm_75")
 set(USE_MKL Yes)
 
 find_package(MKL REQUIRED)
-link_directories(${/home/yuxin/snap/intel/mkl/include/})
+#link_directories(${/home/yuxin/snap/intel/mkl/include/})
 include_directories("/usr/local/cuda-10.0/samples/common/inc/")
 include_directories(${MKL_INCLUDE_DIR})
 message("as ${MKL_LIBRARIES}")

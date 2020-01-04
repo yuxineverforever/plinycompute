@@ -199,6 +199,11 @@ RefCountedObject<ObjType>* makeObject(Args&&... args) {
 }
 
 template <class ObjType, class... Args>
+RefCountedObject<ObjType>* makeGPUObject(Args&&... args) {
+}
+
+
+template <class ObjType, class... Args>
 RefCountedObject<ObjType>* makeObjectWithExtraStorage(size_t extra, Args&&... args) {
 #ifdef DEBUG_OBJECT_MODEL
     PDBTemplateBase temp;
@@ -242,10 +247,16 @@ RefCountedObject<ObjType>* makeObjectWithExtraStorage(size_t extra, Args&&... ar
     // std :: cout << "to set reference count = 0" << std :: endl;
     // set the reference count
     returnVal->setRefCount(0);
-
     // and return it
     return returnVal;
 }
+
+
+
+template <class ObjType, class... Args>
+RefCountedObject<ObjType>* makeGPUObjectWithExtraStorage(size_t extra, Args&&... args) {
+}
+
 
 template <class ObjType>
 Record<ObjType>* getRecord(Handle<ObjType>& forMe) {

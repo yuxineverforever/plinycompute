@@ -15,6 +15,7 @@
  *  limitations under the License.                                           *
  *                                                                           *
  *****************************************************************************/
+#include <boost/stacktrace.hpp>
 
 
 #ifndef PDB_COMMUN_TEMPLATES_C
@@ -258,6 +259,8 @@ Handle<ObjType> PDBCommunicator::getNextObject(bool& success, std::string& errMs
     if (msgSize == 0) {
         success = false;
         errMsg = "Could not read the object size";
+
+        std::cout << boost::stacktrace::stacktrace();
         std::cout << "PDBCommunicator: can not get message size, the connection is possibly closed "
                      "by the other side"
                   << std::endl;

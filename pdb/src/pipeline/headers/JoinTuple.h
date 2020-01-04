@@ -35,7 +35,7 @@ void copyFrom(Handle<T> &out, Handle<T> &in) {
 
 template<typename T>
 void copyTo(T &out, Handle<T> &in) {
-  char *location = (char *) &out;
+  char * location = (char *) &out;
   location -= REF_COUNT_PREAMBLE_SIZE;
   in = (RefCountedObject<T> *) location;
 }
@@ -90,7 +90,6 @@ class JoinTuple : public JoinTupleBase {
 
   void copyTo(void *input, int whichPos) {
     std::vector<Handle<HoldMe>> &me = *((std::vector<Handle<HoldMe>> *) input);
-
     if (whichPos >= me.size()) {
       Handle<HoldMe> temp;
       pdb::copyTo(myData, temp);
@@ -116,7 +115,7 @@ class JoinTuple : public JoinTupleBase {
 
 // this adds a new column to processMe of type TypeToCreate.  This is added at position offset + positions[whichPos]
 template<typename TypeToCreate>
-typename std::enable_if<sizeof(TypeToCreate::myOtherData) == 0, void>::type createCols(void **putUsHere,
+typename std::enable_if<sizeof(TypeToCreate::myOtherData) == 0, void>::type createCols(void ** putUsHere,
                                                                                        TupleSet &processMe,
                                                                                        int offset,
                                                                                        int whichPos,
@@ -131,6 +130,8 @@ typename std::enable_if<sizeof(TypeToCreate::myOtherData) != 0, void>::type crea
                                                                                        int offset,
                                                                                        int whichPos,
                                                                                        std::vector<int> positions) {
+    std::string current_type = getTypeName<TypeToCreate>();
+    std::cout<< " current type is: "<<current_type<<std::endl;
   putUsHere[whichPos] = TypeToCreate::allocate(processMe, offset + positions[whichPos]);
   createCols<decltype(TypeToCreate::myOtherData)>(putUsHere, processMe, offset, whichPos + 1, positions);
 }
@@ -188,14 +189,12 @@ typename std::enable_if<sizeof(TypeToUnPack::myOtherData) != 0, void>::type unpa
 // this is the non-recursive version of eraseEnd
 template<typename TypeToTruncate>
 typename std::enable_if<sizeof(TypeToTruncate::myOtherData) == 0, void>::type eraseEnd(int i, int whichVec, void **us) {
-
   TypeToTruncate::eraseEnd(us[whichVec], i);
 }
 
 // recursive version
 template<typename TypeToTruncate>
 typename std::enable_if<sizeof(TypeToTruncate::myOtherData) != 0, void>::type eraseEnd(int i, int whichVec, void **us) {
-
   TypeToTruncate::eraseEnd(us[whichVec], i);
   eraseEnd<decltype(TypeToTruncate::myOtherData)>(i, whichVec + 1, us);
 }

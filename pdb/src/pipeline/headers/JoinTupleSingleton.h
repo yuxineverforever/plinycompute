@@ -204,12 +204,10 @@ template<typename In1, typename ...Rest>
 typename std::enable_if<sizeof ...(Rest) != 0 && !std::is_base_of<JoinTupleBase, In1>::value,
                         JoinTuplePtr>::type findCorrectJoinTuple
     (std::vector<std::string> &typeList, std::vector<int> &whereEveryoneGoes) {
-
   JoinTuplePtr returnVal;
   std::string in1Name = getTypeName<Handle<In1>>();
   std::cout << "in1Name =" << in1Name << std::endl;
   int in1Pos = findType(in1Name, typeList);
-
   if (in1Pos != -1) {
     returnVal = findCorrectJoinTuple<JoinTuple<In1, char[0]>, Rest...>(typeList, whereEveryoneGoes);
     whereEveryoneGoes.push_back(in1Pos);
@@ -217,18 +215,15 @@ typename std::enable_if<sizeof ...(Rest) != 0 && !std::is_base_of<JoinTupleBase,
   } else {
     returnVal = findCorrectJoinTuple<Rest...>(typeList, whereEveryoneGoes);
   }
-
   return returnVal;
 }
 
 template<typename In1, typename In2, typename ...Rest>
 typename std::enable_if<std::is_base_of<JoinTupleBase, In1>::value, JoinTuplePtr>::type findCorrectJoinTuple
     (std::vector<std::string> &typeList, std::vector<int> &whereEveryoneGoes) {
-
   JoinTuplePtr returnVal;
   std::string in2Name = getTypeName<Handle<In2>>();
   int in2Pos = findType(in2Name, typeList);
-
   if (in2Pos != -1) {
     returnVal = findCorrectJoinTuple<JoinTuple<In2, In1>, Rest...>(typeList, whereEveryoneGoes);
     whereEveryoneGoes.push_back(in2Pos);
@@ -236,7 +231,6 @@ typename std::enable_if<std::is_base_of<JoinTupleBase, In1>::value, JoinTuplePtr
   } else {
     returnVal = findCorrectJoinTuple<In1, Rest...>(typeList, whereEveryoneGoes);
   }
-
   return returnVal;
 }
 

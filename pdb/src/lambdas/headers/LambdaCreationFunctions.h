@@ -85,7 +85,8 @@ auto makeLambda(Handle<ParamOne>& pOne, Handle<ParamTwo>& pTwo, Handle<ParamThre
 }
 
 template <typename ParamOne, typename ParamTwo, typename ParamThree, typename F>
-auto makeLambda(Handle<ParamOne>& pOne, Handle<ParamTwo>& pTwo, Handle<ParamThree>& pThree, F arg) -> LambdaTree<std::enable_if_t<!std::is_reference<decltype(arg(pOne, pTwo, pThree))>::value,
+auto
+  makeLambda(Handle<ParamOne>& pOne, Handle<ParamTwo>& pTwo, Handle<ParamThree>& pThree, F arg) -> LambdaTree<std::enable_if_t<!std::is_reference<decltype(arg(pOne, pTwo, pThree))>::value,
                                                                                                                                   decltype(arg(pOne, pTwo, pThree))>> {
   Handle<Nothing> p4, p5;
   return LambdaTree<decltype(arg(pOne, pTwo, pThree))>(std::make_shared<CPlusPlusLambda<F,

@@ -172,10 +172,7 @@ class VectorTupleSetIterator : public ComputeSource {
     }
 
     // compute how many slots in the output vector we can fill
-    size_t numSlotsToIterate = chunkSize;
-    if (numSlotsToIterate + pos > iterateOverMe->size()) {
-      numSlotsToIterate = iterateOverMe->size() - pos;
-    }
+    size_t numSlotsToIterate = std::min(chunkSize, iterateOverMe->size() - pos);
 
     // resize the output vector as appropriate
     std::vector<Handle<Object>> &inputColumn = output->getColumn<Handle<Object>>(0);

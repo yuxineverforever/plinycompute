@@ -46,7 +46,7 @@ class RHSShuffleJoinSource : public RHSShuffleJoinSourceBase {
   uint64_t workerID = 0;
 
   // the output columns of the tuple set
-  void **columns;
+  void ** columns;
 
   // the vector that contains the hash column
   std::vector<size_t> hashColumn;

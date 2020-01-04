@@ -95,7 +95,7 @@ void PDBPage :: unpin () {
 
 void PDBPage :: repin () {
 	auto spMe = me.lock();
-	parent.repin (spMe);
+	parent.repin(spMe);
 }
 
 void PDBPage :: setSet (PDBSetPtr inPtr) {

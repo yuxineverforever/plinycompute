@@ -97,7 +97,10 @@ inline void* InactiveAllocationBlock::getEnd() {
 }
 
 // These macros are used to manipulate the block of RAM that makes up an allocation block
-// The layout is | num bytes used | offset to root object | number active objects | data <--> |
+// The layout is
+// | num bytes used for CPU objects | offset to CPU root object | number active CPU objects | CPU data <--> |
+// | num bytes used for GPU objects | offset to GPU root object | number active GPU objects | GPU data <--> |
+
 #undef ALLOCATOR_REF_COUNT
 #define ALLOCATOR_REF_COUNT (*((unsigned*)(CHAR_PTR(myState.activeRAM) + 2 * sizeof(size_t))))
 #define LAST_USED (*((size_t*)myState.activeRAM))
@@ -106,6 +109,9 @@ inline void* InactiveAllocationBlock::getEnd() {
 #define HEADER_SIZE (sizeof(unsigned) + 2 * sizeof(size_t))
 #define GET_CHUNK_SIZE(ofMe) (*((unsigned*)ofMe))
 #define CHUNK_HEADER_SIZE sizeof(unsigned)
+
+#define OFFSET_TO_GPU_OBJECT
+#define GPU_USED_SPACE
 
 // free some RAM
 #ifdef DEBUG_OBJECT_MODEL
