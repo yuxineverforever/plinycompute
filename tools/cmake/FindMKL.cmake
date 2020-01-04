@@ -41,6 +41,7 @@ set(MKL_POSSIBLE_LOCATIONS
         /opt/intel/cmkl
         /home/dimitrije/intel/mkl
         /home/yuxin/snap/intel/mkl
+        /home/ubuntu/intel/mkl
         /Library/Frameworks/Intel_MKL.framework/Versions/Current/lib/universal
         "C:/Program Files (x86)/Intel/ComposerXE-2011/mkl"
         "C:/Program Files (x86)/Intel/Composer XE 2013/mkl"
