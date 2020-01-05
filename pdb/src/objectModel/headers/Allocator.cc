@@ -98,20 +98,23 @@ inline void* InactiveAllocationBlock::getEnd() {
 
 // These macros are used to manipulate the block of RAM that makes up an allocation block
 // The layout is
-// | num bytes used for CPU objects | offset to CPU root object | number active CPU objects | CPU data <--> |
-// | num bytes used for GPU objects | offset to GPU root object | number active GPU objects | GPU data <--> |
-
+// | num bytes used for CPU objects | offset to CPU root object | number active CPU & GPU objects | num bytes used for GPU objects | offset to GPU root object |  CPU data <--> | GPU data <--> |
 #undef ALLOCATOR_REF_COUNT
 #define ALLOCATOR_REF_COUNT (*((unsigned*)(CHAR_PTR(myState.activeRAM) + 2 * sizeof(size_t))))
-#define LAST_USED (*((size_t*)myState.activeRAM))
-#define OFFSET_TO_OBJECT (*((size_t*)(CHAR_PTR(myState.activeRAM) + sizeof(size_t))))
-#define OFFSET_TO_OBJECT_RELATIVE(fromWhere) (*((size_t*)(CHAR_PTR(fromWhere) + sizeof(size_t))))
-#define HEADER_SIZE (sizeof(unsigned) + 2 * sizeof(size_t))
+#define LAST_USED_CPU (*((size_t*)myState.activeRAM))
+#define OFFSET_TO_CPU_OBJECT (*((size_t*)(CHAR_PTR(myState.activeRAM) + sizeof(size_t))))
+#define OFFSET_TO_CPU_OBJECT_RELATIVE(fromWhere) (*((size_t*)(CHAR_PTR(fromWhere) + sizeof(size_t))))
+
+#define CPU_HEADER_LENGTH (sizeof(unsigned) + 2 * sizeof(size_t))
+
+#define LAST_USED_GPU (*((size_t*)(CHAR_PTR(myState.activeRAM) + CPU_HEADER_LENGTH)))
+#define OFFSET_TO_GPU_OBJECT (*((size_t*)(CHAR_PTR(myState.activeRAM) + sizeof(size_t) + CPU_HEADER_LENGTH)))
+#define OFFSET_TO_GPU_OBJECT_RELATIVE(fromWhere) (*((size_t*)(CHAR_PTR(fromWhere) + sizeof(size_t) + CPU_HEADER_LENGTH)))
+
+#define HEADER_SIZE (sizeof(unsigned) + 4 * sizeof(size_t))
+
 #define GET_CHUNK_SIZE(ofMe) (*((unsigned*)ofMe))
 #define CHUNK_HEADER_SIZE sizeof(unsigned)
-
-#define OFFSET_TO_GPU_OBJECT
-#define GPU_USED_SPACE
 
 // free some RAM
 #ifdef DEBUG_OBJECT_MODEL
@@ -247,11 +250,12 @@ inline void* defaultGetRAM(size_t howMuch, AllocatorState& myState) {
 
     // if we got here, then we cannot fit, and we need to carve out a bit at the end
     // if there is not enough RAM
-    if (LAST_USED + bytesNeeded > myState.numBytes) {
+    if (LAST_USED_CPU + LAST_USED_GPU + bytesNeeded > myState.numBytes) {
 
         // see how we are supposed to react...
         if (myState.throwException) {
-            PDB_COUT << "Allocator: LAST_USED=" << LAST_USED << std::endl;
+            PDB_COUT << "Allocator: LAST_USED_CPU=" << LAST_USED_CPU << std::endl;
+            PDB_COUT << "Allocator: LAST_USED_GPU=" << LAST_USED_GPU << std::endl;
             PDB_COUT << "Allocator: bytesNeeded=" << bytesNeeded << std::endl;
             PDB_COUT << "Allocator: numBytes=" << myState.numBytes << std::endl;
             // either we throw an exception...
@@ -264,8 +268,8 @@ inline void* defaultGetRAM(size_t howMuch, AllocatorState& myState) {
     }
 
     // now do the allocation
-    void* res = LAST_USED + CHAR_PTR(myState.activeRAM);
-    LAST_USED += bytesNeeded;
+    void* res = LAST_USED_CPU + CHAR_PTR(myState.activeRAM);
+    LAST_USED_CPU += bytesNeeded;
     GET_CHUNK_SIZE(res) = bytesNeeded;
     ALLOCATOR_REF_COUNT++;
     void* retAddress = CHAR_PTR(res) + CHUNK_HEADER_SIZE;
@@ -297,11 +301,12 @@ inline void* fastGetRAM(size_t howMuch, AllocatorState& myState) {
 
     // if we got here, then we cannot fit, and we need to carve out a bit at the end
     // if there is not enough RAM
-    if (LAST_USED + bytesNeeded > myState.numBytes) {
+    if (LAST_USED_CPU + LAST_USED_GPU + bytesNeeded > myState.numBytes) {
 
         // see how we are supposed to react...
         if (myState.throwException) {
-            PDB_COUT << "Allocator: LAST_USED=" << LAST_USED << std::endl;
+            PDB_COUT << "Allocator: LAST_USED_CPU=" << LAST_USED_CPU << std::endl;
+            PDB_COUT << "Allocator: LAST_USED_GPU=" << LAST_USED_GPU << std::endl;
             PDB_COUT << "Allocator: bytesNeeded=" << bytesNeeded << std::endl;
             PDB_COUT << "Allocator: numBytes=" << myState.numBytes << std::endl;
             // either we throw an exception...
@@ -314,8 +319,8 @@ inline void* fastGetRAM(size_t howMuch, AllocatorState& myState) {
     }
 
     // now do the allocation
-    void* res = LAST_USED + CHAR_PTR(myState.activeRAM);
-    LAST_USED += bytesNeeded;
+    void* res = LAST_USED_CPU + CHAR_PTR(myState.activeRAM);
+    LAST_USED_CPU += bytesNeeded;
     GET_CHUNK_SIZE(res) = bytesNeeded;
     ALLOCATOR_REF_COUNT++;
     void* retAddress = CHAR_PTR(res) + CHUNK_HEADER_SIZE;
@@ -332,6 +337,53 @@ inline void* fastGetRAM(size_t howMuch, AllocatorState& myState) {
 #endif
     return retAddress;
 }
+
+
+// returns some RAM for GPU object allocation... this can throw an exception if the request is too large
+// to be handled because there is not enough RAM in the current allocation block
+#ifdef DEBUG_OBJECT_MODEL
+    inline void* fastGetGPURAM(size_t howMuch, AllocatorState& myState, int16_t typeId) {
+    std::cout << "to get RAM with size = " << howMuch << " and typeId = " << typeId << std::endl;
+#else
+inline void* fastGetGPURAM(size_t howMuch, AllocatorState& myState) {
+#endif
+    unsigned bytesNeeded = (unsigned)(CHUNK_HEADER_SIZE + howMuch);
+    if ((bytesNeeded % 4) != 0) {
+        bytesNeeded += (4 - (bytesNeeded % 4));
+    }
+    if (LAST_USED_CPU + LAST_USED_GPU + bytesNeeded > myState.numBytes) {
+        // see how we are supposed to react...
+        if (myState.throwException) {
+            PDB_COUT << "Allocator: LAST_USED_CPU=" << LAST_USED_CPU << std::endl;
+            PDB_COUT << "Allocator: LAST_USED_GPU=" << LAST_USED_GPU << std::endl;
+            PDB_COUT << "Allocator: bytesNeeded=" << bytesNeeded << std::endl;
+            PDB_COUT << "Allocator: numBytes=" << myState.numBytes << std::endl;
+            // either we throw an exception...
+            throw myException;
+            // or we return a nullptr
+        } else {
+            return nullptr;
+        }
+    }
+    // now do the allocation
+    void* res = CHAR_PTR(myState.activeRAM) + myState.numBytes - LAST_USED_GPU - bytesNeeded;
+    LAST_USED_GPU += bytesNeeded;
+    GET_CHUNK_SIZE(res) = bytesNeeded;
+    ALLOCATOR_REF_COUNT++;
+    void* retAddress = CHAR_PTR(res) + CHUNK_HEADER_SIZE;
+#ifdef DEBUG_OBJECT_MODEL
+    std::cout << "**fastGetGPURAM**" << std::endl;
+    std::cout << "###################################" << std::endl;
+    std::cout << "allocator block reference count++=" << ALLOCATOR_REF_COUNT
+              << " with typeId=" << typeId << std::endl;
+    std::cout << "allocator block start =" << myState.activeRAM << std::endl;
+    std::cout << "allocator numBytes=" << myState.numBytes << std::endl;
+    std::cout << "created a new chunk with size =" << bytesNeeded << std::endl;
+    std::cout << "###################################" << std::endl;
+#endif
+    return retAddress;
+}
+
 
 
 // free some RAM
@@ -370,6 +422,20 @@ inline void* DefaultPolicy::getRAM(size_t howMuch, AllocatorState& myState) {
 #endif
 }
 
+// returns some RAM for GPU object allocation... this can throw an exception if the request is too large
+// to be handled because there is not enough RAM in the current allocation block
+#ifdef DEBUG_OBJECT_MODEL
+    inline void* DefaultPolicy::getGPURAM(size_t howMuch, AllocatorState& myState, int16_t typeId) {
+#else
+    inline void* DefaultPolicy::getGPURAM(size_t howMuch, AllocatorState& myState) {
+#endif
+
+#ifdef DEBUG_OBJECT_MODEL
+        return fastGetGPURAM(howMuch, myState, typeId);
+#else
+        return fastGetGPURAM(howMuch, myState);
+#endif
+    }
 
 // free some RAM
 #ifdef DEBUG_OBJECT_MODEL
@@ -408,6 +474,20 @@ inline void* NoReusePolicy::getRAM(size_t howMuch, AllocatorState& myState) {
 #endif
 }
 
+// returns some RAM for GPU objects allocation... this can throw an exception if the request is too large
+// to be handled because there is not enough RAM in the current allocation block
+#ifdef DEBUG_OBJECT_MODEL
+    inline void* NoReusePolicy::getGPURAM(size_t howMuch, AllocatorState& myState, int16_t typeId) {
+#else
+    inline void* NoReusePolicy::getGPURAM(size_t howMuch, AllocatorState& myState) {
+#endif
+
+#ifdef DEBUG_OBJECT_MODEL
+        return fastGetGPURAM(howMuch, myState, typeId);
+#else
+        return fastGetGPURAM(howMuch, myState);
+#endif
+    }
 
 // free some RAM
 #ifdef DEBUG_OBJECT_MODEL
@@ -441,6 +521,25 @@ inline void* NoReferenceCountPolicy::getRAM(size_t howMuch, AllocatorState& mySt
     return defaultGetRAM(howMuch, myState);
 #endif
 }
+
+
+
+// returns some RAM for GPU objects allocation... this can throw an exception if the request is too large
+// to be handled because there is not enough RAM in the current allocation block
+#ifdef DEBUG_OBJECT_MODEL
+    inline void* NoReferenceCountPolicy::getGPURAM(size_t howMuch,
+                                            AllocatorState& myState,
+                                            int16_t typeId) {
+#else
+    inline void* NoReferenceCountPolicy::getGPURAM(size_t howMuch, AllocatorState& myState) {
+#endif
+
+#ifdef DEBUG_OBJECT_MODEL
+        return fastGetGPURAM(howMuch, myState, typeId);
+#else
+        return fastGetGPURAM(howMuch, myState);
+#endif
+    }
 
 
 // return true if allocations should not fail due to not enough RAM...
@@ -579,6 +678,31 @@ inline void* MultiPolicyAllocator<FirstPolicy, OtherPolicies...>::getRAM(size_t 
     */
 }
 
+// returns some RAM for GPU objects allocation... this can throw an exception if the request is too large
+// to be handled because there is not enough RAM in the current allocation block
+    template <typename FirstPolicy, typename... OtherPolicies>
+#ifdef DEBUG_OBJECT_MODEL
+    inline void* MultiPolicyAllocator<FirstPolicy, OtherPolicies...>::getRAM(size_t howMuch,
+                                                                         int16_t typeId) {
+#else
+    inline void* MultiPolicyAllocator<FirstPolicy, OtherPolicies...>::getGPURAM(size_t howMuch) {
+#endif
+
+#ifdef DEBUG_OBJECT_MODEL
+        return myPolicies.getGPURAM(howMuch, myState, typeId);
+#else
+        return myPolicies.getGPURAM(howMuch, myState);
+#endif
+        /*
+            #ifdef DEBUG_OBJECT_MODEL
+                 return defaultGetRAM (howMuch, myState, typeId);
+            #else
+                 return defaultGetRAM (howMuch, myState);
+            #endif
+        */
+    }
+
+
 template <typename FirstPolicy, typename... OtherPolicies>
 inline bool MultiPolicyAllocator<FirstPolicy, OtherPolicies...>::isManaged(void* here) {
 
@@ -608,7 +732,7 @@ inline void MultiPolicyAllocator<FirstPolicy, OtherPolicies...>::emptyOutBlock(v
             c.clear();
         }
 
-        // LAST_USED = HEADER_SIZE;
+        // LAST_USED_CPU = HEADER_SIZE;
         ALLOCATOR_REF_COUNT = 0;
 
         PDB_COUT << "Killed the current block.\n";
@@ -673,8 +797,7 @@ MultiPolicyAllocator<FirstPolicy, OtherPolicies...>::getBytesAvailableInCurrentA
             amtUnused += GET_CHUNK_SIZE(v);
         }
     }
-
-    return myState.numBytes - LAST_USED + amtUnused;
+    return myState.numBytes - LAST_USED_CPU - LAST_USED_GPU + amtUnused;
 }
 
 template <typename FirstPolicy, typename... OtherPolicies>
@@ -686,22 +809,17 @@ MultiPolicyAllocator<FirstPolicy, OtherPolicies...>::getNumObjectsInCurrentAlloc
 template <typename FirstPolicy, typename... OtherPolicies>
 inline unsigned MultiPolicyAllocator<FirstPolicy, OtherPolicies...>::getNumObjectsInAllocatorBlock(
     void* here) {
-
     // see if this guy is from the active block
     if (contains(here)) {
         return ALLOCATOR_REF_COUNT;
     }
-
     // otherwise, he is not in the active block, so look for him
     auto i = std::lower_bound(allInactives.begin(), allInactives.end(), here);
-
     // see if we found him
     if (i != allInactives.end() && !(*i > here)) {
-
         // we did, so dec reference count
         return i->getReferenceCount();
     }
-
     return 0;
 }
 
@@ -757,7 +875,7 @@ inline void MultiPolicyAllocator<FirstPolicy, OtherPolicies...>::setupBlock(
 
     myState.numBytes = numBytesIn;
     myState.curBlockUserSupplied = false;
-    LAST_USED = HEADER_SIZE;
+    LAST_USED_CPU = HEADER_SIZE;
     ALLOCATOR_REF_COUNT = 0;
 }
 
@@ -765,7 +883,6 @@ template <typename FirstPolicy, typename... OtherPolicies>
 template <class ObjType>
 inline void* MultiPolicyAllocator<FirstPolicy, OtherPolicies...>::getAllocationBlock(
     Handle<ObjType>& forMe) {
-
     // try to find the allocation block
     void* here = forMe.getTarget();
     // see if this guy is from the active block
@@ -773,21 +890,18 @@ inline void* MultiPolicyAllocator<FirstPolicy, OtherPolicies...>::getAllocationB
         // std :: cout << "getAllocationBlock: object offset =" << CHAR_PTR (here) - CHAR_PTR
         // (myState.activeRAM) << std :: endl;
         // set up the pointer to the object
-        OFFSET_TO_OBJECT = CHAR_PTR(here) - CHAR_PTR(myState.activeRAM);
+        OFFSET_TO_CPU_OBJECT = CHAR_PTR(here) - CHAR_PTR(myState.activeRAM);
         return myState.activeRAM;
     }
-
     // he's not, so see if he is from another block
     auto i = std::lower_bound(allInactives.begin(), allInactives.end(), here);
-
     // see if we found him
     if (i != allInactives.end() && !(*i > here)) {
 
         // set up the pointer to the object
-        OFFSET_TO_OBJECT_RELATIVE(i->start) = CHAR_PTR(here) - CHAR_PTR(i->start);
+        OFFSET_TO_CPU_OBJECT_RELATIVE(i->start) = CHAR_PTR(here) - CHAR_PTR(i->start);
         return i->start;
     }
-
     // if we got here, we could not find this dude
     return nullptr;
 }

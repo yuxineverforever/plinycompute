@@ -158,16 +158,26 @@ public:
 #else
     inline void* getRAM(size_t howMuch, AllocatorState& myState) {
 #endif
-
         return nullptr;
-
 }
+
+// returns some RAM for GPU objects allocation... this can throw an exception if the request is too large
+// to be handled because there is not enough RAM in the current allocation block
+#ifdef DEBUG_OBJECT_MODEL
+        inline void* getRAM(size_t howMuch, AllocatorState& myState, int16_t typeId){
+#else
+        inline void* getGPURAM(size_t howMuch, AllocatorState& myState) {
+#endif
+            return nullptr;
+        }
 
 inline void
 setPolicy(AllocatorPolicy toMe) {
 }
 
 inline void unsetPolicy() {}
+
+
 };
 
 
@@ -197,10 +207,19 @@ public:
     inline void* getRAM(size_t howMuch, AllocatorState& myState);
 #endif
 
+    // returns some RAM for GPU objects allocation... this can throw an exception if the request is too large
+// to be handled because there is not enough RAM in the current allocation block
+#ifdef DEBUG_OBJECT_MODEL
+        inline void* getGPURAM(size_t howMuch, AllocatorState& myState, int16_t typeId);
+#else
+        inline void* getGPURAM(size_t howMuch, AllocatorState& myState);
+#endif
+
     inline AllocatorPolicy getPolicyName() {
 
         return AllocatorPolicy::defaultAllocator;
     }
+
 };
 
 
@@ -230,6 +249,17 @@ public:
 #else
     inline void* getRAM(size_t howMuch, AllocatorState& myState);
 #endif
+
+
+    // returns some RAM for GPU objects allocation without reclaiming spaces...
+// this can throw an exception if the request is too large
+// to be handled because there is not enough RAM in the current allocation block
+#ifdef DEBUG_OBJECT_MODEL
+        inline void* getGPURAM(size_t howMuch, AllocatorState& myState, int16_t typeId);
+#else
+        inline void* getGPURAM(size_t howMuch, AllocatorState& myState);
+#endif
+
 
     inline AllocatorPolicy getPolicyName() {
 
@@ -263,6 +293,16 @@ public:
 #else
     inline void* getRAM(size_t howMuch, AllocatorState& myState);
 #endif
+
+    // returns some RAM for GPU objects allocation... this can throw an exception if the request is too large
+// to be handled because there is not enough RAM in the current allocation block
+#ifdef DEBUG_OBJECT_MODEL
+        inline void* getGPURAM(size_t howMuch, AllocatorState& myState, int16_t typeId);
+#else
+        inline void* getGPURAM(size_t howMuch, AllocatorState& myState);
+#endif
+
+
 
     inline AllocatorPolicy getPolicyName() {
 
@@ -381,8 +421,31 @@ public:
 #endif
 }
 }
-}
-;
+
+#ifdef DEBUG_OBJECT_MODEL
+    inline void* getGPURAM(size_t howMuch, AllocatorState& myState, int16_t typeId){
+#else
+    inline void* getGPURAM(size_t howMuch, AllocatorState& myState) {
+#endif
+
+        if (useMe) {
+#ifdef DEBUG_OBJECT_MODEL
+            // std :: cout << "I am the policy: " << firstPolicy.getPolicyName() << std:: endl;
+            return firstPolicy.getRAM(howMuch, myState, typeId);
+#else
+            return firstPolicy.getGPURAM(howMuch, myState);
+#endif
+        } else {
+#ifdef DEBUG_OBJECT_MODEL
+            // std :: cout << "I am not the policy: " << firstPolicy.getPolicyName() << std :: endl;
+    return theRest.getRAM(howMuch, myState, typeId);
+#else
+            return theRest.getGPURAM(howMuch, myState);
+#endif
+        }
+    }
+
+};
 // this class is an exception that is (optionally) thrown
 // when we try to do an allocation to create an Object
 // but there is not enough RAM
@@ -399,7 +462,7 @@ template <class ObjType>
 class Handle;
 
 
-// This is the Allocator class.  There is one allocator per thread.  The allocator
+// this is the Allocator class.  There is one allocator per thread.  The allocator
 // is responsible for managing the RAM that is used to allocate everything that
 // is descended from object.  Most programmers (even PDB engineers) will never touch
 // the allocator class directly.
@@ -470,7 +533,19 @@ public:
     inline void* getRAM(size_t howMuch);
 #endif
 
-// free some RAM that was previous allocated via a call to getRAM
+
+    // returns some RAM for GPU objects allocation... this can throw an exception if the request is too large
+// to be handled because there is not enough RAM in the current allocation block
+// JIA NOTE: enable DEBUG_OBJECT_MODEL will bring significant performance overhead, and should be
+// used cautiously.
+#ifdef DEBUG_OBJECT_MODEL
+        inline void* getGPURAM(size_t howMuch, int16_t typeId);
+#else
+        inline void* getGPURAM(size_t howMuch);
+#endif
+
+
+        // free some RAM that was previous allocated via a call to getRAM
 #ifdef DEBUG_OBJECT_MODEL
     inline void freeRAM(void* here, int16_t typeId);
 #else

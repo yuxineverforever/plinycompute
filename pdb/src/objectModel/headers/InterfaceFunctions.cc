@@ -38,6 +38,8 @@
 
 namespace pdb {
 
+
+
 template <class ObjType>
 int16_t getTypeID() {
     static int16_t typeID = -1;
@@ -162,13 +164,12 @@ RefCountedObject<ObjType>* makeObject(Args&&... args) {
               << sizeof(ObjType) + REF_COUNT_PREAMBLE_SIZE << std::endl;
 #endif
     // create a new object
-    RefCountedObject<ObjType>* returnVal = (RefCountedObject<ObjType>*)
+    RefCountedObject<ObjType>* returnVal = (RefCountedObject<ObjType> *)
 #ifdef DEBUG_OBJECT_MODEL
-        (getAllocator().getRAM(sizeof(ObjType) + REF_COUNT_PREAMBLE_SIZE, temp.getTypeCode()));
+                (getAllocator().getRAM(sizeof(ObjType) + REF_COUNT_PREAMBLE_SIZE, temp.getTypeCode()));
 #else
-        (getAllocator().getRAM(sizeof(ObjType) + REF_COUNT_PREAMBLE_SIZE));
+                (getAllocator().getRAM(sizeof(ObjType) + REF_COUNT_PREAMBLE_SIZE));
 #endif
-
     // if we got a nullptr, get outta there
     if (returnVal == nullptr) {
         // std :: cout << "makeObject: return nullptr" << std :: endl;
@@ -200,6 +201,46 @@ RefCountedObject<ObjType>* makeObject(Args&&... args) {
 
 template <class ObjType, class... Args>
 RefCountedObject<ObjType>* makeGPUObject(Args&&... args) {
+#ifdef DEBUG_OBJECT_MODEL
+    PDBTemplateBase temp;
+    temp.template setup<ObjType>();
+    std::cout << "to get GPU RAM from allocator with size ="
+              << sizeof(ObjType) + REF_COUNT_PREAMBLE_SIZE << std::endl;
+#endif
+    // create a new object
+    RefCountedObject<ObjType>* returnVal = (RefCountedObject<ObjType> *)
+#ifdef DEBUG_OBJECT_MODEL
+            (getAllocator().getGPURAM(sizeof(ObjType) + REF_COUNT_PREAMBLE_SIZE, temp.getTypeCode()));
+#else
+            (getAllocator().getGPURAM(sizeof(ObjType) + REF_COUNT_PREAMBLE_SIZE));
+#endif
+    // if we got a nullptr, get outta there
+    if (returnVal == nullptr) {
+        // std :: cout << "makeObject: return nullptr" << std :: endl;
+        return nullptr;
+    }
+    // std :: cout << "to call the placement new" << std :: endl;
+    // call the placement new
+    try {
+        new ((void*)returnVal->getObject()) ObjType(args...);
+    } catch (NotEnoughSpace& n) {
+// for reference counting correctness
+// returnVal->setRefCount(0);
+// Handle<ObjType> temp = returnVal;
+// std :: cout << "to free RAM for exception" << std :: endl;
+#ifdef DEBUG_OBJECT_MODEL
+        getAllocator().freeRAM(returnVal, temp.getTypeCode());
+#else
+        getAllocator().freeRAM(returnVal);
+#endif
+        throw n;
+    }
+    // std :: cout << "set reference count = 0" << std :: endl;
+    // set the reference count
+    returnVal->setRefCount(0);
+
+    // and return it
+    return returnVal;
 }
 
 
@@ -255,6 +296,49 @@ RefCountedObject<ObjType>* makeObjectWithExtraStorage(size_t extra, Args&&... ar
 
 template <class ObjType, class... Args>
 RefCountedObject<ObjType>* makeGPUObjectWithExtraStorage(size_t extra, Args&&... args) {
+#ifdef DEBUG_OBJECT_MODEL
+    PDBTemplateBase temp;
+    temp.template setup<ObjType>();
+    std::cout << "In makeObjectWithExtraStorage:" << std::endl;
+    std::cout << "extra=" << extra << std::endl;
+    std::cout << "sizeof(ObjType)=" << sizeof(ObjType) << std::endl;
+    std::cout << "REF_COUNT_PREAMBLE_SIZE=" << REF_COUNT_PREAMBLE_SIZE << std::endl;
+    std::cout << "to get GPU RAM from allocator with size ="
+              << extra + sizeof(ObjType) + REF_COUNT_PREAMBLE_SIZE << std::endl;
+#endif
+    // create a new object
+    RefCountedObject<ObjType>* returnVal = (RefCountedObject<ObjType>*)
+#ifdef DEBUG_OBJECT_MODEL
+    (getAllocator().getGPURAM(extra + sizeof(ObjType) + REF_COUNT_PREAMBLE_SIZE,
+                               temp.getTypeCode()));
+#else
+            (getAllocator().getGPURAM(extra + sizeof(ObjType) + REF_COUNT_PREAMBLE_SIZE));
+#endif
+    // if we got a nullptr, get outta there
+    if (returnVal == nullptr)
+        return nullptr;
+
+    // std :: cout << "to call the placement new" << std :: endl;
+    // call the placement new
+    try {
+        new ((void*)returnVal->getObject()) ObjType(args...);
+    } catch (NotEnoughSpace& n) {
+// added by Jia based on Chris' proposal
+// for reference counting correctness
+// returnVal->setRefCount(0);
+// Handle<ObjType> temp = returnVal;
+#ifdef DEBUG_OBJECT_MODEL
+        getAllocator().freeRAM(returnVal, temp.getTypeCode());
+#else
+        getAllocator().freeRAM(returnVal);
+#endif
+        throw n;
+    }
+    // std :: cout << "to set reference count = 0" << std :: endl;
+    // set the reference count
+    returnVal->setRefCount(0);
+    // and return it
+    return returnVal;
 }
 
 
