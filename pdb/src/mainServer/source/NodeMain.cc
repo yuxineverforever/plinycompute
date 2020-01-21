@@ -34,7 +34,7 @@
 #include <PDBBufferManagerDebugFrontend.h>
 #include <ExecutionServerBackend.h>
 #include <random>
-#include <PDBCUDAMatrixMultiple.h>
+#include <PDBCUDAUtility.h>
 
 namespace po = boost::program_options;
 namespace fs = boost::filesystem;

@@ -143,7 +143,8 @@ file(GLOB COMPUTATION_SERVER_SOURCE "${PROJECT_SOURCE_DIR}/pdb/src/computationSe
 file(GLOB EXECUTION_SERVER_SOURCE "${PROJECT_SOURCE_DIR}/pdb/src/executionServer/sources/*.cc"
                                   "${PROJECT_SOURCE_DIR}/pdb/src/executionServer/sources/physicalAlgorithms/*.cc")
 
-file(GLOB GPU_SOURCE "${PROJECT_SOURCE_DIR}/pdb/src/cuda/source/*.cu")
+file(GLOB CUDA_SOURCE "${PROJECT_SOURCE_DIR}/pdb/src/cuda/source/*.cu"
+                     "${PROJECT_SOURCE_DIR}/pdb/src/cuda/source/*.cc")
 
 set(SOURCE_FILES_SQL_LITE ${PROJECT_SOURCE_DIR}/third-party/sqlite/source/sqlite3.c)
 
@@ -347,7 +348,7 @@ if (("${CMAKE_VERSION}" VERSION_EQUAL 3.8) OR
     # Modern CMake
     if (USE_CUDA)
         enable_language("CUDA")
-        add_library(pdb-gpu SHARED ${GPU_SOURCE})
+        add_library(pdb-gpu SHARED ${CUDA_SOURCE})
     endif ()
 else ()
     # Old CMake
@@ -358,7 +359,7 @@ else ()
             set(USE_CUDA OFF)
         else ()
             message(STATUS "CUDA found")
-            CUDA_ADD_LIBRARY(pdb-gpu ${GPU_SOURCE} SHARED)
+            CUDA_ADD_LIBRARY(pdb-gpu ${CUDA_SOURCE} SHARED)
         endif ()
     endif ()
 endif ()

@@ -5,7 +5,7 @@
 #include <LambdaCreationFunctions.h>
 #include "JoinComp.h"
 #include "MatrixBlock.h"
-#include "PDBCUDAMatrixMultiple.h"
+#include "PDBCUDAUtility.h"
 #include <mkl.h>
 
 namespace pdb {

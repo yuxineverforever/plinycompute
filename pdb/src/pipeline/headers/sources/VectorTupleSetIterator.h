@@ -105,7 +105,7 @@ class VectorTupleSetIterator : public ComputeSource {
       output->addColumn(0, inputColumn, true);
     } else {
 
-      iterateOverMe = nullptr;
+      iterateOverMe  = nullptr;
       output = nullptr;
     }
 
