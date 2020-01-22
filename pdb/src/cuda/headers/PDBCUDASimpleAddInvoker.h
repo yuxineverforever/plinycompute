@@ -3,6 +3,8 @@
 
 #include <iostream>
 #include <Handle.h>
+#include <functional>
+#include <numeric>
 #include "PDBVector.h"
 #include "PDBCUDAUtility.h"
 #include "PDBCUDAOpType.h"
@@ -10,44 +12,46 @@
 
 // simply support two kind of operations
 template <typename T>
-class PDBCUDASimpleAddInvoker: public PDBCUDAOpInvoker{
+class PDBCUDASimpleAddInvoker: public PDBCUDAOpInvoker<T>{
 public:
 
     bool invoke(){
-        cublasRouting(GPUInputParas[0], GPUInputParas[1], GPUOutputPara);
+        cublasRouting(InputParas[0].first, InputParas[1].first, OutputPara.first);
         return true;
     }
 
     void cublasRouting(T* in1data, T* in2data, T* outdata){
-
+        // wait to add simple add
+        return;
     }
-
+/*
     void setStartAddress(void* allocationBlock){
         blockAddress = allocationBlock;
     }
+ */
 
-    void setInput(T* input){
-        InputParas.push_back(input);
+    void setInput(T* input, std::vector<size_t>& inputDim){
         T* cudaPointer;
-        copyFromHostToDevice(&cudapointer, input, sizeof(T));
-        GPUInputParas.push_back(cudapointer);
+        size_t length = std::accumulate(inputDim.begin(),inputDim.end(),1, std::multiplies<size_t>());
+        copyFromHostToDevice(&cudaPointer, input, sizeof(T) * length);
+        InputParas.push_back(std::make_pair(cudaPointer, inputDim));
     }
 
-    void setOutput(T* output){
-        OutputPara = output;
+    void setOutput(T* output, std::vector<size_t>& outputDim){
         T * cudaPointer;
-        copyFromHostToDevice(&cudaPointer, output, sizeof(T));
-        GPUOutputPara = cudaPointer;
+        size_t length = std::accumulate(outputDim.begin(),outputDim.end(),1, std::multiplies<size_t>());
+        copyFromHostToDevice(&cudaPointer, output, sizeof(T) * length);
+        OutputPara = std::make_pair(cudaPointer, outputDim);
+        copyBackPara = output;
     }
 
 public:
-    std::vector<T*> GPUInputParas;
-    T * GPUOutputPara;
 
-    std::vector<T*> InputParas;
-    T* OutputPara;
+    std::vector<std::pair<T*, std::vector<size_t> >> InputParas;
+    std::pair<T *, std::vector<size_t> > OutputPara;
 
-    void * blockAddress;
+    T * copyBackPara;
 
-    PDBCUDAOpType op = PDBCUDAOpType::MatrixMultiple;
+    PDBCUDAOpType op = PDBCUDAOpType::SimpleAdd;
 };
+#endif

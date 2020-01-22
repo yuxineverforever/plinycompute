@@ -1,15 +1,16 @@
 #ifndef PDB_CUDA_MATRIX_MULTIPLE
 #define PDB_CUDA_MATRIX_MULTIPLE
+
 #include <iostream>
 #include <cstdio>
 #include "cublas_v2.h"
 #include "cuda_runtime.h"
 #include <helper_cuda.h>
 
-extern void copyFromHostToDevice(void **targetDevice, void *sourceHost, size_t bytesNum);
+extern void copyFromHostToDevice(void** targetDevice, void* sourceHost, size_t bytesNum);
 
 
-extern void copyFromDeviceToHost(void *targetHost, void * sourceDevice, size_t bytesNum);
+extern void copyFromDeviceToHost(void* targetHost, void* sourceDevice, size_t bytesNum);
 
 extern void printCudaVersion();
 

@@ -1,4 +1,3 @@
-
 #include "PDBCUDAUtility.h"
 #define NUM_THREADS 128
 

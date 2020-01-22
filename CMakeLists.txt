@@ -10,9 +10,14 @@ set (BOOST_ROOT "/home/yuxin/snap/boost")
 set (Boost_INCLUDE_DIR "/home/yuxin/snap/boost/include")
 set (Boost_LIBRARY_DIRS "/home/yuxin/snap/boost/lib")
 
-project(pdb)
+set (CUDA_INCLUDE_DIR "/usr/local/cuda/include")
+set (CUDA_LIBRARY_DIRS "/usr/local/cuda-10.0/lib64/libcublas.so")
 
 option(USE_CUDA "Use CUDA" ON)
+
+project(pdb)
+
+
 
 # set the output directory
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY  "${PROJECT_SOURCE_DIR}/bin")
@@ -113,7 +118,6 @@ include_directories("${PROJECT_SOURCE_DIR}/pdb/src/sharedLibraries/headers")
 include_directories("${PROJECT_SOURCE_DIR}/pdb/src/storageManager/headers")
 include_directories("${PROJECT_SOURCE_DIR}/pdb/src/work/headers")
 include_directories("${PROJECT_SOURCE_DIR}/pdb/src/cuda/headers")
-
 # add the third party libraries as includes
 include_directories("${PROJECT_SOURCE_DIR}/third-party/mustache/headers")
 include_directories("${PROJECT_SOURCE_DIR}/third-party/qunit/headers")
@@ -347,6 +351,7 @@ if (("${CMAKE_VERSION}" VERSION_EQUAL 3.8) OR
         ("${CMAKE_VERSION}" VERSION_GREATER 3.8))
     # Modern CMake
     if (USE_CUDA)
+        include_directories(${CUDA_INCLUDE_DIR})
         enable_language("CUDA")
         add_library(pdb-gpu SHARED ${CUDA_SOURCE})
     endif ()
@@ -381,9 +386,6 @@ else()
     target_link_libraries(pdb-node pdb-server-common)
     target_link_libraries(pdb-node ${GSL_LIBRARIES})
     target_link_libraries(pdb-node ${Boost_LIBRARIES})
-    add_dependencies(pdb-node pdb-gpu)
-    target_link_libraries(pdb-node pdb-gpu)
-    target_link_libraries(pdb-node "/usr/local/cuda-10.0/lib64/libcublas.so")
 
     # set dependencies for pdb-main
     add_custom_target(pdb-main)
@@ -404,6 +406,10 @@ else()
 
     # include tests that are in applications directory
     include(applications/Applications.cmake)
+
+    add_dependencies(pdb-node pdb-gpu)
+    target_link_libraries(pdb-node pdb-gpu)
+    target_link_libraries(pdb-node ${CUDA_LIBRARY_DIRS})
 
 endif()
 

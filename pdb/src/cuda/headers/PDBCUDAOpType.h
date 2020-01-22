@@ -12,3 +12,5 @@ enum PDBCUDAOpType {
     MatrixMultiple, //0
     VectorAdd, //1
 };
+
+#endif
