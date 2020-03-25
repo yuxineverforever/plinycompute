@@ -31,6 +31,7 @@ set(CMAKE_CXX_STANDARD 14)
 # check the operating system and add the appropriate flags
 set(CMAKE_CXX_FLAGS "-fPIC -Wno-deprecated-declarations")
 
+
 # if we are compiling for debug add the debug flags
 if(CMAKE_BUILD_TYPE MATCHES Debug)
 
@@ -195,6 +196,13 @@ IF (FLEX_FOUND)
             BUILD_BYPRODUCTS ${LogicalPlanFlexOutput}
     )
 ENDIF ()
+
+# use ccache for compilation acceleration
+FIND_PROGRAM(CCACHE ccache)
+IF (CCACHE)
+    message("using ccache")
+    set(CMAKE_CXX_COMPILER_LAUNCHER ${CCACHE})
+ENDIF()
 
 # generate the parser
 FIND_PACKAGE(BISON REQUIRED)

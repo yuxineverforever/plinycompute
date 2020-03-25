@@ -87,7 +87,7 @@ public:
       vector<size_t> in2dim = {J,K};
 
       pdb::PDBCUDAMatrixMultipleInvoker invoker;
-      GPUInvoke(invoker,out->data.data, outdim, in1->data.data, in1dim, in2->data.data, in2dim);
+      GPUInvoke(invoker, out->data.data, outdim, in1->data.data, in1dim, in2->data.data, in2dim);
       return out;
     });
   }

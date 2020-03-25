@@ -157,7 +157,7 @@ int main(int argc, char *argv[]) {
     pid_t pid = fork();
 
     // check whether we are the frontend or the backend
-    if(pid == 0) {
+    if(pid != 0) {
         // do backend setup
         pdb::PDBLoggerPtr logger = make_shared<pdb::PDBLogger>("manager.log");
         pdb::PDBServer backEnd(pdb::PDBServer::NodeType::BACKEND, config, logger);
@@ -170,6 +170,9 @@ int main(int argc, char *argv[]) {
 
         setGPUMemoryManager(gpuMemoryManager, backEnd.getFunctionalityPtr<PDBBufferManagerInterface>());
 
+        if (gpuMemoryManager == nullptr){
+            std::cout<<" still nullptr ?\n";
+        }
         // start the backend
         backEnd.startServer(make_shared<pdb::GenericWork>([&](PDBBuzzerPtr callerBuzzer) {
 
