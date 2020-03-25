@@ -6,13 +6,11 @@
 #define PDB_PDBSTORAGE_H
 
 #include <memory>
-
 struct PDBSharedMemory {
-
   // pointer to the shared memory
   void *memory;
 
-  // the page size
+  // the page size (MB)
   size_t pageSize;
 
   // the number of pages of RAM in the buffer

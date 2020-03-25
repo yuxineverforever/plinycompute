@@ -8,7 +8,8 @@ set(CMAKE_CUDA_COMPILER "/usr/local/cuda-10.0/bin/nvcc")
 set(CMAKE_CUDA_FLAGS "-arch=sm_75")
 
 set (CUDA_INCLUDE_DIR "/usr/local/cuda/include")
-set (CUDA_LIBRARY_DIRS "/usr/local/cuda-10.0/lib64/libcublas.so")
+set (CUDA_BLAS_LIB "/usr/local/cuda-10.0/lib64/libcublas.so")
+set (CUDA_DART_LIB "/usr/local/cuda-10.0/lib64/libcudart.so")
 
 set(USE_MKL Yes)
 
@@ -49,8 +50,10 @@ target_link_libraries(TestMatrixMultiply ${MKL_LIBRARIES})
 target_link_libraries(MatrixMultiplyJoin PDBCUDAUtility)
 target_link_libraries(TestMatrixMultiply PDBCUDAUtility)
 
-target_link_libraries(TestMatrixMultiply ${CUDA_ADD_CUBLAS_TO_TARGET})
-#target_link_libraries(TestMatrixMultiply ${CUDA_LIBRARY_DIRS})
+#target_link_libraries(TestMatrixMultiply ${CUDA_ADD_CUBLAS_TO_TARGET})
+target_link_libraries(TestMatrixMultiply ${CUDA_DART_LIB})
+target_link_libraries(TestMatrixMultiply ${CUDA_BLAS_LIB})
+
 
 # add build dependencies to shared libraries it uses
 add_dependencies(TestMatrixMultiply MatrixBlock)

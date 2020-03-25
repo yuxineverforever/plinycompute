@@ -55,6 +55,7 @@
 #include "PDBCUDAUtility.h"
 #include "PDBCUDAOpInvoker.h"
 #include "PDBCUDAMatrixMultipleInvoker.h"
+#include "PDBCUDAGPUInvoke.h"
 #include <mkl.h>
 
 namespace pdb {
@@ -85,18 +86,11 @@ public:
       vector<size_t> in1dim = {I,J};
       vector<size_t> in2dim = {J,K};
 
-      PDBCUDAMatrixMultipleInvoker<float> invoker;
-      GPUInvoke(&invoker,out->data.data, outdim, in1->data.data, in1dim, in2->data.data, in2dim);
+      pdb::PDBCUDAMatrixMultipleInvoker invoker;
+      GPUInvoke(invoker,out->data.data, outdim, in1->data.data, in1dim, in2->data.data, in2dim);
       return out;
     });
   }
-
-
-
 };
-
-
 }
-
 }
-#define __GPU__COMPUTATIONS

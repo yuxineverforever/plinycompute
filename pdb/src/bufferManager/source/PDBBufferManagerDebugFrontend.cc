@@ -614,7 +614,6 @@ void PDBBufferManagerDebugFrontend::registerHandlers(PDBServer &forMe) {
 }
 
 PDBBufferManagerInterfacePtr PDBBufferManagerDebugFrontend::getBackEnd() {
-
   // init the backend storage manager with the shared memory
   return std::make_shared<PDBBufferManagerDebugBackEnd>(sharedMemory, storageLoc);
 }

@@ -76,7 +76,30 @@ public:
                                                                               request);
   }
 
-  // return anonymous page
+  template <class RequestType, class ResponseType, class ReturnType>
+  static pdb::PDBPageHandle heapRequest(pdb::PDBLoggerPtr &myLogger,
+                                          int port,
+                                          const std::string &address,
+                                          pdb::PDBPageHandle onErr,
+                                          size_t bytesForRequest,
+                                          const std::function<pdb::PDBPageHandle(pdb::Handle<pdb::BufGetPageResult>)> &processResponse,
+                                          void* objectAddress) {
+
+        // init the request
+        Handle<RequestType> request = makeObject<RequestType>(objectAddress);
+        // log the get page, we don't care about the page number since it will be linked to the requested page
+        //instance->logGetPage(minSize, 0, request->currentID);
+        // make a request
+        return RequestFactory::heapRequest<RequestType, ResponseType, ReturnType>(myLogger,
+                                                                                  port,
+                                                                                  address,
+                                                                                  onErr,
+                                                                                  bytesForRequest,
+                                                                                  processResponse,
+                                                                                  request);
+    }
+
+    // return anonymous page
   template <class RequestType, class ResponseType, class ReturnType>
   static bool heapRequest(pdb::PDBLoggerPtr &myLogger,
                           int port,
@@ -216,7 +239,7 @@ public:
   static PDBBufferManagerInterface* instance;
 };
 
-class PDBBufferManagerDebugBackEnd : public PDBBufferManagerBackEnd<PDBBufferManagerDebugBackendFactory> {
+ class PDBBufferManagerDebugBackEnd : public PDBBufferManagerBackEnd<PDBBufferManagerDebugBackendFactory> {
 public:
 
   explicit PDBBufferManagerDebugBackEnd(const PDBSharedMemory &sharedMemory,

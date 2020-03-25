@@ -16,6 +16,7 @@
 #include <BufPinPageResult.h>
 #include <mutex>
 #include <BufFreezeRequestResult.h>
+#include <BufGetPageForObjectRequest.h>
 
 namespace pdb {
 
@@ -222,6 +223,65 @@ pdb::PDBPageHandle pdb::PDBBufferManagerBackEnd<T>::getPage(size_t minBytes) {
 
   // return the page
   return std::move(res);
+}
+
+
+template <class T>
+PDBPageHandle PDBBufferManagerBackEnd<T>::getPageForObject(void *objectAddress) {
+    void* start = (void*)sharedMemory.memory;
+    void* end = (void*)((char*)sharedMemory.memory + sharedMemory.numPages*sharedMemory.pageSize);
+    if (objectAddress < start || objectAddress > end){
+        std::cerr << objectAddress << " is not in the range of shared memory. range start: " << start << " end: " << end << "\n";
+        return nullptr;
+    }
+    // grab the address of the frontend
+    auto port = getConfiguration()->port;
+    auto address = getConfiguration()->address;
+    // somewhere to put the message.
+    std::string errMsg;
+
+    auto res = T::template heapRequest<BufGetPageForObjectRequest, BufGetPageResult, pdb::PDBPageHandle>(
+            myLogger, port, address, nullptr, 1024,
+            [&](Handle<BufGetPageResult> result) {
+                if (result != nullptr) {
+                    PDBPagePtr returnVal = make_shared<PDBPage>(*this);
+                    returnVal->setMe(returnVal);
+                    returnVal->isAnon = result->isAnonymous;
+                    returnVal->pinned = true;
+                    returnVal->dirty = result->isDirty;
+                    returnVal->pageNum = result->pageNum;
+                    returnVal->location.startPos = result->startPos;
+                    returnVal->location.numBytes = result->numBytes;
+                    returnVal->bytes = (char *) this->sharedMemory.memory + result->offset;
+                    // this an anonymous page if it is not set the database and set name
+                    if (!result->isAnonymous) {
+                        returnVal->whichSet = std::make_shared<PDBSet>(result->dbName, result->setName);
+                    }
+                    // put in the the all pages
+                    {
+                        // lock all pages to add the page there
+                        unique_lock<std::mutex> lck(m);
+
+                        // mark the page as loaded
+                        returnVal->status = PDB_PAGE_LOADED;
+
+                        // insert the page
+                        allPages[std::make_pair(returnVal->whichSet, returnVal->pageNum)] = returnVal;
+                    }
+
+                    // notify all threads that the state has changed
+                    cv.notify_all();
+
+                    // return the page handle
+                    return make_shared<PDBPageHandleBase>(returnVal);
+                }
+                // set the error since we failed
+                myLogger->error("Could not get the requested anonymous page of object ");
+                return (pdb::PDBPageHandle) nullptr;
+            },
+            objectAddress);
+
+    return std::move(res);
 }
 
 template<class T>

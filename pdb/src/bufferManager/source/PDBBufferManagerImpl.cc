@@ -256,11 +256,9 @@ void PDBBufferManagerImpl::initialize(std::string tempFileIn, size_t pageSizeIn,
   for (curSize = MIN_PAGE_SIZE; curSize <= sharedMemory.pageSize; curSize *= 2) {
     vector<int64_t> temp;
     vector<void *> tempAgain;
-
     availablePositions.push_back(temp);
     emptyMiniPages.push_back(tempAgain);
     isCreatingSpace.push_back(false);
-
     logOfPageSize++;
   }
 
@@ -294,14 +292,11 @@ void PDBBufferManagerImpl::initialize(std::string tempFileIn, size_t pageSizeIn,
 
   // and create a bunch of pages
   for (int i = 0; i < sharedMemory.numPages; i++) {
-
     // figure out the address
     void *address = mapped + (sharedMemory.pageSize * i);
-
     // store the address
     emptyFullPages.push_back(address);
   }
-
 }
 
 void PDBBufferManagerImpl::clearSet(const PDBSetPtr &set) {
@@ -709,10 +704,8 @@ void PDBBufferManagerImpl::createAdditionalMiniPages(int64_t whichSize, unique_l
   unused.second = whichSize;
 
   for (size_t offset = 0; offset < sharedMemory.pageSize; offset += inc) {
-
     // store the empty mini page as a mini page of that size
     emptyMiniPages[whichSize].push_back(((char *) emptyFullPages.back()) + offset);
-
     // store the mini page as unused
     unused.first.emplace_back(((char *) emptyFullPages.back()) + offset);
   }
@@ -968,21 +961,16 @@ PDBPageHandle PDBBufferManagerImpl::getPage(size_t maxBytes) {
 
   // figure out a free page number
   if (freeAnonPageNumbers.empty()) {
-
     // figure out a new page
     lastFreeAnonPageNumber++;
-
     // did we hit an overflow
     if (lastFreeAnonPageNumber == std::numeric_limits<uint64_t>::max()) {
-
       // log what happened
       getLogger()->fatal(
           "Too many anonymous pages " + std::to_string(lastFreeAnonPageNumber) + " were requested at the same time .");
-
       // kill the server.. we might consider a more graceful shutdown
       exit(-1);
     }
-
     // store the new free page
     freeAnonPageNumbers.emplace_back(lastFreeAnonPageNumber);
   }
@@ -1166,6 +1154,27 @@ PDBPageHandle PDBBufferManagerImpl::getPage(PDBSetPtr whichSet, uint64_t i) {
   return ret;
 }
 
+
+PDBPageHandle PDBBufferManagerImpl::getPageForObject(void* objectAddress){
+
+    void * whichPage = (char *) sharedMemory.memory + ((((char *)objectAddress - (char *) sharedMemory.memory) / sharedMemory.pageSize) * sharedMemory.pageSize);
+    auto pageIter  = constituentPages.find(whichPage);
+    if (pageIter == constituentPages.end()){
+        std::cout << "GetPageForObject: cannot find a whole page for this object! should find one\n";
+        exit(-1);
+    }
+    for (auto minipage: pageIter->second){
+        char* startAddress = (char*)minipage->getBytes();
+        char* endAddress = startAddress + minipage->getSize();
+        if (objectAddress >= startAddress && objectAddress < endAddress){
+            std::cout << "GetPageForObject: find the page for this object! " << " start address is : " << startAddress << "end address is : "<< endAddress << '\n';
+            std::cout << "GetPageForObject: object address is: " << objectAddress << '\n';
+            return std::make_shared<PDBPageHandleBase>(minipage);
+        }
+    }
+}
+
+
 void *PDBBufferManagerImpl::getEmptyMemory(int64_t pageSize, unique_lock<mutex> &lock) {
 
   // get space for it... first see if the space is available
@@ -1178,14 +1187,13 @@ void *PDBBufferManagerImpl::getEmptyMemory(int64_t pageSize, unique_lock<mutex> 
   emptyMiniPages[pageSize].pop_back();
 
   // determine the parent of this guy
-  void *whichPage = (char *) sharedMemory.memory
+  void * whichPage = (char *) sharedMemory.memory
       + ((((char *) space - (char *) sharedMemory.memory) / sharedMemory.pageSize) * sharedMemory.pageSize);
 
   // remove the page we just grabbed from the pool of the unused pages for the parent page...
   auto &parentPage = unusedMiniPages[whichPage].first;
   auto it = std::find(parentPage.begin(), parentPage.end(), space);
   parentPage.erase(it);
-
   return space;
 }
 
@@ -1220,6 +1228,7 @@ void PDBBufferManagerImpl::checkIfOpen(PDBSetPtr &whichSet) {
     }
   }
 }
+
 size_t PDBBufferManagerImpl::getLogPageSize(size_t numBytes) {
 
   size_t bytesRequired = 0;
@@ -1227,7 +1236,6 @@ size_t PDBBufferManagerImpl::getLogPageSize(size_t numBytes) {
   for (; curSize < numBytes; curSize = (curSize << 1)) {
     bytesRequired++;
   }
-
   return bytesRequired;
 }
 

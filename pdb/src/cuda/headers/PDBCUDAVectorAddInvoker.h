@@ -10,45 +10,29 @@
 #include "PDBCUDAOpType.h"
 #include "PDBCUDAOpInvoker.h"
 
-// simply support two kind of operations
-template <typename T = float>
-class PDBCUDAVectorAddInvoker: public PDBCUDAOpInvoker<T>{
-public:
+namespace pdb {
 
-    bool invoke(){
-        cublasRouting(InputParas[0].first, InputParas[1].first, OutputPara.first, InputParas[0].second[0]);
-        return true;
-    }
+    // simply support vector-add operation and vector-add kernel for GPU
+    class PDBCUDAVectorAddInvoker : public PDBCUDAOpInvoker {
+        using T = float;
+    public:
 
-    void cublasRouting(T* in1data, T* in2data, T* outdata, size_t N){
-        // wait to add vector add
-        return;
-    }
+        bool invoke();
 
-    void setInput(T* input, std::vector<size_t>& inputDim){
-        T* cudaPointer;
-        size_t length = std::accumulate(inputDim.begin(),inputDim.end(),1, std::multiplies<size_t>());
-        copyFromHostToDevice(&cudaPointer, input, sizeof(T) * length);
-        InputParas.push_back(std::make_pair(cudaPointer, inputDim));
-    }
+        void cublasRouting(T *in1data, T *in2data, T *outdata, size_t N);
 
-    void setOutput(T* output, std::vector<size_t>& outputDim){
-        T* cudaPointer;
-        size_t length = std::accumulate(outputDim.begin(),outputDim.end(),1, std::multiplies<size_t>());
-        copyFromHostToDevice(&cudaPointer, output, sizeof(T) * length);
-        OutputPara = std::make_pair(cudaPointer, outputDim);
-        copyBackPara = output;
-    }
+        void setInput(T *input, std::vector<size_t> &inputDim);
 
+        void setOutput(T *output, std::vector<size_t> &outputDim);
 
-public:
+    public:
+        // raw pointer and the dimension for the vector
+        std::vector<std::pair<T *, std::vector<size_t> >> InputParas;
+        std::pair<T *, std::vector<size_t> > OutputPara;
 
-    // raw pointer and the dimension for the vector
-    std::vector<std::pair<T*, std::vector<size_t> >> InputParas;
-    std::pair<T *, std::vector<size_t> > OutputPara;
+        T *copyBackPara;
 
-    T* copyBackPara;
-
-    PDBCUDAOpType op = PDBCUDAOpType::VectorAdd;
-};
+        PDBCUDAOpType op = PDBCUDAOpType::VectorAdd;
+    };
+}
 #endif

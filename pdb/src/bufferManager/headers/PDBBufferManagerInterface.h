@@ -36,7 +36,7 @@
  * going to use more than the first numBytes bytes on the page.  freezeSize () can be used on both
  * anonymous and non-anonymous pages.
  *
- * Beause the actual pages are variable sized, we don't figure out where in a file a non-anonymous page
+ * Because the actual pages are variable sized, we don't figure out where in a file a non-anonymous page
  * is going to be written until it is unpinned (at which time its size cannot change).
  *
  * When a page is created, it is pinned.  It is kept in RAM until it is unpinned (a page can be unpinned
@@ -101,6 +101,10 @@ public:
 
   // gets the page size
   virtual size_t getMaxPageSize() = 0;
+
+  // Get the right page info from BufferManager.
+  // This object is on the page ( start address < objectAddress < start address + numBytes ).
+  virtual PDBPageHandle getPageForObject(void* objectAddress) = 0;
 
   // simply loop through and write back any dirty pages.  
   virtual ~PDBBufferManagerInterface () = default;

@@ -29,7 +29,6 @@ struct PDBPageInfo {
 };
 
 enum PDBPageStatus {
-
   PDB_PAGE_LOADING,
   PDB_PAGE_LOADED,
   PDB_PAGE_UNLOADING,
@@ -106,7 +105,7 @@ class PDBPage {
   void decRefCount ();
 
   // a pointer to the raw bytes
-  void *bytes;
+  void * bytes;
 
   // the status of the page
   PDBPageStatus status;
@@ -131,7 +130,6 @@ class PDBPage {
   friend class PDBPageHandleBase;
   friend class PDBBufferManagerImpl;
   friend class PDBBufferManagerFrontEnd;
-
   template <class T>
   friend class PDBBufferManagerBackEnd;
   friend class PDBBufferManagerDebugBackEnd;

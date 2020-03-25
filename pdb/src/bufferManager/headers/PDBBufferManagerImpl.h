@@ -1,8 +1,5 @@
-
-
 #ifndef STORAGE_MGR_H
 #define STORAGE_MGR_H
-
 #include "PDBBufferManagerCheckLRU.h"
 #include "PDBPage.h"
 #include "PDBPageHandle.h"
@@ -12,7 +9,6 @@
 #include "PDBSharedMemory.h"
 #include "PDBBufferManagerInterface.h"
 #include "NodeConfig.h"
-
 #include <map>
 #include <memory>
 #include <condition_variable>
@@ -148,6 +144,14 @@ class PDBBufferManagerImpl : public PDBBufferManagerInterface {
    * @return - a page handle to an anonymous page, it is guaranteed to be pinned and have a size of at least minBytes
    */
   PDBPageHandle getPage(size_t minBytes) override;
+
+  /**
+  * Get the right page info from BufferManager.
+  * This object is on the page ( start address < objectAddress < start address + numBytes ).
+  * @param objectAddress - the physical address of one object
+  * @return - a PagePtr to this page containing the object
+  */
+  PDBPageHandle getPageForObject (void* objectAddress) override ;
 
   /**
    * Returns the maximum page size this buffer manager can give.
@@ -329,7 +333,7 @@ protected:
   set<pair<void *, size_t>, PDBBufferManagerCheckLRU> lastUsed;
 
   /**
-   * tells us how many of the minipages constructed from each page are pinned if the long is a negative value, it gives us the LRU number
+   * tells us how many of the minipages constructed from each page are pinned if the long is a negative value, it gives us the LRU number.
    */
   map<void *, long> numPinned;
 

@@ -346,6 +346,7 @@ target_link_libraries(pdb-tests-common PRIVATE ${Boost_LIBRARIES})
 add_library(logical-plan-parser OBJECT ${LogicalPlanFlexOutput} ${LogicalPlanParserOutput})
 
 
+
 # Find CUDA and compile all the .cu to pdb-gpu
 if (("${CMAKE_VERSION}" VERSION_EQUAL 3.8) OR
         ("${CMAKE_VERSION}" VERSION_GREATER 3.8))
