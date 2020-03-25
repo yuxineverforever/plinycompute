@@ -35,8 +35,6 @@ public:
 
 public:
 
-    //gpu_mem_manager->handleOneObject((void*)input);
-
     std::vector<std::pair<T*, std::vector<size_t> >> InputParas;
     std::pair<T *, std::vector<size_t> > OutputPara;
 

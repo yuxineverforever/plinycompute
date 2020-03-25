@@ -19,7 +19,7 @@ namespace pdb{
     bool PDBCUDAMatrixMultipleInvoker::invoke(){
         std::cout << "PDBCUDAMatrixMultipleInvoker invoke\n";
         cublasRouting(InputParas[0].first, InputParas[1].first, OutputPara.first, InputParas[0].second[0],InputParas[0].second[1],InputParas[1].second[0]);
-        cleanup();
+        //cleanup();
         return true;
     }
 

@@ -1167,7 +1167,7 @@ PDBPageHandle PDBBufferManagerImpl::getPageForObject(void* objectAddress){
         char* startAddress = (char*)minipage->getBytes();
         char* endAddress = startAddress + minipage->getSize();
         if (objectAddress >= startAddress && objectAddress < endAddress){
-            std::cout << "GetPageForObject: find the page for this object! " << " start address is : " << startAddress << "end address is : "<< endAddress << '\n';
+            std::cout << "GetPageForObject: find the page for this object! " << " start address is : " << (void*)startAddress << "end address is : "<< (void*)endAddress << '\n';
             std::cout << "GetPageForObject: object address is: " << objectAddress << '\n';
             return std::make_shared<PDBPageHandleBase>(minipage);
         }
