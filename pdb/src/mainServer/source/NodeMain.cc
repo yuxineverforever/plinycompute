@@ -157,7 +157,7 @@ int main(int argc, char *argv[]) {
     pid_t pid = fork();
 
     // check whether we are the frontend or the backend
-    if(pid != 0) {
+    if(pid == 0) {
         // do backend setup
         pdb::PDBLoggerPtr logger = make_shared<pdb::PDBLogger>("manager.log");
         pdb::PDBServer backEnd(pdb::PDBServer::NodeType::BACKEND, config, logger);

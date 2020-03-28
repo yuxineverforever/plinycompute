@@ -841,7 +841,7 @@ void PDBBufferManagerImpl::unpin(PDBPagePtr me, unique_lock<mutex> &lock) {
 void PDBBufferManagerImpl::pinParent(const PDBPagePtr &me) {
 
   // first, we determine the parent of this guy
-  void *whichPage = (char *) sharedMemory.memory
+  void* whichPage = (char *) sharedMemory.memory
       + ((((char *) me->getBytes() - (char *) sharedMemory.memory) / sharedMemory.pageSize) * sharedMemory.pageSize);
 
   // and increment the number of pinned minipages
@@ -1169,7 +1169,9 @@ PDBPageHandle PDBBufferManagerImpl::getPageForObject(void* objectAddress){
         if (objectAddress >= startAddress && objectAddress < endAddress){
             std::cout << "GetPageForObject: find the page for this object! " << " start address is : " << (void*)startAddress << "end address is : "<< (void*)endAddress << '\n';
             std::cout << "GetPageForObject: object address is: " << objectAddress << '\n';
-            return std::make_shared<PDBPageHandleBase>(minipage);
+            PDBPageHandle thisPage = std::make_shared<PDBPageHandleBase>(minipage);
+            constituentPagesForGPU.push_back(thisPage);
+            return thisPage;
         }
     }
 }
@@ -1183,7 +1185,7 @@ void *PDBBufferManagerImpl::getEmptyMemory(int64_t pageSize, unique_lock<mutex> 
   }
 
   // grab an empty page
-  void *space = emptyMiniPages[pageSize].back();
+  void* space = emptyMiniPages[pageSize].back();
   emptyMiniPages[pageSize].pop_back();
 
   // determine the parent of this guy
@@ -1230,7 +1232,6 @@ void PDBBufferManagerImpl::checkIfOpen(PDBSetPtr &whichSet) {
 }
 
 size_t PDBBufferManagerImpl::getLogPageSize(size_t numBytes) {
-
   size_t bytesRequired = 0;
   size_t curSize = MIN_PAGE_SIZE;
   for (; curSize < numBytes; curSize = (curSize << 1)) {

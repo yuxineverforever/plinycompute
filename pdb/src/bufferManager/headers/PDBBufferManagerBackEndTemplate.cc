@@ -240,6 +240,7 @@ PDBPageHandle PDBBufferManagerBackEnd<T>::getPageForObject(void *objectAddress) 
     // somewhere to put the message.
     std::string errMsg;
 
+
     auto res = T::template heapRequest<BufGetPageForObjectRequest, BufGetPageResult, pdb::PDBPageHandle>(
             myLogger, port, address, nullptr, 1024,
             [&](Handle<BufGetPageResult> result) {
@@ -261,17 +262,13 @@ PDBPageHandle PDBBufferManagerBackEnd<T>::getPageForObject(void *objectAddress) 
                     {
                         // lock all pages to add the page there
                         unique_lock<std::mutex> lck(m);
-
                         // mark the page as loaded
                         returnVal->status = PDB_PAGE_LOADED;
-
                         // insert the page
                         allPages[std::make_pair(returnVal->whichSet, returnVal->pageNum)] = returnVal;
                     }
-
                     // notify all threads that the state has changed
                     cv.notify_all();
-
                     // return the page handle
                     return make_shared<PDBPageHandleBase>(returnVal);
                 }
@@ -280,7 +277,6 @@ PDBPageHandle PDBBufferManagerBackEnd<T>::getPageForObject(void *objectAddress) 
                 return (pdb::PDBPageHandle) nullptr;
             },
             objectAddress);
-
     return std::move(res);
 }
 

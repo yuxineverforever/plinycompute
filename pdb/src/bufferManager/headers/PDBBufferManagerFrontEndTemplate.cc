@@ -416,7 +416,7 @@ bool pdb::PDBBufferManagerFrontEnd::sendPageToBackend(pdb::PDBPageHandle page, s
 
   // create the object
   Handle<pdb::BufGetPageResult> objectToSend = pdb::makeObject<BufGetPageResult>(offset, pageNumber, isAnonymous, sizeFrozen, startPos, numBytes, setName, dbName);
-
+  
   {
     // lock so we can mark the page as sent
     unique_lock<mutex> lck(m);

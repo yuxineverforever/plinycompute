@@ -333,7 +333,8 @@ protected:
   set<pair<void *, size_t>, PDBBufferManagerCheckLRU> lastUsed;
 
   /**
-   * tells us how many of the minipages constructed from each page are pinned if the long is a negative value, it gives us the LRU number.
+   * tells us how many of the minipages constructed from each page are pinned.
+   * If the long is a negative value, it gives us the LRU number.
    */
   map<void *, long> numPinned;
 
@@ -351,6 +352,11 @@ protected:
    * all of the mini-pages that make up a page
    */
   map<void *, vector<PDBPagePtr>> constituentPages;
+
+  /**
+   * all the mini-pages that will be kept for GPU
+   */
+  vector<PDBPageHandle> constituentPagesForGPU;
 
   /**
    * all of the locations from which we are currently allocating minipages.  The first
