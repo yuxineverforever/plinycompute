@@ -22,6 +22,10 @@ class PDBCUDAMemoryManager{
         void* handleOneObject(void *objectAddress) {
             std::cout << "handleOneObject is called!\n";
             pdb::PDBPageHandle whichPage = bufferManager->getPageForObject(objectAddress);
+            if (whichPage == nullptr){
+                std::cout << "handleOneObject return page is nullptr!\n";
+                exit(-1);
+            }
             size_t objectOffset = (char*)objectAddress - (char*)whichPage->getBytes();
             if (gpu_page_table.count(whichPage->getBytes()) != 0) {
                 std::cout << "handleOneObject: object is already on GPU\n";

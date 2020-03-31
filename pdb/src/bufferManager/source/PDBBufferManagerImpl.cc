@@ -1174,6 +1174,7 @@ PDBPageHandle PDBBufferManagerImpl::getPageForObject(void* objectAddress){
             return thisPage;
         }
     }
+    return nullptr;
 }
 
 
