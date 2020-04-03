@@ -4,6 +4,7 @@
 #include <map>
 #include <PDBBufferManagerInterface.h>
 #include "PDBCUDAUtility.h"
+#include "PDBCUDALatch.h"
 
 namespace pdb {
 
@@ -26,33 +27,50 @@ class PDBCUDAMemoryManager{
                 std::cout << "handleOneObject return page is nullptr!\n";
                 exit(-1);
             }
-            size_t objectOffset = (char*)objectAddress - (char*)whichPage->getBytes();
-            if (gpu_page_table.count(whichPage->getBytes()) != 0) {
+
+            void*  pageAddress = whichPage->getBytes();
+            size_t pageBytes = whichPage->getSize();
+            size_t objectOffset = (char*)objectAddress - (char*)pageAddress;
+
+            bool isThere = (gpuPageTable.count(pageAddress) != 0);
+
+            if (isThere) {
+                pageTableLatch.RLock();
                 std::cout << "handleOneObject: object is already on GPU\n";
-                return (void*)((char *)(gpu_page_table[whichPage->getBytes()].second) + objectOffset);
+                auto cudaObjectAddress = (void*)((char *)(gpuPageTable[pageAddress]) + objectOffset);
+                pageTableLatch.RUnlock();
+                return cudaObjectAddress;
             } else {
+                pageTableLatch.WLock();
+
                 std::cout << "handleOneObject: object is not on GPU, move the page\n";
-                //whichPage->repin();
-                void* startAddress = whichPage->getBytes();
-                size_t numBytes = whichPage->getSize();
                 void* cudaPointer;
-                copyFromHostToDevice((void **) &cudaPointer, startAddress, numBytes);
-                gpu_page_table.insert(std::make_pair(whichPage->getBytes(), std::make_pair(whichPage, cudaPointer)));
-                return (void*)((char*)cudaPointer + objectOffset);
+                copyFromHostToDevice((void **) &cudaPointer, pageAddress, pageBytes);
+                gpuPageTable.insert(std::make_pair(pageAddress, cudaPointer));
+                auto cudaObjectAddress = (void*)((char*)cudaPointer + objectOffset);
+
+                pageTableLatch.WUnlock();
+                return cudaObjectAddress;
             }
         }
 
+
     public:
-        // the buffer manager to help maintain gpu page table
+         /**
+          * the buffer manager to help maintain gpu page table
+          */
         PDBBufferManagerInterfacePtr bufferManager;
 
-        // gpu_page_table for mapping CPU bufferManager page address to GPU bufferManager page address
-        // the PDBPageHandle needs to be stored here for keeping some anonymous page. So that, the anonymous page wont be freed.
+        /**
+         * gpu_page_table for mapping CPU bufferManager page address to GPU bufferManager page address
+         * the PDBPageHandle needs to be stored here for keeping some anonymous page. So that, the anonymous page wont be freed.
+         */
+        std::map<void*, void*> gpuPageTable;
 
-        std::map<void*, std::pair<pdb::PDBPageHandle, void*>> gpu_page_table;
-
-
-        // map <pair <PDBSetPtr, size_t>, PDBPagePtr, PDBPageCompare> allPages;
+        /**
+         * pageTableLatch
+         */
+        ReaderWriterLatch pageTableLatch;
     };
 
 }

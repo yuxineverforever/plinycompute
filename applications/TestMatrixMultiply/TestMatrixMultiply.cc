@@ -13,8 +13,8 @@ using namespace pdb::matrix;
 const size_t blockSize = 1024;
 const uint32_t matrixRows = 100;
 const uint32_t matrixColumns = 100;
-const uint32_t numRows = 2;
-const uint32_t numCols = 2;
+const uint32_t numRows = 10;
+const uint32_t numCols = 10;
 
 void initMatrix(pdb::PDBClient &pdbClient, const std::string &set) {
 
