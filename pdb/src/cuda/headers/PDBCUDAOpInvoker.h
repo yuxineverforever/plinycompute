@@ -17,20 +17,12 @@ public:
 
     PDBCUDAOpInvoker(){};
 
-    void setInput(float* input, std::vector<size_t>& inputDim){
-        std::cout << "PDBCUDAOpInvoker setionput \n";
-        return;
-    };
+    void setInput(float* input, std::vector<size_t>& inputDim);
 
-    void setOutput(float* output, std::vector<size_t>& outputDim){
-        std::cout << "PDBCUDAOpInvoker setoutput \n";
-        return;
-    };
+    void setOutput(float* output, std::vector<size_t>& outputDim);
 
-    bool invoke(){
-        std::cout << "PDBCUDAOpInvoker invoke \n";
-        return true;
-    };
+    bool invoke();
+
 public:
     PDBCUDAOpType op;
 };

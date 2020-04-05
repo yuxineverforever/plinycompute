@@ -34,6 +34,7 @@ class LAMinElementAggregate
     : public AggregateComp<LAMinElementOutputType, MatrixBlock, int, LAMinElementValueType> {
 
 public:
+
     ENABLE_DEEP_COPY
 
     LAMinElementAggregate() {}

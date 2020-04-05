@@ -4,20 +4,20 @@ extern void* gpuMemoryManager;
 namespace pdb{
 
     void PDBCUDAMatrixMultipleInvoker::setInput(T* input, std::vector<size_t>& inputDim){
-        std::cout << "PDBCUDAMatrixMultipleInvoker setionput \n";
+        std::cout << "PDBCUDAMatrixMultipleInvoker setInput() \n";
         T* cudaPointer = (T*)((PDBCUDAMemoryManager*)gpuMemoryManager)->handleOneObject((void*)input);
         InputParas.push_back(std::make_pair(cudaPointer, inputDim));
     }
 
     void PDBCUDAMatrixMultipleInvoker::setOutput(T* output, std::vector<size_t>& outputDim){
-        std::cout << "PDBCUDAMatrixMultipleInvoker setoutput \n";
+        std::cout << "PDBCUDAMatrixMultipleInvoker setOutput() \n";
         T* cudaPointer = (T*)((PDBCUDAMemoryManager*)gpuMemoryManager)->handleOneObject((void*)output);
         OutputPara = std::make_pair(cudaPointer, outputDim);
         copyBackPara = output;
     }
 
     bool PDBCUDAMatrixMultipleInvoker::invoke(){
-        std::cout << "PDBCUDAMatrixMultipleInvoker invoke\n";
+        std::cout << "PDBCUDAMatrixMultipleInvoker invoke() \n";
         cublasRouting(InputParas[0].first, InputParas[1].first, OutputPara.first, InputParas[0].second[0],InputParas[0].second[1],InputParas[1].second[0]);
         //cleanup();
         return true;

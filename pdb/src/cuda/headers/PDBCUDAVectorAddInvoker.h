@@ -19,11 +19,13 @@ namespace pdb {
 
         bool invoke();
 
-        void cublasRouting(T *in1data, T *in2data, T *outdata, size_t N);
+        void cublasRouting(T *in1data, T *in2data, size_t N);
 
         void setInput(T *input, std::vector<size_t> &inputDim);
 
         void setOutput(T *output, std::vector<size_t> &outputDim);
+
+        void cleanup();
 
     public:
         // raw pointer and the dimension for the vector

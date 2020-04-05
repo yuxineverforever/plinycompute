@@ -2,6 +2,8 @@
 
 #include <Object.h>
 #include <PDBVector.h>
+#include <PDBCUDAVectorAddInvoker.h>
+#include <PDBCUDAGPUInvoke.h>
 
 namespace pdb {
 
@@ -49,13 +51,18 @@ public:
     // get the data
     float *myData = data->c_ptr();
     float *otherData = other.data->c_ptr();
+    size_t length = numRows * numCols;
+    vector<size_t> outdim = {length};
+    vector<size_t> in1dim = {length};
+    PDBCUDAVectorAddInvoker invoker;
+    GPUInvoke(invoker, data, outdim, other.data, in1dim);
 
     // sum up the data
-    for (int i = 0; i < numRows * numCols; i++) {
-      (myData)[i] += (otherData)[i];
-    }
-
+    //for (int i = 0; i < numRows * numCols; i++) {
+    //  (myData)[i] += (otherData)[i];
+    //}
     // return me
+
     return *this;
   }
 };

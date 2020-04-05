@@ -27,21 +27,21 @@ class PDBCUDAMemoryManager{
                 std::cout << "handleOneObject return page is nullptr!\n";
                 exit(-1);
             }
-
             void*  pageAddress = whichPage->getBytes();
             size_t pageBytes = whichPage->getSize();
             size_t objectOffset = (char*)objectAddress - (char*)pageAddress;
-
             bool isThere = (gpuPageTable.count(pageAddress) != 0);
-
             if (isThere) {
-                pageTableLatch.RLock();
+
+                //pageTableLatch.RLock();
+
                 std::cout << "handleOneObject: object is already on GPU\n";
                 auto cudaObjectAddress = (void*)((char *)(gpuPageTable[pageAddress]) + objectOffset);
-                pageTableLatch.RUnlock();
+
+                //pageTableLatch.RUnlock();
                 return cudaObjectAddress;
             } else {
-                pageTableLatch.WLock();
+                //pageTableLatch.WLock();
 
                 std::cout << "handleOneObject: object is not on GPU, move the page\n";
                 void* cudaPointer;
@@ -49,7 +49,7 @@ class PDBCUDAMemoryManager{
                 gpuPageTable.insert(std::make_pair(pageAddress, cudaPointer));
                 auto cudaObjectAddress = (void*)((char*)cudaPointer + objectOffset);
 
-                pageTableLatch.WUnlock();
+                //pageTableLatch.WUnlock();
                 return cudaObjectAddress;
             }
         }
@@ -70,7 +70,7 @@ class PDBCUDAMemoryManager{
         /**
          * pageTableLatch
          */
-        ReaderWriterLatch pageTableLatch;
+        //ReaderWriterLatch pageTableLatch;
     };
 
 }
