@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include "PDBCUDAMatrixMultipleInvoker.h"
+#include "PDBCUDAVectorAddInvoker.h"
 #include <vector>
 
 // `Out` vector should be reserved before passing as parameter
@@ -18,13 +19,15 @@ bool GPUInvoke(InvokerType& f, pdb::Handle<OutputType> Output, pdb::Handle<Input
 template <typename InvokerType, typename InputType, typename OutputType>
 bool GPUInvoke(InvokerType& f, pdb::Handle<pdb::Vector<OutputType>> Out, pdb::Handle<pdb::Vector<InputType>> In1, pdb::Handle<pdb::Vector<InputType>> In2);
 
-
 template <typename InvokerType, typename InputType, typename OutputType>
 bool GPUInvoke(InvokerType& f, pdb::Handle<pdb::Vector<OutputType>> Out, std::vector<size_t>& OutDim, pdb::Handle<pdb::Vector<InputType>> In1, std::vector<size_t>& In1Dim);
 
-
 template <typename InvokerType, typename InputType, typename OutputType>
 bool GPUInvoke(InvokerType& f, pdb::Handle<pdb::Vector<OutputType>> Out, std::vector<size_t>& OutDim, pdb::Handle<pdb::Vector<InputType>> In1, std::vector<size_t>& In1Dim, pdb::Handle<pdb::Vector<InputType> > In2, std::vector<size_t>& In2Dim);
+
+bool GPUInvoke(pdb::PDBCUDAMatrixMultipleInvoker& f, pdb::Handle<pdb::Vector<float>> Out, std::vector<size_t>& OutDim, pdb::Handle<pdb::Vector<float>> In1, std::vector<size_t>& In1Dim, pdb::Handle<pdb::Vector<float> > In2, std::vector<size_t>& In2Dim);
+
+bool GPUInvoke(pdb::PDBCUDAVectorAddInvoker& f, pdb::Handle<pdb::Vector<float>> Out, std::vector<size_t>& OutDim, pdb::Handle<pdb::Vector<float>> In1, std::vector<size_t>& In1Dim);
 
 /*
 template <typename InvokerType, typename InputType, typename OutputType>

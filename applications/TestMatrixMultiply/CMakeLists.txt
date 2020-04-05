@@ -41,8 +41,11 @@ add_library(cuda-obj SHARED ${CUDA_SOURCE})
 
 target_link_libraries(TestMatrixMultiply ${MKL_LIBRARIES})
 
+
+target_link_libraries(MatrixBlockData cuda-obj)
 target_link_libraries(MatrixMultiplyJoin cuda-obj)
 target_link_libraries(TestMatrixMultiply cuda-obj)
+
 
 #target_link_libraries(TestMatrixMultiply ${CUDA_ADD_CUBLAS_TO_TARGET})
 target_link_libraries(TestMatrixMultiply ${CUDA_DART_LIB})

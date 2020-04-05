@@ -47,7 +47,6 @@ public:
    * @return
    */
   MatrixBlockData& operator+(MatrixBlockData& other) {
-
     // get the data
     float *myData = data->c_ptr();
     float *otherData = other.data->c_ptr();
@@ -56,13 +55,11 @@ public:
     vector<size_t> in1dim = {length};
     PDBCUDAVectorAddInvoker invoker;
     GPUInvoke(invoker, data, outdim, other.data, in1dim);
-
     // sum up the data
     //for (int i = 0; i < numRows * numCols; i++) {
     //  (myData)[i] += (otherData)[i];
     //}
     // return me
-
     return *this;
   }
 };

@@ -101,13 +101,15 @@ bool GPUInvoke(InvokerType& f, pdb::Handle<pdb::Vector<OutputType>> Out, pdb::Ha
  * @param In1 - input param 1
  * @param In1Dim - input param 1 dimension
  * @return bool - successful or not
- */
+ *
+*/
 template <typename InvokerType, typename InputType, typename OutputType>
 bool GPUInvoke(InvokerType& f, pdb::Handle<pdb::Vector<OutputType>> Out, std::vector<size_t>& OutDim, pdb::Handle<pdb::Vector<InputType>> In1, std::vector<size_t>& In1Dim){
     auto In1Object = In1->c_ptr();
     auto OutObject = Out->c_ptr();
     return SimpleTypeGPUInvoke(f, OutObject, OutDim, In1Object, In1Dim);
 }
+
 
 /**
  * GPUInvoke just allow trivial copyable types. Handle 2 input param case.
@@ -131,3 +133,17 @@ bool GPUInvoke(InvokerType& f, pdb::Handle<pdb::Vector<OutputType>> Out, std::ve
     return SimpleTypeGPUInvoke(f, OutObject, OutDim, In1Object, In1Dim, In2Object, In2Dim);
 }
 
+
+bool GPUInvoke(pdb::PDBCUDAMatrixMultipleInvoker& f, pdb::Handle<pdb::Vector<float>> Out, std::vector<size_t>& OutDim, pdb::Handle<pdb::Vector<float>> In1, std::vector<size_t>& In1Dim, pdb::Handle<pdb::Vector<float> > In2, std::vector<size_t>& In2Dim){
+    auto In1Object = In1->c_ptr();
+    auto In2Object = In2->c_ptr();
+    auto OutObject = Out->c_ptr();
+    return SimpleTypeGPUInvoke(f, OutObject, OutDim, In1Object, In1Dim, In2Object, In2Dim);
+}
+
+
+bool GPUInvoke(pdb::PDBCUDAVectorAddInvoker& f, pdb::Handle<pdb::Vector<float>> Out, std::vector<size_t>& OutDim, pdb::Handle<pdb::Vector<float>> In1, std::vector<size_t>& In1Dim){
+    auto In1Object = In1->c_ptr();
+    auto OutObject = Out->c_ptr();
+    return SimpleTypeGPUInvoke(f, OutObject, OutDim, In1Object, In1Dim);
+}
