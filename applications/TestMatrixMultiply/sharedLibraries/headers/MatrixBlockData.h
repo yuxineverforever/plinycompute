@@ -54,8 +54,9 @@ public:
     size_t length = numRows * numCols;
     vector<size_t> outdim = {length};
     vector<size_t> in1dim = {length};
-    PDBCUDAVectorAddInvoker invoker;
-    GPUInvoke(invoker, data, outdim, other.data, in1dim);
+
+    pdb::PDBCUDAOpType op = pdb::PDBCUDAOpType ::VectorAdd;
+    GPUInvoke(op, data, outdim, other.data, in1dim);
 
     /*
     // sum up the data

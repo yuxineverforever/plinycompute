@@ -11,6 +11,7 @@ namespace pdb{
     bool PDBCUDAVectorAddInvoker::invoke(){
         //std::cout << "PDBCUDAVectorAddInvoker invoke() \n";
         cublasRouting(outputPara.first, inputParas[0].first, inputParas[0].second[0]);
+        cleanup();
         return true;
     }
     /**

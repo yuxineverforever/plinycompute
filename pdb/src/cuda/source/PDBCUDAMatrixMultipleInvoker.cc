@@ -23,7 +23,7 @@ namespace pdb{
     bool PDBCUDAMatrixMultipleInvoker::invoke(){
         //std::cout << "PDBCUDAMatrixMultipleInvoker invoke() \n";
         cublasRouting(inputParas[0].first, inputParas[1].first, outputPara.first, inputParas[0].second[0], inputParas[0].second[1], inputParas[1].second[0]);
-        //cleanup();
+        cleanup();
         return true;
     }
 
@@ -32,7 +32,6 @@ namespace pdb{
         const float beta  = 0.0f;
         cublasSgemm(cudaHandle, CUBLAS_OP_N, CUBLAS_OP_N, in1NumRow, in2NumCol, in1NumCol, &alpha, in1data, in1NumRow, in2data, in1NumCol, &beta, outdata, in1NumRow);
         copyFromDeviceToHost((void*)copyBackPara, (void*)outputPara.first, outputPara.second[0] * outputPara.second[1] * sizeof(float));
-        cleanup();
     }
 
     void PDBCUDAMatrixMultipleInvoker::cleanup(){
