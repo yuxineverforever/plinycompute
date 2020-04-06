@@ -41,6 +41,7 @@ public:
     T* copyBackPara;
 
     PDBCUDAOpType op = PDBCUDAOpType::MatrixMultiple;
+
 };
 }
 #endif

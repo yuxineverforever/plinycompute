@@ -21,7 +21,7 @@ class PDBCUDAMemoryManager{
          * @return void* - the address of object on the GPU page which contains the object
          */
         void* handleOneObject(void *objectAddress) {
-            std::cout << "handleOneObject is called!\n";
+            //std::cout << "handleOneObject is called!\n";
             pdb::PDBPageHandle whichPage = bufferManager->getPageForObject(objectAddress);
             if (whichPage == nullptr){
                 std::cout << "handleOneObject return page is nullptr!\n";
@@ -33,13 +33,13 @@ class PDBCUDAMemoryManager{
             bool isThere = (gpuPageTable.count(pageAddress) != 0);
             if (isThere) {
                 //pageTableLatch.RLock();
-                std::cout << "handleOneObject: object is already on GPU\n";
+                //std::cout << "handleOneObject: object is already on GPU\n";
                 auto cudaObjectAddress = (void*)((char *)(gpuPageTable[pageAddress]) + objectOffset);
                 //pageTableLatch.RUnlock();
                 return cudaObjectAddress;
             } else {
                 //pageTableLatch.WLock();
-                std::cout << "handleOneObject: object is not on GPU, move the page\n";
+                //std::cout << "handleOneObject: object is not on GPU, move the page\n";
                 void* cudaPointer;
                 copyFromHostToDevice((void **) &cudaPointer, pageAddress, pageBytes);
                 gpuPageTable.insert(std::make_pair(pageAddress, cudaPointer));
