@@ -29,7 +29,7 @@ namespace pdb{
         const float beta  = 0.0f;
         cublasCreate(&handle);
         cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, in1NumRow, in2NumCol, in1NumCol, &alpha, in1data, in1NumRow, in2data, in1NumCol, &beta, outdata, in1NumRow);
-        copyFromDeviceToHost((void*)copyBackPara, (void*)OutputPara.first, OutputPara.second[0]*OutputPara.second[1]);
+        copyFromDeviceToHost((void*)copyBackPara, (void*)OutputPara.first, OutputPara.second[0]*OutputPara.second[1]*sizeof(float));
     }
 
     void PDBCUDAMatrixMultipleInvoker::cleanup(){

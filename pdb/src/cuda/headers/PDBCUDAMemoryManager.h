@@ -32,17 +32,13 @@ class PDBCUDAMemoryManager{
             size_t objectOffset = (char*)objectAddress - (char*)pageAddress;
             bool isThere = (gpuPageTable.count(pageAddress) != 0);
             if (isThere) {
-
                 //pageTableLatch.RLock();
-
                 std::cout << "handleOneObject: object is already on GPU\n";
                 auto cudaObjectAddress = (void*)((char *)(gpuPageTable[pageAddress]) + objectOffset);
-
                 //pageTableLatch.RUnlock();
                 return cudaObjectAddress;
             } else {
                 //pageTableLatch.WLock();
-
                 std::cout << "handleOneObject: object is not on GPU, move the page\n";
                 void* cudaPointer;
                 copyFromHostToDevice((void **) &cudaPointer, pageAddress, pageBytes);

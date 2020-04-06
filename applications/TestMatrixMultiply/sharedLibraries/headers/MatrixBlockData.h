@@ -55,13 +55,15 @@ public:
     vector<size_t> in1dim = {length};
     PDBCUDAVectorAddInvoker invoker;
     GPUInvoke(invoker, data, outdim, other.data, in1dim);
+    /*
     // sum up the data
-    //for (int i = 0; i < numRows * numCols; i++) {
-    //  (myData)[i] += (otherData)[i];
-    //}
+    for (int i = 0; i < numRows * numCols; i++) {
+    (myData)[i] += (otherData)[i];
+    }
+    */
     // return me
     return *this;
-  }
+}
 };
 
 }

@@ -13,8 +13,8 @@ using namespace pdb::matrix;
 const size_t blockSize = 1024;
 const uint32_t matrixRows = 100;
 const uint32_t matrixColumns = 100;
-const uint32_t numRows = 10;
-const uint32_t numCols = 10;
+const uint32_t numRows = 2;
+const uint32_t numCols = 2;
 
 void initMatrix(pdb::PDBClient &pdbClient, const std::string &set) {
 
@@ -34,7 +34,8 @@ void initMatrix(pdb::PDBClient &pdbClient, const std::string &set) {
       // init the values
       float *vals = myInt->data.data->c_ptr();
       for (int v = 0; v < (matrixRows / numRows) * (matrixColumns / numCols); ++v) {
-        vals[v] = 1.0f * v;
+        //vals[v] = 1.0f * v + 2.0f;
+        vals[v] = 1.0f;
       }
 
       data->push_back(myInt);
@@ -64,7 +65,6 @@ int main(int argc, char* argv[]) {
   pdbClient.registerType("libraries/libMatrixMultiplyJoin.so");
   pdbClient.registerType("libraries/libMatrixScanner.so");
   pdbClient.registerType("libraries/libMatrixWriter.so");
-  //pdbClient.registerType("libraries/libPDBCUDAMatrixMultiple.so");
 
   /// 2. Create the set
 
@@ -110,10 +110,8 @@ int main(int argc, char* argv[]) {
   // grab the iterator
   auto it = pdbClient.getSetIterator<MatrixBlock>("myData", "C");
   while(it->hasNextRecord()) {
-
     // grab the record
     auto r = it->getNextRecord();
-
     // write out the values
     float *values = r->data.data->c_ptr();
     for(int i = 0; i < r->data.numRows; ++i) {

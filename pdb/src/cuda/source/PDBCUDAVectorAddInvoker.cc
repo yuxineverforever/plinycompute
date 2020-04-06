@@ -20,7 +20,7 @@ namespace pdb{
         const float alpha = 1.0;
         cublasCreate(&handle);
         cublasSaxpy(handle, N, &alpha, in1data, 1, outdata, 1);
-        copyFromDeviceToHost((void*)copyBackPara, (void*)OutputPara.first, OutputPara.second[0]);
+        copyFromDeviceToHost((void*)copyBackPara, (void*)OutputPara.first, OutputPara.second[0]* sizeof(float));
     }
 
     void PDBCUDAVectorAddInvoker::setInput(T* input, std::vector<size_t>& inputDim){
