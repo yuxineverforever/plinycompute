@@ -40,10 +40,6 @@ namespace po = boost::program_options;
 namespace fs = boost::filesystem;
 using namespace pdb;
 
-void setGPUCUDAHandler(cublasHandle_t* handle){
-    cublasCreate(handle);
-}
-
 void setGPUMemoryManager(void ** gpuMgr, pdb::PDBBufferManagerInterfacePtr myMgr){
     PDBCUDAMemoryManager* tmp = new PDBCUDAMemoryManager(myMgr);
     *gpuMgr = (void*)tmp;
@@ -173,8 +169,6 @@ int main(int argc, char *argv[]) {
         backEnd.addFunctionality(std::make_shared<pdb::ExecutionServerBackend>());
 
         setGPUMemoryManager(&gpuMemoryManager, backEnd.getFunctionalityPtr<PDBBufferManagerInterface>());
-        setGPUCUDAHandler(&cudaHandle);
-
         // start the backend
         backEnd.startServer(make_shared<pdb::GenericWork>([&](PDBBuzzerPtr callerBuzzer) {
 

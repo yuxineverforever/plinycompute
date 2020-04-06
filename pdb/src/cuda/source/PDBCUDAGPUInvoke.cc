@@ -146,3 +146,43 @@ bool GPUInvoke(pdb::PDBCUDAVectorAddInvoker& f, pdb::Handle<pdb::Vector<float>> 
     auto OutObject = Out->c_ptr();
     return SimpleTypeGPUInvoke(f, OutObject, OutDim, In1Object, In1Dim);
 }
+
+/** By default, this GPUInvoke will handle the matrix multiple case for join.
+ * @param op
+ * @param Out
+ * @param OutDim
+ * @param In1
+ * @param In1Dim
+ * @return
+ */
+extern pdb::PDBCUDAVectorAddInvoker vectorAddInvoker;
+bool GPUInvoke(pdb::PDBCUDAOpType& op, pdb::Handle<pdb::Vector<float>> Out, std::vector<size_t>& OutDim, pdb::Handle<pdb::Vector<float>> In1, std::vector<size_t>& In1Dim){
+    if (op!=pdb::PDBCUDAOpType::VectorAdd){
+        exit(-1);
+    }
+    auto In1Object = In1->c_ptr();
+    auto OutObject = Out->c_ptr();
+    return SimpleTypeGPUInvoke(vectorAddInvoker, OutObject, OutDim, In1Object, In1Dim);
+}
+
+/** By default, this GPUInvoke will handle the vector add case for aggregation.
+ * @param op
+ * @param Out
+ * @param OutDim
+ * @param In1
+ * @param In1Dim
+ * @param In2
+ * @param In2Dim
+ * @return
+ */
+extern pdb::PDBCUDAMatrixMultipleInvoker matrixMultipleInvoker;
+bool GPUInvoke(pdb::PDBCUDAOpType& op, pdb::Handle<pdb::Vector<float>> Out, std::vector<size_t>& OutDim, pdb::Handle<pdb::Vector<float>> In1, std::vector<size_t>& In1Dim, pdb::Handle<pdb::Vector<float> > In2, std::vector<size_t>& In2Dim){
+    if (op!=pdb::PDBCUDAOpType::MatrixMultiple){
+        exit(-1);
+    }
+    auto In1Object = In1->c_ptr();
+    auto In2Object = In2->c_ptr();
+    auto OutObject = Out->c_ptr();
+    return SimpleTypeGPUInvoke(matrixMultipleInvoker, OutObject, OutDim, In1Object, In1Dim, In2Object, In2Dim);
+}
+

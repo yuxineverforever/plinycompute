@@ -5,12 +5,12 @@
 #include <Handle.h>
 #include "PDBVector.h"
 #include "PDBCUDAUtility.h"
-
-enum PDBCUDAOpType {
-    SimpleAdd,
-    SimpleMultiple,
-    MatrixMultiple, //0
-    VectorAdd, //1
-};
-
+namespace pdb {
+    enum PDBCUDAOpType {
+        SimpleAdd,
+        SimpleMultiple,
+        MatrixMultiple, //0
+        VectorAdd, //1
+    };
+}
 #endif

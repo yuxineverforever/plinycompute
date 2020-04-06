@@ -17,6 +17,8 @@ namespace pdb {
         using T = float;
     public:
 
+        PDBCUDAVectorAddInvoker();
+
         bool invoke();
 
         void cublasRouting(T *in1data, T *in2data, size_t N);
@@ -29,12 +31,12 @@ namespace pdb {
 
     public:
         // raw pointer and the dimension for the vector
-        std::vector<std::pair<T *, std::vector<size_t> >> InputParas;
-        std::pair<T *, std::vector<size_t> > OutputPara;
-
+        std::vector<std::pair<T *, std::vector<size_t> >> inputParas;
+        std::pair<T *, std::vector<size_t> > outputPara;
         T *copyBackPara;
 
         PDBCUDAOpType op = PDBCUDAOpType::VectorAdd;
+        cublasHandle_t cudaHandle;
     };
 }
 #endif

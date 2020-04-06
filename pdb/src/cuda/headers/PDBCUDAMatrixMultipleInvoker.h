@@ -16,12 +16,11 @@ namespace pdb{
 
 //simply support Matrix Multiply kernel.
 class PDBCUDAMatrixMultipleInvoker: public PDBCUDAOpInvoker{
-
     using T = float;
 
 public:
 
-    PDBCUDAMatrixMultipleInvoker() = default;
+    PDBCUDAMatrixMultipleInvoker();
 
     bool invoke();
 
@@ -34,14 +33,12 @@ public:
     void cleanup();
 
 public:
-
-    std::vector<std::pair<T*, std::vector<size_t> >> InputParas;
-    std::pair<T *, std::vector<size_t> > OutputPara;
-
+    std::vector<std::pair<T*, std::vector<size_t> >> inputParas;
+    std::pair<T *, std::vector<size_t> > outputPara;
     T* copyBackPara;
 
     PDBCUDAOpType op = PDBCUDAOpType::MatrixMultiple;
-
+    cublasHandle_t cudaHandle;
 };
 }
 #endif

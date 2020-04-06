@@ -11,7 +11,8 @@ set (Boost_INCLUDE_DIR "/home/yuxin/snap/boost/include")
 set (Boost_LIBRARY_DIRS "/home/yuxin/snap/boost/lib")
 
 set (CUDA_INCLUDE_DIR "/usr/local/cuda/include")
-set (CUDA_LIBRARY_DIRS "/usr/local/cuda-10.0/lib64/libcublas.so")
+set (CUDA_BLAS_LIB "/usr/local/cuda-10.0/lib64/libcublas.so")
+set (CUDA_DART_LIB "/usr/local/cuda-10.0/lib64/libcudart.so")
 
 option(USE_CUDA "Use CUDA" ON)
 
@@ -418,7 +419,8 @@ else()
 
     add_dependencies(pdb-node pdb-gpu)
     target_link_libraries(pdb-node pdb-gpu)
-    target_link_libraries(pdb-node ${CUDA_LIBRARY_DIRS})
+    target_link_libraries(pdb-node ${CUDA_BLAS_LIB})
+    target_link_libraries(pdb-node ${CUDA_DART_LIB})
 
 endif()
 
