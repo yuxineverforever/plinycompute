@@ -14,7 +14,9 @@
 // simply support two kind of operations
 namespace pdb{
 
-//simply support Matrix Multiply kernel.
+/**
+ * PDBCUDAMatrixMultipleInvoker - A wrapper for cublas sgemm
+ */
 class PDBCUDAMatrixMultipleInvoker: public PDBCUDAOpInvoker{
     using T = float;
 
@@ -33,11 +35,29 @@ public:
     void cleanup();
 
 public:
+
+    /**
+     *
+     */
     std::vector<std::pair<T*, std::vector<size_t> >> inputParas;
+
+    /**
+     *
+     */
     std::pair<T *, std::vector<size_t> > outputPara;
+
+    /**
+     *
+     */
     T* copyBackPara;
 
+    /**
+     *  for amortize the D2H copy overhead
+     */
+    pair<void*, size_t> pageToCopyBack = std::make_pair(nullptr, 0);
+
     PDBCUDAOpType op = PDBCUDAOpType::MatrixMultiple;
+
     cublasHandle_t cudaHandle;
 };
 }
