@@ -24,7 +24,7 @@ namespace pdb{
     void PDBCUDAVectorAddInvoker::cublasRouting(T* outdata, T* in1data, size_t N){
         const float alpha = 1.0;
         cublasSaxpy(cudaHandle, N, &alpha, in1data, 1, outdata, 1);
-        //copyFromDeviceToHost((void*)copyBackPara, (void*)outputPara.first, outputPara.second[0] * sizeof(float));
+        copyFromDeviceToHost((void*)copyBackPara, (void*)outputPara.first, outputPara.second[0] * sizeof(float));
     }
 
     void PDBCUDAVectorAddInvoker::setInput(T* input, std::vector<size_t>& inputDim){
@@ -42,15 +42,6 @@ namespace pdb{
         auto cudaObjectPointer =((PDBCUDAMemoryManager*)gpuMemoryManager)->handleObject(PageInfo, (void*)output);
         outputPara = std::make_pair((T*)cudaObjectPointer, outputDim);
         copyBackPara = output;
-        if (pageToCopyBack.second == 0){
-            pageToCopyBack = PageInfo;
-        } else {
-            if (pageToCopyBack != PageInfo){
-                std::cout << "PDBCUDAMatrixMultipleInvoker copy back a page \n";
-                void* cudaPage = ((PDBCUDAMemoryManager*)gpuMemoryManager)->getCUDAPage(pageToCopyBack);
-                copyFromDeviceToHost(pageToCopyBack.first, cudaPage, pageToCopyBack.second);
-            }
-        }
     }
 
     void PDBCUDAVectorAddInvoker::cleanup(){

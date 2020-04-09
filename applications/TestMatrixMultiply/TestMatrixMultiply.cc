@@ -11,8 +11,8 @@ using namespace pdb::matrix;
 
 // some constants for the test
 const size_t blockSize = 1024;
-const uint32_t matrixRows = 10000;
-const uint32_t matrixColumns = 10000;
+const uint32_t matrixRows = 1000;
+const uint32_t matrixColumns = 1000;
 const uint32_t numRows = 20;
 const uint32_t numCols = 20;
 
@@ -118,7 +118,7 @@ int main(int argc, char* argv[]) {
       for(int j = 0; j < r->data.numCols; ++j) {
             //std::cout << values[i * r->data.numCols + j] << ", ";
       }
-      std::cout << "\n";
+      //std::cout << "\n";
     }
     std::cout << "\n\n";
   }

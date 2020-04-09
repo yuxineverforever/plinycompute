@@ -6,9 +6,29 @@ set(CMAKE_CXX_COMPILER "clang++")
 set(CMAKE_CUDA_COMPILER "/usr/local/cuda-10.0/bin/nvcc")
 set(CMAKE_CUDA_FLAGS "-arch=sm_75")
 
-set (BOOST_ROOT "/home/yuxin/snap/boost")
-set (Boost_INCLUDE_DIR "/home/yuxin/snap/boost/include")
-set (Boost_LIBRARY_DIRS "/home/yuxin/snap/boost/lib")
+set(BOOST_POSSIBLE_LOCATIONS
+        /home/yuxin/snap/boost
+        /home/ubuntu/pdb/boost_1_72_0
+        )
+
+foreach (i ${BOOST_POSSIBLE_LOCATIONS})
+    if (EXISTS ${i})
+        if (${i} STREQUAL /home/yuxin/snap/boost)
+            set (BOOST_ROOT "/home/yuxin/snap/boost")
+            set (Boost_INCLUDE_DIR "/home/yuxin/snap/boost/include")
+            set (Boost_LIBRARY_DIRS "/home/yuxin/snap/boost/lib")
+            message(Find Boost at ${i})
+            break()
+        endif()
+        if (${i} STREQUAL /home/ubuntu/pdb/boost_1_72_0)
+            set (BOOST_ROOT "/home/ubuntu/pdb/boost_1_72_0")
+            set (Boost_INCLUDE_DIR "/home/ubuntu/pdb/boost_1_72_0")
+            set (Boost_LIBRARY_DIRS "/home/ubuntu/pdb/boost_1_72_0/stage/lib")
+            message(Find Boost at ${i})
+            break()
+        endif()
+    endif()
+endforeach()
 
 set (CUDA_INCLUDE_DIR "/usr/local/cuda/include")
 set (CUDA_BLAS_LIB "/usr/local/cuda-10.0/lib64/libcublas.so")
@@ -17,8 +37,6 @@ set (CUDA_DART_LIB "/usr/local/cuda-10.0/lib64/libcudart.so")
 option(USE_CUDA "Use CUDA" ON)
 
 project(pdb)
-
-
 
 # set the output directory
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY  "${PROJECT_SOURCE_DIR}/bin")

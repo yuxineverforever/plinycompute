@@ -9,7 +9,6 @@ namespace pdb{
 
     void PDBCUDAMatrixMultipleInvoker::setInput(T* input, std::vector<size_t>& inputDim){
         std::cout << "PDBCUDAMatrixMultipleInvoker setInput() \n";
-
         auto PageInfo = ((PDBCUDAMemoryManager*)gpuMemoryManager)->getObjectPage((void*)input);
         auto cudaObjectPointer =((PDBCUDAMemoryManager*)gpuMemoryManager)->handleObject(PageInfo, (void*)input);
         inputParas.push_back(std::make_pair((T*)cudaObjectPointer, inputDim));
@@ -17,20 +16,10 @@ namespace pdb{
 
     void PDBCUDAMatrixMultipleInvoker::setOutput(T* output, std::vector<size_t>& outputDim){
         std::cout << "PDBCUDAMatrixMultipleInvoker setOutput() \n";
-
         auto PageInfo = ((PDBCUDAMemoryManager*)gpuMemoryManager)->getObjectPage((void*)output);
         auto cudaObjectPointer =((PDBCUDAMemoryManager*)gpuMemoryManager)->handleObject(PageInfo, (void*)output);
         outputPara = std::make_pair((T*)cudaObjectPointer, outputDim);
         copyBackPara = output;
-        if (pageToCopyBack.second == 0){
-            pageToCopyBack = PageInfo;
-        } else {
-            if (pageToCopyBack != PageInfo){
-                std::cout << "PDBCUDAMatrixMultipleInvoker copy back a page \n";
-                void* cudaPage = ((PDBCUDAMemoryManager*)gpuMemoryManager)->getCUDAPage(pageToCopyBack);
-                copyFromDeviceToHost(pageToCopyBack.first, cudaPage, pageToCopyBack.second);
-            }
-        }
     }
 
     bool PDBCUDAMatrixMultipleInvoker::invoke(){
@@ -44,7 +33,7 @@ namespace pdb{
         const float alpha = 1.0f;
         const float beta  = 0.0f;
         cublasSgemm(cudaHandle, CUBLAS_OP_N, CUBLAS_OP_N, in1NumRow, in2NumCol, in1NumCol, &alpha, in1data, in1NumRow, in2data, in1NumCol, &beta, outdata, in1NumRow);
-        //copyFromDeviceToHost((void*)copyBackPara, (void*)outputPara.first, outputPara.second[0] * outputPara.second[1] * sizeof(float));
+        copyFromDeviceToHost((void*)copyBackPara, (void*)outputPara.first, outputPara.second[0] * outputPara.second[1] * sizeof(float));
     }
 
     void PDBCUDAMatrixMultipleInvoker::cleanup(){
