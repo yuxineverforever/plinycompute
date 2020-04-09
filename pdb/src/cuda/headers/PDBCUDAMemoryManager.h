@@ -40,7 +40,11 @@ class PDBCUDAMemoryManager{
             }
             void*  pageAddress = whichPage->getBytes();
             size_t pageBytes = whichPage->getSize();
-            return std::make_pair(pageAddress, pageBytes);
+            auto pageInfo = std::make_pair(pageAddress, pageBytes);
+            if (objectPageHandles.count(pageInfo) == 0){
+                objectPageHandles.insert(std::make_pair(pageInfo, whichPage));
+            }
+            return pageInfo;
         }
 
         /**
@@ -90,6 +94,11 @@ class PDBCUDAMemoryManager{
          * gpu_page_table for mapping CPU bufferManager page address to GPU bufferManager page address
          */
         std::map<pair<void*,size_t>, void*> gpuPageTable;
+
+        /**
+         * objectPageHandles - keep all the handles for a specific page, so that the pages will be unpinned.
+         */
+        std::map<pair<void*, size_t>, pdb::PDBPageHandle> objectPageHandles;
 
         /**
          * pageTableLatch
