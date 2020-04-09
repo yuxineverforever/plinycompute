@@ -118,7 +118,7 @@ int main(int argc, char* argv[]) {
       for(int j = 0; j < r->data.numCols; ++j) {
             //std::cout << values[i * r->data.numCols + j] << ", ";
       }
-      std::cout << "\n";
+      //std::cout << "\n";
     }
     std::cout << "\n\n";
   }
