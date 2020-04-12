@@ -137,6 +137,8 @@ void pdb::Pipeline::run() {
     for (ComputeExecutorPtr &q : pipeline) {
 
       try {
+
+        //std::cout << "normal process \n";
         curChunk = q->process(curChunk);
 
       } catch (NotEnoughSpace &n) {
@@ -154,6 +156,7 @@ void pdb::Pipeline::run() {
         ram = std::make_shared<MemoryHolder>(outputPageSet->getNewPage());
 
         // then try again
+        // std::cout << " exception process \n";
         curChunk = q->process(curChunk);
       }
     }

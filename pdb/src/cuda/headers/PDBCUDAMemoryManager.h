@@ -62,7 +62,7 @@ class PDBCUDAMemoryManager{
                 return (void*)((char *)(gpuPageTable[pageInfo]) + cudaObjectOffset);
             } else {
                 // pageTableLatch.WLock();
-                // std::cout << "handleInputObject: object is not on GPU, move the page\n";
+                std::cout << "handleInputObject: object is not on GPU, move the page\n";
                 void* cudaPointer;
                 copyFromHostToDevice((void **) &cudaPointer, pageInfo.first, pageInfo.second);
                 gpuPageTable.insert(std::make_pair(pageInfo, cudaPointer));
@@ -103,6 +103,7 @@ class PDBCUDAMemoryManager{
         /**
          * pageTableLatch
          */
+
         //ReaderWriterLatch pageTableLatch;
     };
 

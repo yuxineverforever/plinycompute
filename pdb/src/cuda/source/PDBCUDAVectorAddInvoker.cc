@@ -9,7 +9,7 @@ namespace pdb{
     }
 
     bool PDBCUDAVectorAddInvoker::invoke(){
-        //std::cout << "PDBCUDAVectorAddInvoker invoke() \n";
+        std::cout << "PDBCUDAVectorAddInvoker invoke() \n";
         cublasRouting(outputPara.first, inputParas[0].first, inputParas[0].second[0]);
         cleanup();
         return true;
@@ -28,7 +28,7 @@ namespace pdb{
     }
 
     void PDBCUDAVectorAddInvoker::setInput(T* input, std::vector<size_t>& inputDim){
-        std::cout << "PDBCUDAVectorAddInvoker setInput() \n";
+        //std::cout << "PDBCUDAVectorAddInvoker setInput() \n";
         assert(inputDim.size() == 1);
         auto PageInfo = ((PDBCUDAMemoryManager*)gpuMemoryManager)->getObjectPage((void*)input);
         auto cudaObjectPointer =((PDBCUDAMemoryManager*)gpuMemoryManager)->handleObject(PageInfo, (void*)input);
@@ -36,7 +36,7 @@ namespace pdb{
     }
 
     void PDBCUDAVectorAddInvoker::setOutput(T* output, std::vector<size_t>& outputDim){
-        std::cout << "PDBCUDAVectorAddInvoker setOutput() \n";
+        //std::cout << "PDBCUDAVectorAddInvoker setOutput() \n";
         assert(outputDim.size()==1);
         auto PageInfo = ((PDBCUDAMemoryManager*)gpuMemoryManager)->getObjectPage((void*)output);
         auto cudaObjectPointer =((PDBCUDAMemoryManager*)gpuMemoryManager)->handleObject(PageInfo, (void*)output);

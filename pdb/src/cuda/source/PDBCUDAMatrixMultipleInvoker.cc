@@ -8,14 +8,14 @@ namespace pdb{
     }
 
     void PDBCUDAMatrixMultipleInvoker::setInput(T* input, std::vector<size_t>& inputDim){
-        std::cout << "PDBCUDAMatrixMultipleInvoker setInput() \n";
+        //std::cout << "PDBCUDAMatrixMultipleInvoker setInput() \n";
         auto PageInfo = ((PDBCUDAMemoryManager*)gpuMemoryManager)->getObjectPage((void*)input);
         auto cudaObjectPointer =((PDBCUDAMemoryManager*)gpuMemoryManager)->handleObject(PageInfo, (void*)input);
         inputParas.push_back(std::make_pair((T*)cudaObjectPointer, inputDim));
     }
 
     void PDBCUDAMatrixMultipleInvoker::setOutput(T* output, std::vector<size_t>& outputDim){
-        std::cout << "PDBCUDAMatrixMultipleInvoker setOutput() \n";
+        //std::cout << "PDBCUDAMatrixMultipleInvoker setOutput() \n";
         auto PageInfo = ((PDBCUDAMemoryManager*)gpuMemoryManager)->getObjectPage((void*)output);
         auto cudaObjectPointer =((PDBCUDAMemoryManager*)gpuMemoryManager)->handleObject(PageInfo, (void*)output);
         outputPara = std::make_pair((T*)cudaObjectPointer, outputDim);

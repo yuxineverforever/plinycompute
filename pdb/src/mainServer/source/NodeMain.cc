@@ -35,10 +35,17 @@
 #include <ExecutionServerBackend.h>
 #include <random>
 #include "PDBCUDAMemoryManager.h"
+#include "PDBCUDATaskManager.h"
 
 namespace po = boost::program_options;
 namespace fs = boost::filesystem;
 using namespace pdb;
+
+
+void setGPUTaskManager(void ** gpuTaskMgr, int32_t numThreads){
+    PDBCUDATaskManager * tmp = new PDBCUDATaskManager(numThreads);
+    *gpuTaskMgr = (void*)tmp;
+}
 
 void setGPUMemoryManager(void ** gpuMgr, pdb::PDBBufferManagerInterfacePtr myMgr){
     PDBCUDAMemoryManager* tmp = new PDBCUDAMemoryManager(myMgr);
@@ -92,7 +99,7 @@ pdb::PDBPageHandle createRandomTempPage(pdb::PDBBufferManagerImpl &myMgr, vector
 }
 
 extern void* gpuMemoryManager;
-extern cublasHandle_t cudaHandle;
+extern void* gpuTaskManager;
 int main(int argc, char *argv[]) {
 
     // create the program options
@@ -109,8 +116,8 @@ int main(int argc, char *argv[]) {
     desc.add_options()("debugBufferManager", po::bool_switch(&config->debugBufferManager), "Whether we want to debug the buffer manager or not. (has to be compiled for that)");
     desc.add_options()("managerAddress,d", po::value<std::string>(&config->managerAddress)->default_value("localhost"), "IP of the manager");
     desc.add_options()("managerPort,o", po::value<int32_t>(&config->managerPort)->default_value(8108), "Port of the manager");
-    desc.add_options()("sharedMemSize,s", po::value<size_t>(&config->sharedMemSize)->default_value(10240), "The size of the shared memory (MB)");
-    desc.add_options()("pageSize,e", po::value<size_t>(&config->pageSize)->default_value(1024l * 1024l * 1024l), "The size of a page (bytes)");
+    desc.add_options()("sharedMemSize,s", po::value<size_t>(&config->sharedMemSize)->default_value(14336), "The size of the shared memory (MB)");
+    desc.add_options()("pageSize,e", po::value<size_t>(&config->pageSize)->default_value(1024l * 1024l * 2048l), "The size of a page (bytes)");
     desc.add_options()("numThreads,t", po::value<int32_t>(&config->numThreads)->default_value(1), "The number of threads we want to use");
     desc.add_options()("rootDirectory,r", po::value<std::string>(&config->rootDirectory)->default_value("./pdbRoot"), "The root directory we want to use.");
     desc.add_options()("maxRetries", po::value<uint32_t>(&config->maxRetries)->default_value(5), "The maximum number of retries before we give up.");
@@ -169,6 +176,8 @@ int main(int argc, char *argv[]) {
         backEnd.addFunctionality(std::make_shared<pdb::ExecutionServerBackend>());
 
         setGPUMemoryManager(&gpuMemoryManager, backEnd.getFunctionalityPtr<PDBBufferManagerInterface>());
+        setGPUTaskManager(&gpuTaskManager, config->numThreads);
+
         // start the backend
         backEnd.startServer(make_shared<pdb::GenericWork>([&](PDBBuzzerPtr callerBuzzer) {
 

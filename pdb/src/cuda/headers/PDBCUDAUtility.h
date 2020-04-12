@@ -5,6 +5,7 @@
 #include <cstdio>
 #include "cublas_v2.h"
 #include "cuda_runtime.h"
+#include "helper_cuda.h"
 
 void copyFromHostToDevice(void** targetDevice, void* sourceHost, size_t bytesNum);
 
