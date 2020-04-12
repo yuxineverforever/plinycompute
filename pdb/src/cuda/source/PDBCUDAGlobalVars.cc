@@ -8,7 +8,4 @@
 void* gpuMemoryManager = nullptr;
 void* gpuTaskManager = nullptr;
 
-pdb::PDBCUDAVectorAddInvoker vectorAddInvoker;
-pdb::PDBCUDAMatrixMultipleInvoker matrixMultipleInvoker;
-
 #endif

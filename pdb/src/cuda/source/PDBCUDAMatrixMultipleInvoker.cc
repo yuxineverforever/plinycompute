@@ -1,10 +1,15 @@
 #include "PDBCUDAMatrixMultipleInvoker.h"
+#include "PDBCUDATaskManager.h"
 
 extern void* gpuMemoryManager;
+extern void* gpuTaskManager;
+
 namespace pdb{
 
     PDBCUDAMatrixMultipleInvoker::PDBCUDAMatrixMultipleInvoker(){
-        cublasCreate(&cudaHandle);
+        auto threadInfo = ((PDBCUDATaskManager*)gpuTaskManager)->getThreadInfoFromPool();
+        cudaStream = threadInfo.first;
+        cudaHandle = threadInfo.second;
     }
 
     void PDBCUDAMatrixMultipleInvoker::setInput(T* input, std::vector<size_t>& inputDim){
@@ -32,8 +37,9 @@ namespace pdb{
     void PDBCUDAMatrixMultipleInvoker::cublasRouting(T* in1data, T* in2data, T* outdata, size_t in1NumRow, size_t in1NumCol, size_t in2NumCol){
         const float alpha = 1.0f;
         const float beta  = 0.0f;
+
         cublasSgemm(cudaHandle, CUBLAS_OP_N, CUBLAS_OP_N, in1NumRow, in2NumCol, in1NumCol, &alpha, in1data, in1NumRow, in2data, in1NumCol, &beta, outdata, in1NumRow);
-        copyFromDeviceToHost((void*)copyBackPara, (void*)outputPara.first, outputPara.second[0] * outputPara.second[1] * sizeof(float));
+        copyFromDeviceToHostAsync((void*)copyBackPara, (void*)outputPara.first, outputPara.second[0] * outputPara.second[1] * sizeof(float), cudaStream);
     }
 
     void PDBCUDAMatrixMultipleInvoker::cleanup(){

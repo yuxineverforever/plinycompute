@@ -158,11 +158,12 @@ bool GPUInvoke(pdb::PDBCUDAVectorAddInvoker& f, pdb::Handle<pdb::Vector<float>> 
  * @param In1Dim
  * @return
  */
-extern pdb::PDBCUDAVectorAddInvoker vectorAddInvoker;
+
 bool GPUInvoke(pdb::PDBCUDAOpType& op, pdb::Handle<pdb::Vector<float>> Out, std::vector<size_t>& OutDim, pdb::Handle<pdb::Vector<float>> In1, std::vector<size_t>& In1Dim){
     if (op!=pdb::PDBCUDAOpType::VectorAdd){
         exit(-1);
     }
+    pdb::PDBCUDAVectorAddInvoker vectorAddInvoker;
     auto In1Object = In1->c_ptr();
     auto OutObject = Out->c_ptr();
     return SimpleTypeGPUInvoke(vectorAddInvoker, OutObject, OutDim, In1Object, In1Dim);
@@ -178,11 +179,12 @@ bool GPUInvoke(pdb::PDBCUDAOpType& op, pdb::Handle<pdb::Vector<float>> Out, std:
  * @param In2Dim
  * @return
  */
-extern pdb::PDBCUDAMatrixMultipleInvoker matrixMultipleInvoker;
+
 bool GPUInvoke(pdb::PDBCUDAOpType& op, pdb::Handle<pdb::Vector<float>> Out, std::vector<size_t>& OutDim, pdb::Handle<pdb::Vector<float>> In1, std::vector<size_t>& In1Dim, pdb::Handle<pdb::Vector<float> > In2, std::vector<size_t>& In2Dim){
     if (op!=pdb::PDBCUDAOpType::MatrixMultiple){
         exit(-1);
     }
+    pdb::PDBCUDAMatrixMultipleInvoker matrixMultipleInvoker;
     auto In1Object = In1->c_ptr();
     auto In2Object = In2->c_ptr();
     auto OutObject = Out->c_ptr();

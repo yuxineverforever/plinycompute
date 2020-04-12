@@ -38,7 +38,11 @@ namespace pdb {
         pair<void*, size_t> pageToCopyBack = std::make_pair(nullptr, 0);
 
         PDBCUDAOpType op = PDBCUDAOpType::VectorAdd;
+
         cublasHandle_t cudaHandle;
+
+        cudaStream_t cudaStream;
+
     };
 }
 #endif

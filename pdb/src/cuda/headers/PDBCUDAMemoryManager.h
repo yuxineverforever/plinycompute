@@ -12,7 +12,10 @@ class PDBCUDAMemoryManager;
 using PDBCUDAMemoryManagerPtr = std::shared_ptr<PDBCUDAMemoryManager>;
 class PDBCUDAMemoryManager{
     public:
-
+        /**
+         *
+         * @param buffer
+         */
         PDBCUDAMemoryManager(PDBBufferManagerInterfacePtr buffer) {
             bufferManager = buffer;
         }

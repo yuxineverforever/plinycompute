@@ -1,11 +1,16 @@
 #include <assert.h>
 #include "PDBCUDAVectorAddInvoker.h"
+#include "PDBCUDATaskManager.h"
 
 extern void* gpuMemoryManager;
+extern void* gpuTaskManager;
+
 namespace pdb{
 
     PDBCUDAVectorAddInvoker::PDBCUDAVectorAddInvoker(){
-        cublasCreate(&cudaHandle);
+        auto threadInfo = ((PDBCUDATaskManager*)gpuTaskManager)->getThreadInfoFromPool();
+        cudaStream = threadInfo.first;
+        cudaHandle = threadInfo.second;
     }
 
     bool PDBCUDAVectorAddInvoker::invoke(){
@@ -14,6 +19,7 @@ namespace pdb{
         cleanup();
         return true;
     }
+
     /**
      * Perform SAXPY on vector elements: outdata[] = outdata[] + in1data[];
      * @param in1data

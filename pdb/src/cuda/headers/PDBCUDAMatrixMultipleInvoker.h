@@ -59,6 +59,8 @@ public:
     PDBCUDAOpType op = PDBCUDAOpType::MatrixMultiple;
 
     cublasHandle_t cudaHandle;
+
+    cudaStream_t cudaStream;
 };
 }
 #endif
