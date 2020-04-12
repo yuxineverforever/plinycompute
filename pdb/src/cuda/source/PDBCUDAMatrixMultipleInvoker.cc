@@ -13,22 +13,22 @@ namespace pdb{
     }
 
     void PDBCUDAMatrixMultipleInvoker::setInput(T* input, std::vector<size_t>& inputDim){
-        //std::cout << "PDBCUDAMatrixMultipleInvoker setInput() \n";
+        std::cout<< (long) pthread_self() << ": PDBCUDAMatrixMultipleInvoker setInput() \n";
         auto PageInfo = ((PDBCUDAMemoryManager*)gpuMemoryManager)->getObjectPage((void*)input);
-        auto cudaObjectPointer =((PDBCUDAMemoryManager*)gpuMemoryManager)->handleObject(PageInfo, (void*)input);
+        auto cudaObjectPointer =((PDBCUDAMemoryManager*)gpuMemoryManager)->handleObject(PageInfo, (void*)input, cudaStream);
         inputParas.push_back(std::make_pair((T*)cudaObjectPointer, inputDim));
     }
 
     void PDBCUDAMatrixMultipleInvoker::setOutput(T* output, std::vector<size_t>& outputDim){
-        //std::cout << "PDBCUDAMatrixMultipleInvoker setOutput() \n";
+        std::cout << (long) pthread_self()<< ": PDBCUDAMatrixMultipleInvoker setOutput() \n";
         auto PageInfo = ((PDBCUDAMemoryManager*)gpuMemoryManager)->getObjectPage((void*)output);
-        auto cudaObjectPointer =((PDBCUDAMemoryManager*)gpuMemoryManager)->handleObject(PageInfo, (void*)output);
+        auto cudaObjectPointer =((PDBCUDAMemoryManager*)gpuMemoryManager)->handleObject(PageInfo, (void*)output, cudaStream);
         outputPara = std::make_pair((T*)cudaObjectPointer, outputDim);
         copyBackPara = output;
     }
 
     bool PDBCUDAMatrixMultipleInvoker::invoke(){
-        std::cout << "PDBCUDAMatrixMultipleInvoker invoke() \n";
+        std::cout << (long) pthread_self() << " :PDBCUDAMatrixMultipleInvoker invoke() \n";
         cublasRouting(inputParas[0].first, inputParas[1].first, outputPara.first, inputParas[0].second[0], inputParas[0].second[1], inputParas[1].second[0]);
         cleanup();
         return true;
@@ -37,7 +37,6 @@ namespace pdb{
     void PDBCUDAMatrixMultipleInvoker::cublasRouting(T* in1data, T* in2data, T* outdata, size_t in1NumRow, size_t in1NumCol, size_t in2NumCol){
         const float alpha = 1.0f;
         const float beta  = 0.0f;
-
         cublasSgemm(cudaHandle, CUBLAS_OP_N, CUBLAS_OP_N, in1NumRow, in2NumCol, in1NumCol, &alpha, in1data, in1NumRow, in2data, in1NumCol, &beta, outdata, in1NumRow);
         copyFromDeviceToHostAsync((void*)copyBackPara, (void*)outputPara.first, outputPara.second[0] * outputPara.second[1] * sizeof(float), cudaStream);
     }

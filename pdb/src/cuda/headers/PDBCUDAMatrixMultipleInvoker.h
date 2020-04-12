@@ -37,24 +37,19 @@ public:
 public:
 
     /**
-     *
+     * input para for computation on device
      */
     std::vector<std::pair<T*, std::vector<size_t> >> inputParas;
 
     /**
-     *
+     * output para for computation on device
      */
     std::pair<T *, std::vector<size_t> > outputPara;
 
     /**
-     *
+     * copyBackPara on host
      */
     T* copyBackPara;
-
-    /**
-     *  for amortize the D2H copy overhead
-     */
-    pair<void*, size_t> pageToCopyBack = std::make_pair(nullptr, 0);
 
     PDBCUDAOpType op = PDBCUDAOpType::MatrixMultiple;
 

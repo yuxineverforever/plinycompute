@@ -12,7 +12,7 @@ namespace pdb{
         }
 
         PDBCUDATaskManager::~PDBCUDATaskManager(){
-            for (int i=0; i<threadNum+1; i++){
+            for (int i=0; i < threadNum + 1; i++){
                 cudaStreamDestroy(streams[i]);
                 cublasDestroy(handles[i]);
             }
@@ -23,13 +23,13 @@ namespace pdb{
              long threadID = (long) pthread_self();
              std::cout << "thread ID: " << threadID << std::endl;
 
+             std::unique_lock<std::mutex> lock(m);
              if (threadStreamMap.count(threadID) != 0){
                 return std::make_pair(streams[threadStreamMap[threadID]], handles[threadStreamMap[threadID]]);
              } else {
-                 uint64_t  counter = threadStreamMap.size();
-                 threadStreamMap[threadID] = counter;
+                 uint64_t counter = threadStreamMap.length();
+                 threadStreamMap.insert(threadID,counter);
                  return std::make_pair(streams[counter], handles[counter]);
              }
-
         }
 }

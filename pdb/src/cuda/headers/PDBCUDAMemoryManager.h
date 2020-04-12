@@ -5,6 +5,7 @@
 #include <PDBBufferManagerInterface.h>
 #include "PDBCUDAUtility.h"
 #include "PDBCUDALatch.h"
+#include "threadSafeMap.h"
 
 namespace pdb {
 
@@ -44,8 +45,9 @@ class PDBCUDAMemoryManager{
             void*  pageAddress = whichPage->getBytes();
             size_t pageBytes = whichPage->getSize();
             auto pageInfo = std::make_pair(pageAddress, pageBytes);
+            std::unique_lock<std::mutex> pageLock(pageHandleMutex);
             if (objectPageHandles.count(pageInfo) == 0){
-                objectPageHandles.insert(std::make_pair(pageInfo, whichPage));
+                objectPageHandles.insert(pageInfo, whichPage);
             }
             return pageInfo;
         }
@@ -56,21 +58,24 @@ class PDBCUDAMemoryManager{
          * @param objectAddress
          * @return
          */
-        void* handleObject(pair<void*, size_t> pageInfo, void *objectAddress) {
+        void* handleObject(pair<void*, size_t> pageInfo, void *objectAddress, cudaStream_t cs) {
 
             size_t cudaObjectOffset = getObjectOffset(pageInfo.first, objectAddress);
 
+            std::cout << (long) pthread_self() <<" : pageInfo: " << pageInfo.first << "bytes: "<< pageInfo.second << std::endl;
+
+            std::unique_lock<std::mutex> lock(pageTableMutex);
             if (gpuPageTable.count(pageInfo) != 0) {
-                // std::cout << "handleInputObject: object is already on GPU\n";
+                std::cout << (long) pthread_self()  << " : handleInputObject: object is already on GPU! \n";
                 return (void*)((char *)(gpuPageTable[pageInfo]) + cudaObjectOffset);
             } else {
-                // pageTableLatch.WLock();
-                std::cout << "handleInputObject: object is not on GPU, move the page\n";
+                std::cout << (long) pthread_self() << " : handleInputObject: object is not on GPU, move the page\n";
                 void* cudaPointer;
-                copyFromHostToDevice((void **) &cudaPointer, pageInfo.first, pageInfo.second);
-                gpuPageTable.insert(std::make_pair(pageInfo, cudaPointer));
+                copyFromHostToDeviceAsync((void **) &cudaPointer, pageInfo.first, pageInfo.second, cs);
+                gpuPageTable.insert(pageInfo, cudaPointer);
                 return (void*)((char*)cudaPointer + cudaObjectOffset);
             }
+
         }
 
         /**
@@ -79,7 +84,6 @@ class PDBCUDAMemoryManager{
          * @return
          */
         void* getCUDAPage(pair<void*, size_t> pageInfo){
-
             if (gpuPageTable.count(pageInfo) == 0){
                 std::cout << "getCUDAPage: cannot get CUDA page for this CPU Page!\n";
                 exit(-1);
@@ -96,18 +100,23 @@ class PDBCUDAMemoryManager{
         /**
          * gpu_page_table for mapping CPU bufferManager page address to GPU bufferManager page address
          */
-        std::map<pair<void*,size_t>, void*> gpuPageTable;
+        //std::map<pair<void*,size_t>, void*> gpuPageTable;
+        threadSafeMap< pair<void*,size_t>, void*> gpuPageTable;
 
         /**
          * objectPageHandles - keep all the handles for a specific page, so that the pages will be unpinned.
          */
-        std::map<pair<void*, size_t>, pdb::PDBPageHandle> objectPageHandles;
+        threadSafeMap<pair<void*, size_t>, pdb::PDBPageHandle> objectPageHandles;
 
         /**
-         * pageTableLatch
+         * one mutex to protect the gpuPageTable access
          */
+         std::mutex pageTableMutex;
 
-        //ReaderWriterLatch pageTableLatch;
+         /**
+          * one mutex to protect the pageHandles
+          */
+          std::mutex pageHandleMutex;
     };
 
 }

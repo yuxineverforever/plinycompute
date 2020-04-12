@@ -1,8 +1,11 @@
+#pragma once
+
 #include <iostream>
 #include <stdint.h>
 #include <pthread.h>
 #include "PDBCUDAUtility.h"
 #include <map>
+#include "threadSafeMap.h"
 
 namespace pdb{
 
@@ -20,14 +23,26 @@ namespace pdb{
         PDBCUDAThreadInfo getThreadInfoFromPool();
 
     private:
+
+        /**
+         *  streams and handles
+         */
         cudaStream_t *streams;
         cublasHandle_t * handles;
+
+        /**
+         * number of threads
+         */
         int32_t  threadNum;
+
+        /**
+         * mutex for protection
+         */
+         std::mutex m;
 
         /**
          * mapping the cpu thread id to gpu stream id / handle id
          */
-        std::map<long, int32_t > threadStreamMap;
-
+         threadSafeMap<long, uint64_t> threadStreamMap;
     };
 }

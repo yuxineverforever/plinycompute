@@ -35,8 +35,6 @@ namespace pdb {
         std::pair<T *, std::vector<size_t> > outputPara;
         T *copyBackPara;
 
-        pair<void*, size_t> pageToCopyBack = std::make_pair(nullptr, 0);
-
         PDBCUDAOpType op = PDBCUDAOpType::VectorAdd;
 
         cublasHandle_t cudaHandle;

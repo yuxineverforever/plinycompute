@@ -143,7 +143,7 @@ include_directories("${PROJECT_SOURCE_DIR}/third-party/mustache/headers")
 include_directories("${PROJECT_SOURCE_DIR}/third-party/qunit/headers")
 include_directories("${PROJECT_SOURCE_DIR}/third-party/sqlite/headers")
 include_directories("${PROJECT_SOURCE_DIR}/third-party/concurent_queue/headers")
-
+include_directories("${PROJECT_SOURCE_DIR}/third-party/threadsafe_lookup_table/headers")
 
 # specify the source files
 file(GLOB SERVER_FUNCTIONALITIES_SOURCE "${PROJECT_SOURCE_DIR}/pdb/src/serverFunctionalities/source/*.cc")
