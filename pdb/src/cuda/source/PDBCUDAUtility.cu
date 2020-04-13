@@ -16,6 +16,8 @@ void copyFromHostToDevice(void **targetDevice, void *sourceHost, size_t bytesNum
 
 void copyFromHostToDeviceAsync(void ** targetDevice, void * sourceHost, size_t bytesNum, cudaStream_t cs){
     checkCudaErrors(cudaMalloc((void **) targetDevice, bytesNum));
+    long threadID = (long) pthread_self();
+    std::cout << "bug thread ID: "<< threadID << " " << cs << std::endl;
     checkCudaErrors(cudaMemcpyAsync(*targetDevice, sourceHost, bytesNum, cudaMemcpyHostToDevice, cs));
 }
 

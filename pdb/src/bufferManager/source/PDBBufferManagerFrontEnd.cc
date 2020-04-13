@@ -118,10 +118,6 @@ void pdb::PDBBufferManagerFrontEnd::registerHandlers(pdb::PDBServer &forMe) {
         return handleUnpinPageRequest(request, sendUsingMe);
       }));
 
-  forMe.registerHandler(BufGetPageForObjectRequest_TYPEID,
-          make_shared<pdb::HeapRequestHandler<BufGetPageForObjectRequest>>([&](Handle<BufGetPageForObjectRequest> request, PDBCommunicatorPtr sendUsingMe){
-              return handleGetPageForObjectRequest(request, sendUsingMe);
-          }));
 }
 
 pdb::PDBBufferManagerInterfacePtr pdb::PDBBufferManagerFrontEnd::getBackEnd() {

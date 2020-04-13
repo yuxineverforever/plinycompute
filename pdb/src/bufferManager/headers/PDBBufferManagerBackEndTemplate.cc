@@ -227,22 +227,20 @@ pdb::PDBPageHandle pdb::PDBBufferManagerBackEnd<T>::getPage(size_t minBytes) {
 
 
 template <class T>
-PDBPageHandle PDBBufferManagerBackEnd<T>::getPageForObject(void *objectAddress) {
+PDBPagePtr PDBBufferManagerBackEnd<T>::getPageForObject(void *objectAddress) {
     void* startSharedMem = (void*)sharedMemory.memory;
-    void* endSharedMem = (void*)((char*)sharedMemory.memory + sharedMemory.numPages*sharedMemory.pageSize);
+    void* endSharedMem = (void*)((char*)sharedMemory.memory + sharedMemory.numPages * sharedMemory.pageSize);
     if (objectAddress < startSharedMem || objectAddress > endSharedMem){
         std::cerr << objectAddress << " is not in the range of shared memory. range start: " << startSharedMem << " end: " << endSharedMem << "\n";
         return nullptr;
     }
-
     for (auto & iter: allPages){
         char * start = (char*) iter.second->getBytes();
         char * end = start + iter.second->getSize();
         if (objectAddress >= start && objectAddress < end){
             //std::cout << "GetPageForObject: find the page for this object! " << " start address is : " << (void*)start << "end address is : "<< (void*)end << '\n';
             //std::cout << "GetPageForObject: object address is: " << objectAddress << '\n';
-            PDBPageHandle thisPage = std::make_shared<PDBPageHandleBase>(iter.second);
-            return thisPage;
+            return iter.second;
         }
     }
     std::cout << "GetPageForObject: cannot find the page for this object! \n";

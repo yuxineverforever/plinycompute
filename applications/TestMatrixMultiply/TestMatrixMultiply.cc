@@ -10,11 +10,11 @@ using namespace pdb;
 using namespace pdb::matrix;
 
 // some constants for the test
-const size_t blockSize = 2048;
-const uint32_t matrixRows = 100;
-const uint32_t matrixColumns = 100;
-const uint32_t numRows = 5;
-const uint32_t numCols = 5;
+const size_t blockSize = 512;
+const uint32_t matrixRows = 10000;
+const uint32_t matrixColumns = 10000;
+const uint32_t numRows = 16;
+const uint32_t numCols = 16;
 
 void initMatrix(pdb::PDBClient &pdbClient, const std::string &set) {
 

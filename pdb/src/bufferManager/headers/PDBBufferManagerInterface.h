@@ -104,7 +104,7 @@ public:
 
   // Get the right page info from BufferManager.
   // This object is on the page ( start address < objectAddress < start address + numBytes ).
-  virtual PDBPageHandle getPageForObject(void* objectAddress) = 0;
+  virtual PDBPagePtr getPageForObject(void* objectAddress) = 0;
 
   // simply loop through and write back any dirty pages.  
   virtual ~PDBBufferManagerInterface () = default;

@@ -126,11 +126,6 @@ protected:
   std::pair<bool, std::string> handleUnpinPageRequest(pdb::Handle<pdb::BufUnpinPageRequest> &request, std::shared_ptr<T> &sendUsingMe);
 
 
-  // handles the get page request from the backend for one object
-  template <class T>
-  std::pair<bool, std::string> handleGetPageForObjectRequest(pdb::Handle<pdb::BufGetPageForObjectRequest> &request, std::shared_ptr<T> &sendUsingMe);
-
-
   // handles the logic for the forwarding
   template <class T>
   bool handleForwardPage(pdb::PDBPageHandle &page, std::shared_ptr<T> &communicator, std::string &error);

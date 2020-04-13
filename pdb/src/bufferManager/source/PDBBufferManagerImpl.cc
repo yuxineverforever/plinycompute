@@ -1155,26 +1155,9 @@ PDBPageHandle PDBBufferManagerImpl::getPage(PDBSetPtr whichSet, uint64_t i) {
 }
 
 
-PDBPageHandle PDBBufferManagerImpl::getPageForObject(void* objectAddress){
-
-    void * whichPage = (char *) sharedMemory.memory + ((((char *)objectAddress - (char *) sharedMemory.memory) / sharedMemory.pageSize) * sharedMemory.pageSize);
-    auto pageIter  = constituentPages.find(whichPage);
-    if (pageIter == constituentPages.end()){
-        //std::cout << "GetPageForObject: cannot find a whole page for this object! should find one\n";
-        exit(-1);
-    }
-    for (auto minipage: pageIter->second){
-        char* startAddress = (char*)minipage->getBytes();
-        char* endAddress = startAddress + minipage->getSize();
-        if (objectAddress >= startAddress && objectAddress < endAddress){
-            //std::cout << "GetPageForObject: find the page for this object! " << " start address is : " << (void*)startAddress << "end address is : "<< (void*)endAddress << '\n';
-            //std::cout << "GetPageForObject: object address is: " << objectAddress << '\n';
-            PDBPageHandle thisPage = std::make_shared<PDBPageHandleBase>(minipage);
-            constituentPagesForGPU.push_back(thisPage);
-            return thisPage;
-        }
-    }
-    return nullptr;
+PDBPagePtr PDBBufferManagerImpl::getPageForObject(void* objectAddress){
+    std::cerr << "getPageForObject() should not be called here \n";
+    exit(-1);
 }
 
 

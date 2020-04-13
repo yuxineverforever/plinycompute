@@ -97,7 +97,7 @@ public:
    * @param objectAddress - physical address of one object
    * @return PDBPageHandle - a page contains this object
    */
-  PDBPageHandle getPageForObject(void* objectAddress) override;
+  PDBPagePtr getPageForObject(void* objectAddress) override;
 
 
   void registerHandlers(PDBServer &forMe) override;

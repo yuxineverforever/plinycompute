@@ -288,16 +288,6 @@ std::pair<bool, std::string> pdb::PDBBufferManagerFrontEnd::handleUnpinPageReque
   return make_pair(res, errMsg);
 }
 
-template <class T>
-std::pair<bool, std::string> pdb::PDBBufferManagerFrontEnd::handleGetPageForObjectRequest(pdb::Handle<pdb::BufGetPageForObjectRequest> &request, std::shared_ptr<T> &sendUsingMe) {
-    // grab the page
-    auto page = this->getPageForObject(request->objectAddress);
-    // send the page to the backend
-    string error;
-    bool res = this->sendPageToBackend(page, sendUsingMe, error);
-    return make_pair(res, error);
-}
-
 
 template<class T>
 bool pdb::PDBBufferManagerFrontEnd::handleForwardPage(pdb::PDBPageHandle &page, shared_ptr<T> &communicator, std::string &error) {

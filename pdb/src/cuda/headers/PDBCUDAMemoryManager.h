@@ -37,18 +37,14 @@ class PDBCUDAMemoryManager{
          * @return
          */
         pair<void*, size_t> getObjectPage(void *objectAddress){
-            pdb::PDBPageHandle whichPage = bufferManager->getPageForObject(objectAddress);
+            pdb::PDBPagePtr whichPage = bufferManager->getPageForObject(objectAddress);
             if (whichPage == nullptr){
                 std::cout << "getObjectOffset: cannot get page for this object!\n";
                 exit(-1);
             }
-            void*  pageAddress = whichPage->getBytes();
+            void* pageAddress = whichPage->getBytes();
             size_t pageBytes = whichPage->getSize();
             auto pageInfo = std::make_pair(pageAddress, pageBytes);
-            std::unique_lock<std::mutex> pageLock(pageHandleMutex);
-            if (objectPageHandles.count(pageInfo) == 0){
-                objectPageHandles.insert(pageInfo, whichPage);
-            }
             return pageInfo;
         }
 
@@ -75,7 +71,6 @@ class PDBCUDAMemoryManager{
                 gpuPageTable.insert(pageInfo, cudaPointer);
                 return (void*)((char*)cudaPointer + cudaObjectOffset);
             }
-
         }
 
         /**
@@ -101,22 +96,13 @@ class PDBCUDAMemoryManager{
          * gpu_page_table for mapping CPU bufferManager page address to GPU bufferManager page address
          */
         //std::map<pair<void*,size_t>, void*> gpuPageTable;
-        threadSafeMap< pair<void*,size_t>, void*> gpuPageTable;
-
-        /**
-         * objectPageHandles - keep all the handles for a specific page, so that the pages will be unpinned.
-         */
-        threadSafeMap<pair<void*, size_t>, pdb::PDBPageHandle> objectPageHandles;
+        threadSafeMap < pair<void*, size_t>, void*> gpuPageTable;
 
         /**
          * one mutex to protect the gpuPageTable access
          */
          std::mutex pageTableMutex;
 
-         /**
-          * one mutex to protect the pageHandles
-          */
-          std::mutex pageHandleMutex;
     };
 
 }

@@ -151,7 +151,7 @@ class PDBBufferManagerImpl : public PDBBufferManagerInterface {
   * @param objectAddress - the physical address of one object
   * @return - a PagePtr to this page containing the object
   */
-  PDBPageHandle getPageForObject (void* objectAddress) override ;
+  PDBPagePtr getPageForObject(void* objectAddress) override ;
 
   /**
    * Returns the maximum page size this buffer manager can give.
