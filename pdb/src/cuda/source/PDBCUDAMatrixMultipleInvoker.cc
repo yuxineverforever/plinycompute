@@ -15,14 +15,16 @@ namespace pdb{
     void PDBCUDAMatrixMultipleInvoker::setInput(T* input, std::vector<size_t>& inputDim){
         std::cout<< (long) pthread_self() << ": PDBCUDAMatrixMultipleInvoker setInput() \n";
         auto PageInfo = ((PDBCUDAMemoryManager*)gpuMemoryManager)->getObjectPage((void*)input);
-        auto cudaObjectPointer =((PDBCUDAMemoryManager*)gpuMemoryManager)->handleObject(PageInfo, (void*)input, cudaStream);
+        auto cudaObjectPointer =((PDBCUDAMemoryManager*)gpuMemoryManager)->handleInputObject(PageInfo, (void*)input, cudaStream);
         inputParas.push_back(std::make_pair((T*)cudaObjectPointer, inputDim));
     }
 
     void PDBCUDAMatrixMultipleInvoker::setOutput(T* output, std::vector<size_t>& outputDim){
         std::cout << (long) pthread_self()<< ": PDBCUDAMatrixMultipleInvoker setOutput() \n";
         auto PageInfo = ((PDBCUDAMemoryManager*)gpuMemoryManager)->getObjectPage((void*)output);
-        auto cudaObjectPointer =((PDBCUDAMemoryManager*)gpuMemoryManager)->handleObject(PageInfo, (void*)output, cudaStream);
+
+        auto cudaObjectPointer =((PDBCUDAMemoryManager*)gpuMemoryManager)->handleOutputObject(PageInfo, (void*)output, cudaStream);
+
         outputPara = std::make_pair((T*)cudaObjectPointer, outputDim);
         copyBackPara = output;
     }
@@ -30,7 +32,7 @@ namespace pdb{
     bool PDBCUDAMatrixMultipleInvoker::invoke(){
         std::cout << (long) pthread_self() << " :PDBCUDAMatrixMultipleInvoker invoke() \n";
         cublasRouting(inputParas[0].first, inputParas[1].first, outputPara.first, inputParas[0].second[0], inputParas[0].second[1], inputParas[1].second[0]);
-        cleanup();
+        //cleanup();
         return true;
     }
 

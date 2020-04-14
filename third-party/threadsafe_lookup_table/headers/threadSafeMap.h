@@ -12,9 +12,10 @@
 template<typename Key, typename Value>
 class threadSafeMap{
 
-private:
+public:
     std::map<Key, Value> tsMap;
     mutable std::shared_timed_mutex mutex;
+
 public:
 
     threadSafeMap() = default;

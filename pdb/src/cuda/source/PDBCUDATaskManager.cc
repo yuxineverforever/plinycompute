@@ -2,7 +2,11 @@
 
 namespace pdb{
 
-        PDBCUDATaskManager::PDBCUDATaskManager(int32_t NumOfthread): threadNum(NumOfthread){
+        PDBCUDATaskManager::PDBCUDATaskManager(int32_t NumOfthread, bool isManager): threadNum(NumOfthread){
+            if (isManager){
+                return;
+            }
+
             streams = new cudaStream_t[2*threadNum+1];
             handles = new cublasHandle_t[2*threadNum+1];
             for (int32_t i = 0; i < 2*threadNum+1; i++){
