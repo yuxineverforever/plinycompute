@@ -33,8 +33,8 @@ namespace pdb{
                  std::cout << "thread ID: " << threadID << " find in map! stream: " << streams[threadStreamMap[threadID]] << std::endl;
                  return std::make_pair(streams[threadStreamMap[threadID]], handles[threadStreamMap[threadID]]);
              } else {
-                 uint64_t counter = threadStreamMap.length();
-                 threadStreamMap.insert(threadID,counter);
+                 uint64_t counter = threadStreamMap.size();
+                 threadStreamMap.insert(std::make_pair(threadID,counter));
                  std::cout << "thread ID: " << threadID << " not find in map stream: " << streams[counter] << std::endl;
                  return std::make_pair(streams[counter], handles[counter]);
              }

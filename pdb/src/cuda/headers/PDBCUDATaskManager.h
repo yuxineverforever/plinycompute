@@ -43,6 +43,6 @@ namespace pdb{
         /**
          * mapping the cpu thread id to gpu stream id / handle id
          */
-         threadSafeMap<long, uint64_t> threadStreamMap;
+         std::map<long, uint64_t> threadStreamMap;
     };
 }

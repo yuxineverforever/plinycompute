@@ -64,4 +64,11 @@ public:
         return tsMap.size();
     }
 
+    /**
+     *
+     */
+     void erase(Key& key){
+         std::unique_lock<std::shared_timed_mutex> lock(mutex);
+         tsMap.erase(key);
+     }
 };

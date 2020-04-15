@@ -3,19 +3,20 @@
 
 #include <map>
 #include <list>
+#include <set>
 #include <PDBBufferManagerInterface.h>
 #include "PDBCUDAUtility.h"
-#include "PDBCUDALatch.h"
 #include "threadSafeMap.h"
 #include <assert.h>
 
 namespace pdb {
 
 class PDBCUDAMemoryManager;
-using PDBCUDAMemoryManagerPtr = std::shared_ptr<PDBCUDAMemoryManager>;
-class PDBCUDAMemoryManager{
 
-    using frame_id_t = int32_t;
+using PDBCUDAMemoryManagerPtr = std::shared_ptr<PDBCUDAMemoryManager>;
+using frame_id_t  = int32_t;
+
+class PDBCUDAMemoryManager{
 
     public:
 
@@ -27,15 +28,16 @@ class PDBCUDAMemoryManager{
             if (isManager){
                 return;
             }
-
+            clock_hand = 0;
             bufferManager = buffer;
-            poolSize = 2 * NumOfthread;
+            poolSize = NumOfthread+1;
             pageSize = buffer->getMaxPageSize();
             for (size_t i = 0; i < poolSize; i++){
                 void* cudaPointer;
                 cudaMalloc((void**)&cudaPointer, pageSize);
                 availablePosition.push_back(cudaPointer);
                 freeList.push_back(static_cast<int32_t>(i));
+                recentlyUsed.push_back(false);
             }
         }
 
@@ -44,7 +46,7 @@ class PDBCUDAMemoryManager{
          */
         ~PDBCUDAMemoryManager(){
 
-            for (auto & iter: gpuPageTable.tsMap){
+            for (auto & iter: gpuPageTable){
                 freeGPUMemory(&iter.second);
             }
             for (auto & frame: freeList){
@@ -98,11 +100,13 @@ class PDBCUDAMemoryManager{
 
             } else {
 
+                std::cout << (long) pthread_self() << " handleInputObject cannot find the input page ! copy it! \n";
+
                 void* cudaPointer;
 
                 copyFromHostToDeviceAsync((void **) &cudaPointer, pageInfo.first, pageInfo.second, cs);
 
-                gpuPageTable.insert(pageInfo, cudaPointer);
+                gpuPageTable.insert(std::make_pair(pageInfo, cudaPointer));
 
                 return (void*)((char*)cudaPointer + cudaObjectOffset);
             }
@@ -115,36 +119,55 @@ class PDBCUDAMemoryManager{
             size_t cudaObjectOffset = getObjectOffset(pageInfo.first, objectAddress);
 
             std::unique_lock<std::mutex> lock(pageTableMutex);
+
             if (gpuPageTable.count(pageInfo) != 0) {
                 return (void*)((char *)(gpuPageTable[pageInfo]) + cudaObjectOffset);
             } else {
                 assert(pageInfo.second == pageSize);
-                frame_id_t frame;
-                if (!freeList.empty()){
-                    frame = freeList.front();
-                    freeList.pop_front();
-                } else {
-                    std::cerr << "freeList is empty!\n";
-                }
-                gpuPageTable.insert(pageInfo, availablePosition[frame]);
+                frame_id_t frame = getAvailableFrame();
+                gpuPageTable.insert(std::make_pair(pageInfo, availablePosition[frame]));
+                framePageTable.insert(std::make_pair(pageInfo, frame));
                 return (void*)((char*)availablePosition[frame] + cudaObjectOffset);
             }
         }
 
-        /**
-         *
-         * @param pageInfo
-         * @return
-         */
-        void* getCUDAPage(pair<void*, size_t> pageInfo){
-            if (gpuPageTable.count(pageInfo) == 0){
-                std::cout << "getCUDAPage: cannot get CUDA page for this CPU Page!\n";
-                exit(-1);
+        frame_id_t getAvailableFrame(){
+            frame_id_t frame;
+            if (!freeList.empty()){
+                frame = freeList.front();
+                freeList.pop_front();
+                recentlyUsed[frame] = true;
+                return frame;
+            } else {
+               while(recentlyUsed[clock_hand] == true){
+                   recentlyUsed[clock_hand] = false;
+                   incrementIterator(clock_hand);
+               }
+               recentlyUsed[clock_hand] = true;
+               frame = clock_hand;
+               incrementIterator(clock_hand);
+               auto iter = std::find_if(framePageTable.begin(), framePageTable.end(),[&](const std::pair< pair<void*, size_t>, frame_id_t> &pair){
+                    return pair.second == frame;
+               });
+               framePageTable.erase(iter);
+               gpuPageTable.erase(iter->first);
+               return frame;
             }
-            return gpuPageTable[pageInfo];
         }
 
-    public:
+
+    private:
+
+        void incrementIterator(int32_t & it){
+                if (it == poolSize){
+                    it = 0;
+                } else{
+                    it++;
+                }
+        }
+
+
+    private:
          /**
           * the buffer manager to help maintain gpu page table
           */
@@ -154,7 +177,13 @@ class PDBCUDAMemoryManager{
          * gpu_page_table for mapping CPU bufferManager page address to GPU bufferManager page address
          */
          //std::map<pair<void*,size_t>, void*> gpuPageTable;
-         threadSafeMap < pair<void*, size_t>, void*> gpuPageTable;
+         std::map < pair<void*, size_t>, void*> gpuPageTable;
+
+         /**
+          * framePageTable for mapping CPU bufferManager page address to GPU frame.
+          */
+         std::map< pair<void*, size_t>, frame_id_t > framePageTable;
+
 
         /**
          * one mutex to protect the gpuPageTable access
@@ -180,6 +209,16 @@ class PDBCUDAMemoryManager{
           * Frames for holding the free memory
           */
           std::list<frame_id_t> freeList;
+
+          /**
+           * True if the frame has recently been used
+           */
+          std::vector<bool> recentlyUsed;
+
+          /**
+           * Clock hand for mimic a LRU algorithm
+           */
+          int32_t clock_hand;
     };
 
 }
