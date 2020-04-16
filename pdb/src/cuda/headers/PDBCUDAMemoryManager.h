@@ -30,7 +30,7 @@ class PDBCUDAMemoryManager{
             }
             clock_hand = 0;
             bufferManager = buffer;
-            poolSize = NumOfthread+1;
+            poolSize = NumOfthread;
             pageSize = buffer->getMaxPageSize();
             for (size_t i = 0; i < poolSize; i++){
                 void* cudaPointer;
@@ -90,7 +90,7 @@ class PDBCUDAMemoryManager{
         void* handleInputObject(pair<void*, size_t> pageInfo, void *objectAddress, cudaStream_t cs) {
             size_t cudaObjectOffset = getObjectOffset(pageInfo.first, objectAddress);
 
-            std::cout << (long) pthread_self() << " : pageInfo: " << pageInfo.first << "bytes: "<< pageInfo.second << std::endl;
+            //std::cout << (long) pthread_self() << " : pageInfo: " << pageInfo.first << "bytes: "<< pageInfo.second << std::endl;
 
             std::unique_lock<std::mutex> lock(pageTableMutex);
 
@@ -100,7 +100,7 @@ class PDBCUDAMemoryManager{
 
             } else {
 
-                std::cout << (long) pthread_self() << " handleInputObject cannot find the input page ! copy it! \n";
+                //std::cout << (long) pthread_self() << " handleInputObject cannot find the input page ! copy it! \n";
 
                 void* cudaPointer;
 
@@ -115,12 +115,12 @@ class PDBCUDAMemoryManager{
 
 
         void* handleOutputObject(pair<void*, size_t> pageInfo, void *objectAddress, cudaStream_t cs){
-
             size_t cudaObjectOffset = getObjectOffset(pageInfo.first, objectAddress);
-
+            long threadID = (long) pthread_self();
             std::unique_lock<std::mutex> lock(pageTableMutex);
-
             if (gpuPageTable.count(pageInfo) != 0) {
+                recentlyUsed[framePageTable[pageInfo]] = true;
+                //std::cout << "thread ID :" << threadID <<" frame : " << framePageTable[pageInfo] << " has been used recently! \n";
                 return (void*)((char *)(gpuPageTable[pageInfo]) + cudaObjectOffset);
             } else {
                 assert(pageInfo.second == pageSize);
@@ -139,6 +139,7 @@ class PDBCUDAMemoryManager{
                 recentlyUsed[frame] = true;
                 return frame;
             } else {
+
                while(recentlyUsed[clock_hand] == true){
                    recentlyUsed[clock_hand] = false;
                    incrementIterator(clock_hand);
@@ -149,6 +150,11 @@ class PDBCUDAMemoryManager{
                auto iter = std::find_if(framePageTable.begin(), framePageTable.end(),[&](const std::pair< pair<void*, size_t>, frame_id_t> &pair){
                     return pair.second == frame;
                });
+
+               if (iter->second < 0 || iter->second > poolSize){
+                    std::cerr << " frame number is wrong! \n";
+               }
+
                framePageTable.erase(iter);
                gpuPageTable.erase(iter->first);
                return frame;
@@ -158,12 +164,11 @@ class PDBCUDAMemoryManager{
 
     private:
 
-        void incrementIterator(int32_t & it){
-                if (it == poolSize){
-                    it = 0;
-                } else{
-                    it++;
-                }
+        void incrementIterator(int32_t& it){
+            if (++it == poolSize){
+                it = 0;
+            }
+            return;
         }
 
 
