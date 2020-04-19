@@ -43,7 +43,6 @@ namespace pdb {
 class PDBClient : public ServerFunctionality {
 
  public:
-
   /**
    * Creates PDBClient
    * @param portIn - the port number of the PDB manager server

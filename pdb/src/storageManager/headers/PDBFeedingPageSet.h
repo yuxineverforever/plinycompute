@@ -14,7 +14,6 @@
 namespace pdb {
 
 enum class PDBFeedingPageSetUsagePolicy {
-
   REMOVE_AFTER_USED,
   KEEP_AFTER_USED
 };
