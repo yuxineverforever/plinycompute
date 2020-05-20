@@ -27,6 +27,7 @@
 #include <iostream>
 #include <iterator>
 #include <cstring>
+#include "PDBCUDAMemAllocator.h"
 
 // PRELOAD %Array <Nothing>%
 
@@ -45,7 +46,6 @@ class JoinMap;
 
 template <class TypeContained>
 class Array : public Object {
-
 public:
     // constructor/sdestructor
     Array();
@@ -77,6 +77,12 @@ private:
 
     // the array of data
     Nothing data[0];
+
+    // allocator
+    shared_ptr <PDBCUDAMemAllocator> myAllocator;
+
+    // location
+    TypeContained *alternativeLocation;
 
 public:
     // create a new Array object of size howMany, and copy our contents into it

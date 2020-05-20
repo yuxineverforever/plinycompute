@@ -118,7 +118,7 @@ int main(int argc, char *argv[]) {
     desc.add_options()("managerPort,o", po::value<int32_t>(&config->managerPort)->default_value(8108), "Port of the manager");
     desc.add_options()("sharedMemSize,s", po::value<size_t>(&config->sharedMemSize)->default_value(20480), "The size of the shared memory (MB)");
     desc.add_options()("pageSize,e", po::value<size_t>(&config->pageSize)->default_value(1024l * 1024l * 1024l), "The size of a page (bytes)");
-    desc.add_options()("numThreads,t", po::value<int32_t>(&config->numThreads)->default_value(8), "The number of threads we want to use");
+    desc.add_options()("numThreads,t", po::value<int32_t>(&config->numThreads)->default_value(1), "The number of threads we want to use");
     desc.add_options()("rootDirectory,r", po::value<std::string>(&config->rootDirectory)->default_value("./pdbRoot"), "The root directory we want to use.");
     desc.add_options()("maxRetries", po::value<uint32_t>(&config->maxRetries)->default_value(5), "The maximum number of retries before we give up.");
 

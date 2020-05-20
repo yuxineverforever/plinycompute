@@ -28,6 +28,7 @@
 #include <iostream>
 #include <iterator>
 #include <cstring>
+#include "PDBCUDAMemAllocator.h"
 
 // PRELOAD %Vector <Nothing>%
 
@@ -54,6 +55,10 @@ public:
     // numUsed of them, calling a no-arg constructor on each.  Thus, after
     // this call, size () will return numUsed
     Vector(uint32_t initSize, uint32_t numUsed);
+
+
+
+    Vector (uint32_t initSize, shared_ptr <PDBCUDAMemAllocator> myAllocator);
 
     // this constructor pre-allocates initSize slots, but does not do anything
     // to them.  Thus, after this call, size () will return zero

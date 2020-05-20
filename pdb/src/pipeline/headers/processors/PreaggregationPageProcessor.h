@@ -53,7 +53,7 @@ public:
       // make an object to hold
       pdb::Handle<pdb::Vector<pdb::Handle<pdb::Map<pdb::Nothing>>>> maps = pdb::makeObject<pdb::Vector<pdb::Handle<pdb::Map<pdb::Nothing>>>>();
 
-      // copy all the maps  that we need to
+      // copy all the maps that we need to
       for(int t = 0; t < numProcessingThreads; ++t) {
 
         // copy the map

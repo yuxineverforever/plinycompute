@@ -105,15 +105,12 @@ void pdb::Pipeline::cleanPipeline() {
     reverser.push_back(unwrittenPages.front());
     unwrittenPages.pop();
   }
-
   while (!reverser.empty()) {
     unwrittenPages.push(reverser.back());
     reverser.pop_back();
   }
-
   // write back all of the pages
   cleanPages(999999999);
-
   if (!unwrittenPages.empty())
     std::cout << "This is bad: in destructor for pipeline, still some pages with objects!!\n";
 }
@@ -137,10 +134,8 @@ void pdb::Pipeline::run() {
     for (ComputeExecutorPtr &q : pipeline) {
 
       try {
-
         //std::cout << "normal process \n";
         curChunk = q->process(curChunk);
-
       } catch (NotEnoughSpace &n) {
 
         // we run out of space so  this page can contain important data, process the page and possibly store it
@@ -200,11 +195,9 @@ void pdb::Pipeline::run() {
 
     // we need to keep the page
     keepPage(ram, iteration);
-
     // TODO make this nicer
     makeObjectAllocatorBlock(1024, true);
-  }
-  else {
+  } else {
     dismissPage(ram, true);
   }
 
