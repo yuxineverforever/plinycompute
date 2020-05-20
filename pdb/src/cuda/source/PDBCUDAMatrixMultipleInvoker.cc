@@ -22,9 +22,7 @@ namespace pdb{
     void PDBCUDAMatrixMultipleInvoker::setOutput(T* output, std::vector<size_t>& outputDim){
         //std::cout << (long) pthread_self()<< ": PDBCUDAMatrixMultipleInvoker setOutput() \n";
         auto PageInfo = ((PDBCUDAMemoryManager*)gpuMemoryManager)->getObjectPage((void*)output);
-
         auto cudaObjectPointer =((PDBCUDAMemoryManager*)gpuMemoryManager)->handleOutputObject(PageInfo, (void*)output, cudaStream);
-
         outputPara = std::make_pair((T*)cudaObjectPointer, outputDim);
         copyBackPara = output;
     }

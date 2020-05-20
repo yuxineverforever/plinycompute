@@ -30,7 +30,7 @@ class PDBCUDAMemoryManager{
             }
             clock_hand = 0;
             bufferManager = buffer;
-            poolSize = NumOfthread;
+            poolSize = NumOfthread + 1;
             pageSize = buffer->getMaxPageSize();
             for (size_t i = 0; i < poolSize; i++){
                 void* cudaPointer;
@@ -95,13 +95,9 @@ class PDBCUDAMemoryManager{
             std::unique_lock<std::mutex> lock(pageTableMutex);
 
             if (gpuPageTable.count(pageInfo) != 0) {
-
                 return (void*)((char *)(gpuPageTable[pageInfo]) + cudaObjectOffset);
-
             } else {
-
                 //std::cout << (long) pthread_self() << " handleInputObject cannot find the input page ! copy it! \n";
-
                 void* cudaPointer;
 
                 copyFromHostToDeviceAsync((void **) &cudaPointer, pageInfo.first, pageInfo.second, cs);

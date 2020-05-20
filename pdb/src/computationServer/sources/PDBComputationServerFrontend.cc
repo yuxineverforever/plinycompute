@@ -18,7 +18,6 @@
 #include "SimpleRequestResult.h"
 
 void pdb::PDBComputationServerFrontend::init() {
-
   // init the class
   logger = make_shared<pdb::PDBLogger>((boost::filesystem::path(getConfiguration()->rootDirectory) / "logs").string(),
                                        "PDBComputationServerFrontend.log");
@@ -46,7 +45,6 @@ bool pdb::PDBComputationServerFrontend::executeJob(pdb::Handle<pdb::ExJob> &job)
 
   // update the meta data for each set
   for(const auto &set : setsToMaterialize) {
-
     // update the container type
     std::string error;
     success = client.updateSetContainerType(set.first, set.second, containerType, error) && success;
