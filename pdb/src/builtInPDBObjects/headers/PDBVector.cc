@@ -34,7 +34,7 @@
 // Note: we need to write all operations in constructors, destructors, and assignment operators
 // WITHOUT using
 // the underlying type in any way (including assignment, initialization, destruction, size).
-//
+//713
 namespace pdb {
 
 template <class TypeContained>
@@ -47,7 +47,6 @@ Vector<TypeContained>::Vector(uint32_t initSize) {
 
 template <class TypeContained>
 Vector<TypeContained>::Vector(uint32_t initSize, uint32_t usedSize) {
-
     // this way, we'll allocate extra bytes on the end of the array
     // std :: cout << "sizeof(TypeContained)=" << sizeof(TypeContained) << std :: endl;
     // std :: cout << "sizeof(Handle)=" << sizeof(Handle<Nothing>) << std :: endl;
@@ -56,13 +55,13 @@ Vector<TypeContained>::Vector(uint32_t initSize, uint32_t usedSize) {
     myArray = makeObjectWithExtraStorage<Array<TypeContained>>(sizeof(TypeContained) * initSize, initSize, usedSize);
 }
 
-
 template <class TypeContained>
 Vector<TypeContained>::Vector(uint32_t initSize, shared_ptr <PDBCUDAMemAllocator> myAllocator){
+
     myArray = makeObjectWithExtraStorage<Array<TypeContained>>(sizeof(TypeContained)*initSize, initSize);
     TypeContained* newLoc = myAllocator->MemMalloc(sizeof(TypeContained) * initSize);
-    tempArray->myAllocator = myAllocator;
-    tempArray->alternativeLocation = newLoc;
+    myArray->myAllocator = myAllocator;
+    myArray->alternativeLocation = newLoc;
 }
 
 template <class TypeContained>

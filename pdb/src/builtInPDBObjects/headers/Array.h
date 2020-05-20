@@ -81,9 +81,8 @@ private:
     // allocator
     shared_ptr <PDBCUDAMemAllocator> myAllocator;
 
-    // location
-    TypeContained *alternativeLocation;
-
+    // alternative location
+    TypeContained* alternativeLocation;
 
 public:
     // create a new Array object of size howMany, and copy our contents into it
