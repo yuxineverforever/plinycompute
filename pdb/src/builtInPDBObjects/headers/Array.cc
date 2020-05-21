@@ -170,22 +170,17 @@ Array<TypeContained>::~Array() {
 template <class TypeContained>
 Handle<Array<TypeContained>> Array<TypeContained>::resize(uint32_t howMany) {
 
-
     if (alternativeLocation == nullptr){
         // allocate the new Array
         Handle<Array<TypeContained>> tempArray = makeObjectWithExtraStorage<Array<TypeContained>>(sizeof(TypeContained) * howMany, howMany);
         // copy everything over
         TypeContained* newLoc = (TypeContained*)(tempArray->data);
-        uint32_t max = usedSlots;
-        if (max < howMany)
-            max = howMany;
-        uint32_t min = usedSlots;
-        if (min > howMany)
-            min = howMany;
+
+        uint32_t min = usedSlots > howMany ? howMany : usedSlots;
         tempArray->usedSlots = min;
+
         // JiaNote: deep copy may cause exception, and cause usedSlots inconsistent
         size_t myUsedSlots = usedSlots;
-
         for (uint32_t i = 0; i < min || i < myUsedSlots; i++) {
 
             if (i < min) {
@@ -197,35 +192,38 @@ Handle<Array<TypeContained>> Array<TypeContained>::resize(uint32_t howMany) {
                 usedSlots--;
             }
         }
-
+        // empty out this guy
+        return tempArray;
     } else {
+
         Handle<Array<TypeContained>> tempArray = makeObjectWithExtraStorage<Array<TypeContained>>(sizeof(TypeContained) * howMany, howMany);
         TypeContained* newLoc = myAllocator->MemMalloc(sizeof(TypeContained) * howMany);
 
-        uint32_t max = usedSlots;
-        if (max < howMany)
-            max = howMany;
-        uint32_t min = usedSlots;
-        if (min > howMany)
-            min = howMany;
+        uint32_t min = usedSlots > howMany ? howMany : usedSlots;
         tempArray->usedSlots = min;
+
         // JiaNote: deep copy may cause exception, and cause usedSlots inconsistent
         size_t myUsedSlots = usedSlots;
 
-
         for (uint32_t i = 0; i < min || i < myUsedSlots; i++) {
-
             if (i < min) {
                 new ((void*)&(newLoc[i])) TypeContained();
                 newLoc[i] = ((TypeContained*)(alternativeLocation))[i];
             } else if (i < myUsedSlots) {
-                ((TypeContained*)(data))[i].~TypeContained();
+                ((TypeContained*)(alternativeLocation))[i].~TypeContained();
                 usedSlots--;
             }
         }
+
+        tempArray->myAllocator = myAllocator;
+        tempArray->alternativeLocation = newLoc;
+        myAllocator->MemFree(alternativeLocation);
+        alternativeLocation = nullptr;
+        myAllocator = nullptr;
+
+        // empty out this guy
+        return tempArray;
     }
-    // empty out this guy
-    return tempArray;
 }
 
 template <class TypeContained>
