@@ -55,8 +55,17 @@ Vector<TypeContained>::Vector(uint32_t initSize, uint32_t usedSize) {
 }
 
 template <class TypeContained>
-Vector<TypeContained>::Vector(uint32_t initSize, shared_ptr <PDBCUDAMemAllocator> myAllocator){
+Vector<TypeContained>::Vector(uint32_t initSize, std::shared_ptr <PDBCUDAMemAllocator> myAllocator){
+
     myArray = makeObjectWithExtraStorage<Array<TypeContained>>(sizeof(TypeContained)*initSize, initSize);
+    TypeContained* newLoc = myAllocator->MemMalloc(sizeof(TypeContained) * initSize);
+    myArray->myAllocator = myAllocator;
+    myArray->alternativeLocation = newLoc;
+}
+
+template <class TypeContained>
+Vector<TypeContained>::Vector(uint32_t initSize, uint32_t usedSize, std::shared_ptr <PDBCUDAMemAllocator> myAllocator){
+    myArray = makeObjectWithExtraStorage<Array<TypeContained>>(sizeof(TypeContained)*initSize, initSize, usedSize);
     TypeContained* newLoc = myAllocator->MemMalloc(sizeof(TypeContained) * initSize);
     myArray->myAllocator = myAllocator;
     myArray->alternativeLocation = newLoc;

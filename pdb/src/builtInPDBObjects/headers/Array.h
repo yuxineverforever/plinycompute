@@ -28,6 +28,7 @@
 #include <iterator>
 #include <cstring>
 #include "PDBCUDAMemAllocator.h"
+#include "PDBRamPointer.h"
 
 // PRELOAD %Array <Nothing>%
 
@@ -79,10 +80,10 @@ private:
     Nothing data[0];
 
     // allocator
-    shared_ptr <PDBCUDAMemAllocator> myAllocator;
+    std::shared_ptr <PDBCUDAMemAllocator> myAllocator;
 
     // alternative location
-    TypeContained* alternativeLocation;
+    RamPointerReference alternativeLocation;
 
 public:
     // create a new Array object of size howMany, and copy our contents into it

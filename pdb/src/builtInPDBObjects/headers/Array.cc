@@ -117,6 +117,7 @@ Array<TypeContained>::Array(uint32_t numSlotsIn, uint32_t numUsedSlots) {
         bzero(data, numUsedSlots * sizeof(TypeContained));
     }
 }
+
 template <class TypeContained>
 Array<TypeContained>::Array(uint32_t numSlotsIn) {
     typeInfo.setup<TypeContained>();

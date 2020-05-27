@@ -57,8 +57,12 @@ public:
     Vector(uint32_t initSize, uint32_t numUsed);
 
 
+    //
+    Vector (uint32_t initSize, std::shared_ptr <PDBCUDAMemAllocator> myAllocator);
 
-    Vector (uint32_t initSize, shared_ptr <PDBCUDAMemAllocator> myAllocator);
+    //
+    Vector(uint32_t initSize, uint32_t numUsed, std::shared_ptr <PDBCUDAMemAllocator> myAllocator);
+
 
     // this constructor pre-allocates initSize slots, but does not do anything
     // to them.  Thus, after this call, size () will return zero

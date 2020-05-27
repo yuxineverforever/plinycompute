@@ -30,14 +30,12 @@ void initMatrix(pdb::PDBClient &pdbClient, const std::string &set) {
 
       // allocate a matrix
       Handle<MatrixBlock> myInt = makeObject<MatrixBlock>(r, c, matrixRows / numRows, matrixColumns / numCols);
-
       // init the values
       float *vals = myInt->data.data->c_ptr();
       for (int v = 0; v < (matrixRows / numRows) * (matrixColumns / numCols); ++v) {
         //vals[v] = 1.0f * v + 2.0f;
         vals[v] = 1.0f;
       }
-
       data->push_back(myInt);
     }
   }
