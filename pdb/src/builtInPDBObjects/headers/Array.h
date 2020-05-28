@@ -50,14 +50,16 @@ class Array : public Object {
 public:
     // constructor/sdestructor
     Array();
-    Array(uint32_t numSlots);
+
+    Array(uint32_t numSlots, bool isGPU = false);
+
     Array(const Array& copyFromMe);
     ~Array();
 
     // this constructor pre-allocates the given number of slots, and initializes the specified
     // number,
     // so that the number of used slots is equal to the secod parameter
-    Array(uint32_t numSlots, uint32_t numUsedSlots);
+    Array(uint32_t numSlots, uint32_t numUsedSlots, bool isGPU = false);
 
     // normally these would be defined by the ENABLE_DEEP_COPY macro, but because
     // Array is the one variable-sized type that we allow, we need to manually override
@@ -103,6 +105,9 @@ public:
 
     // add an empty item at the end
     void push_back();
+
+    // push the data to GPU
+    void push_to_GPU();
 
     // remove from the end and shrink the number of used slots
     void pop_back();

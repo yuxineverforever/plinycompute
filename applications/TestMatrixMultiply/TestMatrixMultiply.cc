@@ -24,22 +24,22 @@ void initMatrix(pdb::PDBClient &pdbClient, const std::string &set) {
   // put the chunks here
   Handle<Vector<Handle<MatrixBlock>>> data = pdb::makeObject<Vector<Handle<MatrixBlock>>>();
 
+  bool onGPU = true;
   // fill the vector up
   for (uint32_t r = 0; r < numRows; r++) {
     for (uint32_t c = 0; c < numCols; c++) {
-
       // allocate a matrix
-      Handle<MatrixBlock> myInt = makeObject<MatrixBlock>(r, c, matrixRows / numRows, matrixColumns / numCols);
+      Handle<MatrixBlock> myInt = makeObject<MatrixBlock>(r, c, matrixRows / numRows, matrixColumns / numCols, onGPU);
       // init the values
       float *vals = myInt->data.data->c_ptr();
       for (int v = 0; v < (matrixRows / numRows) * (matrixColumns / numCols); ++v) {
         //vals[v] = 1.0f * v + 2.0f;
         vals[v] = 1.0f;
       }
+      myInt->data.data->push_to_GPU();
       data->push_back(myInt);
     }
   }
-
   // init the records
   getRecord(data);
 

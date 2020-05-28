@@ -18,10 +18,9 @@ public:
    */
   MatrixBlockData() = default;
 
-  MatrixBlockData(uint32_t numRows, uint32_t numCols) : numRows(numRows), numCols(numCols) {
-
+  MatrixBlockData(uint32_t numRows, uint32_t numCols, bool onGPU) : numRows(numRows), numCols(numCols), useGPU(onGPU) {
     // allocate the data
-    data = makeObject<Vector<float>>(numRows * numCols, numRows * numCols);
+    data = makeObject<Vector<float>>(numRows * numCols, numRows * numCols, onGPU);
   }
 
   ENABLE_DEEP_COPY
@@ -35,6 +34,11 @@ public:
    * The number of columns in the block
    */
   uint32_t numCols = 0;
+
+  /**
+   * Whether the data should be on GPU
+   */
+  bool useGPU = false;
 
   /**
    * The values of the block

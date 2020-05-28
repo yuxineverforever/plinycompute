@@ -98,7 +98,7 @@ Array<TypeContained>::Array(const Array& toMe) {
 }
 
 template <class TypeContained>
-Array<TypeContained>::Array(uint32_t numSlotsIn, uint32_t numUsedSlots) {
+Array<TypeContained>::Array(uint32_t numSlotsIn, uint32_t numUsedSlots, bool isGPU) {
     typeInfo.setup<TypeContained>();
     usedSlots = numUsedSlots;
     numSlots = numSlotsIn;
@@ -119,7 +119,7 @@ Array<TypeContained>::Array(uint32_t numSlotsIn, uint32_t numUsedSlots) {
 }
 
 template <class TypeContained>
-Array<TypeContained>::Array(uint32_t numSlotsIn) {
+Array<TypeContained>::Array(uint32_t numSlotsIn, bool isGPU) {
     typeInfo.setup<TypeContained>();
     usedSlots = 0;
     numSlots = numSlotsIn;
@@ -261,6 +261,13 @@ void Array<TypeContained>::push_back(const TypeContained& val) {
         ((((TypeContained*)(alternativeLocation))[usedSlots])) = val;
         usedSlots++;
     }
+}
+
+template <class TypeContained>
+void Array<TypeContained>::push_to_GPU(){
+
+    //move the data to alternative location on GPU
+    memmove(alternativeLocation, data, getSize());
 }
 
 

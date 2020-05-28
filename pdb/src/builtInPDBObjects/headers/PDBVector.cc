@@ -34,46 +34,35 @@
 // Note: we need to write all operations in constructors, destructors, and assignment operators
 // WITHOUT using
 // the underlying type in any way (including assignment, initialization, destruction, size).
-//713
+//
 namespace pdb {
 
 template <class TypeContained>
-Vector<TypeContained>::Vector(uint32_t initSize) {
+Vector<TypeContained>::Vector(uint32_t initSize, bool onGPU) {
+
     // this way, we'll allocate extra bytes on the end of the array
-    myArray = makeObjectWithExtraStorage<Array<TypeContained>>(sizeof(TypeContained) * initSize,
-                                                               initSize);
+    myArray = makeObjectWithExtraStorage<Array<TypeContained>>(sizeof(TypeContained) * initSize, initSize, onGPU);
 }
 
 template <class TypeContained>
-Vector<TypeContained>::Vector(uint32_t initSize, uint32_t usedSize) {
-    // this way, we'll allocate extra bytes on the end of the array
+Vector<TypeContained>::Vector(uint32_t initSize, uint32_t usedSize, bool onGPU) {
+    // This way, we'll allocate extra bytes on the end of the array
     // std :: cout << "sizeof(TypeContained)=" << sizeof(TypeContained) << std :: endl;
     // std :: cout << "sizeof(Handle)=" << sizeof(Handle<Nothing>) << std :: endl;
     // std :: cout << "sizeof(HandleBase)=" << sizeof(HandleBase) << std :: endl;
     // std :: cout << "initSize=" << initSize << std :: endl;
-    myArray = makeObjectWithExtraStorage<Array<TypeContained>>(sizeof(TypeContained) * initSize, initSize, usedSize);
-}
-
-template <class TypeContained>
-Vector<TypeContained>::Vector(uint32_t initSize, std::shared_ptr <PDBCUDAMemAllocator> myAllocator){
-
-    myArray = makeObjectWithExtraStorage<Array<TypeContained>>(sizeof(TypeContained)*initSize, initSize);
-    TypeContained* newLoc = myAllocator->MemMalloc(sizeof(TypeContained) * initSize);
-    myArray->myAllocator = myAllocator;
-    myArray->alternativeLocation = newLoc;
-}
-
-template <class TypeContained>
-Vector<TypeContained>::Vector(uint32_t initSize, uint32_t usedSize, std::shared_ptr <PDBCUDAMemAllocator> myAllocator){
-    myArray = makeObjectWithExtraStorage<Array<TypeContained>>(sizeof(TypeContained)*initSize, initSize, usedSize);
-    TypeContained* newLoc = myAllocator->MemMalloc(sizeof(TypeContained) * initSize);
-    myArray->myAllocator = myAllocator;
-    myArray->alternativeLocation = newLoc;
+    myArray = makeObjectWithExtraStorage<Array<TypeContained>>(sizeof(TypeContained) * initSize, initSize, usedSize, onGPU);
 }
 
 template <class TypeContained>
 Vector<TypeContained>::Vector() {
     myArray = makeObjectWithExtraStorage<Array<TypeContained>>(sizeof(TypeContained), 1);
+}
+
+
+template <class TypeContained>
+void Vector<TypeContained>::push_to_GPU(){
+    myArray->push_to_GPU();
 }
 
 template <class TypeContained>
