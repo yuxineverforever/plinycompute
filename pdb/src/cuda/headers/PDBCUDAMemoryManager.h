@@ -31,7 +31,7 @@ class PDBCUDAMemoryManager{
             }
             clock_hand = 0;
             bufferManager = buffer;
-            poolSize = NumOfthread + 1;
+            poolSize = NumOfthread + 2;
             pageSize = buffer->getMaxPageSize();
             for (size_t i = 0; i < poolSize; i++){
                 void* cudaPointer;
@@ -106,7 +106,6 @@ class PDBCUDAMemoryManager{
 
                 return (void*)((char*)cudaPointer + cudaObjectOffset);
             }
-
         }
 
 
@@ -126,6 +125,24 @@ class PDBCUDAMemoryManager{
                 return (void*)((char*)availablePosition[frame] + cudaObjectOffset);
             }
         }
+
+        void* memMalloc(size_t memSize){
+
+            if (allocatorPage == -1){
+                frame_id_t oneframe = getAvailableFrame();
+                bytesUsed = 0;
+                allocatorPage = oneframe;
+            }
+
+            if (memSize > (pageSize - bytesUsed)){
+                std::cerr << "Unable to allocator space : the space on page is not enough!\n";
+            }
+
+            size_t start = bytesUsed;
+            bytesUsed += memSize;
+            return (void*)((char*)availablePosition[allocatorPage] + start);
+        }
+
 
         frame_id_t getAvailableFrame(){
             frame_id_t frame;
@@ -150,17 +167,11 @@ class PDBCUDAMemoryManager{
                if (iter->second < 0 || iter->second > poolSize){
                     std::cerr << " frame number is wrong! \n";
                }
-
                framePageTable.erase(iter);
                gpuPageTable.erase(iter->first);
                return frame;
             }
         }
-
-    public:
-
-        static PDBCUDAMemAllocator memAllocator;
-
 
     private:
 
@@ -226,6 +237,13 @@ class PDBCUDAMemoryManager{
            * Clock hand for mimic a LRU algorithm
            */
           int32_t clock_hand;
+
+          /**
+           * ============================================== Here is the part for mem allocator ==============================================
+           */
+          size_t bytesUsed = 0;
+
+          frame_id_t allocatorPage = -1;
     };
 
 }
