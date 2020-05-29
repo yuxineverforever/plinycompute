@@ -37,7 +37,7 @@ public:
    * @param numCols - the number of columns the block has
    */
   MatrixBlock(uint32_t rowID, uint32_t colID, uint32_t numRows, uint32_t numCols, bool onGPU) : metaData(rowID, colID),
-                                                                                    data(numRows, numCols, onGPU), useGPU(onGPU){}
+                                                                                    data(numRows, numCols, onGPU), isGPU(onGPU) {}
 
   ENABLE_DEEP_COPY
 
@@ -52,9 +52,9 @@ public:
   MatrixBlockData data;
 
   /**
-   * whether the data should be put on GPU
+   * whether the data is on GPU
    */
-  bool useGPU = false;
+  bool isGPU;
 
   /**
    *

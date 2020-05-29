@@ -106,9 +106,6 @@ public:
     // add an empty item at the end
     void push_back();
 
-    // push the data to GPU
-    void push_to_GPU();
-
     // remove from the end and shrink the number of used slots
     void pop_back();
 

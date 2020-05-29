@@ -20,10 +20,9 @@ namespace pdb{
     }
 
     void PDBCUDAMatrixMultipleInvoker::setOutput(T* output, std::vector<size_t>& outputDim){
-        //std::cout << (long) pthread_self()<< ": PDBCUDAMatrixMultipleInvoker setOutput() \n";
-        auto PageInfo = ((PDBCUDAMemoryManager*)gpuMemoryManager)->getObjectPage((void*)output);
-        auto cudaObjectPointer =((PDBCUDAMemoryManager*)gpuMemoryManager)->handleOutputObject(PageInfo, (void*)output, cudaStream);
-        outputPara = std::make_pair((T*)cudaObjectPointer, outputDim);
+
+        // NOTE: the output pointer should point to an address on GPU
+        outputPara = std::make_pair((T*)output, outputDim);
         copyBackPara = output;
     }
 
@@ -38,7 +37,7 @@ namespace pdb{
         const float alpha = 1.0f;
         const float beta  = 0.0f;
         cublasSgemm(cudaHandle, CUBLAS_OP_N, CUBLAS_OP_N, in1NumRow, in2NumCol, in1NumCol, &alpha, in1data, in1NumRow, in2data, in1NumCol, &beta, outdata, in1NumRow);
-        copyFromDeviceToHostAsync((void*)copyBackPara, (void*)outputPara.first, outputPara.second[0] * outputPara.second[1] * sizeof(float), cudaStream);
+        //copyFromDeviceToHostAsync((void*)copyBackPara, (void*)outputPara.first, outputPara.second[0] * outputPara.second[1] * sizeof(float), cudaStream);
     }
 
     void PDBCUDAMatrixMultipleInvoker::cleanup(){

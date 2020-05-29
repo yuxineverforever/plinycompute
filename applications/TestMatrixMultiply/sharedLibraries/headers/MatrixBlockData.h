@@ -18,7 +18,7 @@ public:
    */
   MatrixBlockData() = default;
 
-  MatrixBlockData(uint32_t numRows, uint32_t numCols, bool onGPU) : numRows(numRows), numCols(numCols), useGPU(onGPU) {
+  MatrixBlockData(uint32_t numRows, uint32_t numCols, bool onGPU) : numRows(numRows), numCols(numCols), isGPU(onGPU){
     // allocate the data
     data = makeObject<Vector<float>>(numRows * numCols, numRows * numCols, onGPU);
   }
@@ -36,9 +36,9 @@ public:
   uint32_t numCols = 0;
 
   /**
-   * Whether the data should be on GPU
+   * is the data on GPU
    */
-  bool useGPU = false;
+  bool isGPU;
 
   /**
    * The values of the block
@@ -51,6 +51,7 @@ public:
    * @return
    */
   MatrixBlockData& operator+(MatrixBlockData& other) {
+
     // get the data
     float *myData = data->c_ptr();
     float *otherData = other.data->c_ptr();

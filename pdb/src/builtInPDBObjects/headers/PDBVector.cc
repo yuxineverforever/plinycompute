@@ -59,12 +59,6 @@ Vector<TypeContained>::Vector() {
     myArray = makeObjectWithExtraStorage<Array<TypeContained>>(sizeof(TypeContained), 1);
 }
 
-
-template <class TypeContained>
-void Vector<TypeContained>::push_to_GPU(){
-    myArray->push_to_GPU();
-}
-
 template <class TypeContained>
 size_t Vector<TypeContained>::size() const {
     return myArray->numUsedSlots();

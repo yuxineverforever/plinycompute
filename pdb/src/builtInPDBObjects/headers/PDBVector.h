@@ -61,11 +61,6 @@ public:
     // to them.  Thus, after this call, size () will return zero
     Vector(uint32_t initSize, bool onGPU = false);
 
-
-    // push the data to GPU.
-    void push_to_GPU();
-
-
     // these operations all have the same semantics as in std :: vector
     Vector();
     size_t size() const;

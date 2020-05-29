@@ -8,6 +8,7 @@
 #include "PDBCUDAUtility.h"
 #include "threadSafeMap.h"
 #include <assert.h>
+#include "PDBCUDAMemAllocator.h"
 
 namespace pdb {
 
@@ -88,10 +89,9 @@ class PDBCUDAMemoryManager{
          * @return
          */
         void* handleInputObject(pair<void*, size_t> pageInfo, void *objectAddress, cudaStream_t cs) {
+
             size_t cudaObjectOffset = getObjectOffset(pageInfo.first, objectAddress);
-
             //std::cout << (long) pthread_self() << " : pageInfo: " << pageInfo.first << "bytes: "<< pageInfo.second << std::endl;
-
             std::unique_lock<std::mutex> lock(pageTableMutex);
 
             if (gpuPageTable.count(pageInfo) != 0) {
@@ -157,6 +157,10 @@ class PDBCUDAMemoryManager{
             }
         }
 
+    public:
+
+        static PDBCUDAMemAllocator memAllocator;
+
 
     private:
 
@@ -168,7 +172,9 @@ class PDBCUDAMemoryManager{
         }
 
 
+
     private:
+
          /**
           * the buffer manager to help maintain gpu page table
           */

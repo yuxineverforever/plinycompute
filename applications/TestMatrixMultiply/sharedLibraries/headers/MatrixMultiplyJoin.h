@@ -30,8 +30,11 @@ public:
       uint32_t J = in2->data.numCols;
       // K and L should be equal
       uint32_t K = in1->data.numCols;
+
+      bool onGPU = true;
+
       // make the output block
-      Handle <MatrixBlock> out = makeObject<MatrixBlock>(in1->getRowID(), in2->getColID(), I, J);
+      Handle <MatrixBlock> out = makeObject<MatrixBlock>(in1->getRowID(), in2->getColID(), I, J, onGPU);
 
       vector<size_t> outdim = {I,J};
       vector<size_t> in1dim = {I,K};
