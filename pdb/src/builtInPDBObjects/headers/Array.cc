@@ -122,7 +122,6 @@ Array<TypeContained>::Array(uint32_t numSlotsIn, uint32_t numUsedSlots, bool isG
 
 template <class TypeContained>
 Array<TypeContained>::Array(uint32_t numSlotsIn, bool isGPU) {
-
     //TODO: add GPU related code
     typeInfo.setup<TypeContained>();
     usedSlots = 0;

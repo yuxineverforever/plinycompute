@@ -81,12 +81,6 @@ private:
     // the array of data
     Nothing data[0];
 
-    // allocator
-    std::shared_ptr <PDBCUDAMemAllocator> myAllocator;
-
-    // alternative location
-    RamPointerReference alternativeLocation;
-
 public:
     // create a new Array object of size howMany, and copy our contents into it
     Handle<Array<TypeContained>> resize(uint32_t howMany);
