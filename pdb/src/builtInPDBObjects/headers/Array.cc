@@ -98,7 +98,7 @@ Array<TypeContained>::Array(const Array& toMe) {
 }
 
 template <class TypeContained>
-Array<TypeContained>::Array(uint32_t numSlotsIn, uint32_t numUsedSlots, bool isGPU) {
+Array<TypeContained>::Array(uint32_t numSlotsIn, uint32_t numUsedSlots) {
 
     //TODO: add GPU related code
     typeInfo.setup<TypeContained>();
@@ -121,7 +121,7 @@ Array<TypeContained>::Array(uint32_t numSlotsIn, uint32_t numUsedSlots, bool isG
 }
 
 template <class TypeContained>
-Array<TypeContained>::Array(uint32_t numSlotsIn, bool isGPU) {
+Array<TypeContained>::Array(uint32_t numSlotsIn) {
     //TODO: add GPU related code
     typeInfo.setup<TypeContained>();
     usedSlots = 0;
