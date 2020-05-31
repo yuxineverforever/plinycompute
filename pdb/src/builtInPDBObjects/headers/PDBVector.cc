@@ -122,7 +122,11 @@ void Vector<TypeContained>::resize(uint32_t toMe) {
 
 template <class TypeContained>
 TypeContained* Vector<TypeContained>::c_ptr() const {
-    return myArray->c_ptr();
+    if (alternativeLocation == nullptr){
+        return myArray->c_ptr();
+    } else {
+        return alternativeLocation.get().ramAddress;
+    }
 }
 
 // Add by Shangyu;

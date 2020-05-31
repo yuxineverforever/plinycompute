@@ -174,69 +174,34 @@ Array<TypeContained>::~Array() {
 template <class TypeContained>
 Handle<Array<TypeContained>> Array<TypeContained>::resize(uint32_t howMany) {
 
-    if (alternativeLocation == nullptr){
-        // allocate the new Array
-        Handle<Array<TypeContained>> tempArray = makeObjectWithExtraStorage<Array<TypeContained>>(sizeof(TypeContained) * howMany, howMany);
-        // copy everything over
-        TypeContained* newLoc = (TypeContained*)(tempArray->data);
+    // allocate the new Array
+    Handle<Array<TypeContained>> tempArray = makeObjectWithExtraStorage<Array<TypeContained>>(sizeof(TypeContained) * howMany, howMany);
+    // copy everything over
+    TypeContained* newLoc = (TypeContained*)(tempArray->data);
 
-        uint32_t min = usedSlots > howMany ? howMany : usedSlots;
-        tempArray->usedSlots = min;
+    uint32_t min = usedSlots > howMany ? howMany : usedSlots;
+    tempArray->usedSlots = min;
 
-        // JiaNote: deep copy may cause exception, and cause usedSlots inconsistent
-        size_t myUsedSlots = usedSlots;
-        for (uint32_t i = 0; i < min || i < myUsedSlots; i++) {
+    // JiaNote: deep copy may cause exception, and cause usedSlots inconsistent
+    size_t myUsedSlots = usedSlots;
+    for (uint32_t i = 0; i < min || i < myUsedSlots; i++) {
 
-            if (i < min) {
-                new ((void*)&(newLoc[i])) TypeContained();
-                newLoc[i] = ((TypeContained*)(data))[i];
-            } else if (i < myUsedSlots) {
-                ((TypeContained*)(data))[i].~TypeContained();
+        if (i < min) {
+            new ((void*)&(newLoc[i])) TypeContained();
+            newLoc[i] = ((TypeContained*)(data))[i];
+        } else if (i < myUsedSlots) {
+            ((TypeContained*)(data))[i].~TypeContained();
                 // JiaNote: we need make usedSlots consistent in cases of exception
-                usedSlots--;
-            }
+            usedSlots--;
         }
-        // empty out this guy
-        return tempArray;
-    } else {
-
-        Handle<Array<TypeContained>> tempArray = makeObjectWithExtraStorage<Array<TypeContained>>(sizeof(TypeContained) * howMany, howMany);
-        TypeContained* newLoc = myAllocator->MemMalloc(sizeof(TypeContained) * howMany);
-
-        uint32_t min = usedSlots > howMany ? howMany : usedSlots;
-        tempArray->usedSlots = min;
-
-        // JiaNote: deep copy may cause exception, and cause usedSlots inconsistent
-        size_t myUsedSlots = usedSlots;
-
-        for (uint32_t i = 0; i < min || i < myUsedSlots; i++) {
-            if (i < min) {
-                new ((void*)&(newLoc[i])) TypeContained();
-                newLoc[i] = ((TypeContained*)(alternativeLocation))[i];
-            } else if (i < myUsedSlots) {
-                ((TypeContained*)(alternativeLocation))[i].~TypeContained();
-                usedSlots--;
-            }
-        }
-
-        tempArray->myAllocator = myAllocator;
-        tempArray->alternativeLocation = newLoc;
-        myAllocator->MemFree(alternativeLocation);
-        alternativeLocation = nullptr;
-        myAllocator = nullptr;
-
-        // empty out this guy
-        return tempArray;
     }
+    // empty out this guy
+    return tempArray;
 }
 
 template <class TypeContained>
 TypeContained& Array<TypeContained>::getObj(uint32_t which) {
-    if (alternativeLocation == nullptr){
         return ((TypeContained*)(data))[which];
-    } else {
-        return ((TypeContained*)(alternativeLocation))[which];
-    }
 }
 
 template <class TypeContained>
@@ -245,61 +210,35 @@ void Array<TypeContained>::assign(uint32_t which, const TypeContained& val) {
         std::cerr << "Bad: you are writing past the end of the vector!\n";
         return;
     }
-    if (alternativeLocation == nullptr){
-        ((TypeContained*)(data))[which] = val;
-    } else {
-        ((TypeContained*)(alternativeLocation))[which] = val;
-    }
+    ((TypeContained*)(data))[which] = val;
 }
 
 template <class TypeContained>
 void Array<TypeContained>::push_back(const TypeContained& val) {
     // need a placement new to correctly initialize before the copy
-    if (alternativeLocation == nullptr){
         new ((void*)&(((TypeContained*)(data))[usedSlots])) TypeContained();
         ((((TypeContained*)(data))[usedSlots])) = val;
         usedSlots++;
-    } else {
-        new ((void*)&(((TypeContained*)(alternativeLocation))[usedSlots])) TypeContained();
-        ((((TypeContained*)(alternativeLocation))[usedSlots])) = val;
-        usedSlots++;
-    }
 }
 
 template <class TypeContained>
 void Array<TypeContained>::push_back() {
     // need a placement new
-    if (alternativeLocation == nullptr){
-        new ((void*)&(((TypeContained*)(data))[usedSlots])) TypeContained();
-        usedSlots++;
-    } else {
-        new ((void*)&(((TypeContained*)(alternativeLocation))[usedSlots])) TypeContained();
-        usedSlots++;
-    }
+    new ((void*)&(((TypeContained*)(data))[usedSlots])) TypeContained();
+    usedSlots++;
 }
 
 
 template <class TypeContained>
 TypeContained* Array<TypeContained>::c_ptr() {
-    if (alternativeLocation == nullptr){
-        return ((TypeContained*)(data));
-    } else {
-        return ((TypeContained*)(alternativeLocation));
-    }
+    return ((TypeContained*)(data));
 }
 
 template <class TypeContained>
 void Array<TypeContained>::pop_back() {
-    if (alternativeLocation == nullptr){
-        if (usedSlots != 0) {
-            ((TypeContained*)(data))[usedSlots - 1].~TypeContained();
-            usedSlots--;
-        }
-    } else {
-        if (usedSlots != 0) {
-            ((TypeContained*)(alternativeLocation))[usedSlots - 1].~TypeContained();
-            usedSlots--;
-        }
+    if (usedSlots != 0) {
+        ((TypeContained*)(data))[usedSlots - 1].~TypeContained();
+        usedSlots--;
     }
 }
 
