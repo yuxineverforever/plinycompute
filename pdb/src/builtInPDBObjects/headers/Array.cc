@@ -71,7 +71,6 @@ void Array<TypeContained>::setUpAndCopyFrom(void* target, void* source) const {
 #ifdef DEBUG_DEEP_COPY
     PDB_COUT << "dataSize=" << dataSize << std::endl;
 #endif
-
     if (!toMe.typeInfo.descendsFromObject()) {
         // in this case, we might have a fundmanetal type... regardless, just do a simple bitwise
         // copy
@@ -231,7 +230,11 @@ void Array<TypeContained>::push_back() {
 
 template <class TypeContained>
 TypeContained* Array<TypeContained>::c_ptr() {
-    return ((TypeContained*)(data));
+    if (alternativeLocation == nullptr){
+        return ((TypeContained*)(data));
+    } else {
+        return ((TypeContained*) alternativeLocation.get().ramAddress);
+    }
 }
 
 template <class TypeContained>

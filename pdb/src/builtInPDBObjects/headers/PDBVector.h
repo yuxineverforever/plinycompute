@@ -49,8 +49,6 @@ private:
     // this is where the data are actually stored
     Handle<Array<TypeContained>> myArray;
 
-    // alternative location
-    RamPointerReference alternativeLocation;
 
 public:
     ENABLE_DEEP_COPY

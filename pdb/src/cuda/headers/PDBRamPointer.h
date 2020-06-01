@@ -6,13 +6,10 @@ namespace pdb{
     class RamPointer{
     public:
         RamPointer(void* physicalAddress): ramAddress(physicalAddress){}
-
         RamPointer() = delete;
-
         inline bool operator== (const RamPointer& rp){
             return ramAddress == rp.ramAddress;
         }
-
     public:
         void* ramAddress;
     };
