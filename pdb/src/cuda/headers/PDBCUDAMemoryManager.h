@@ -46,7 +46,6 @@ class PDBCUDAMemoryManager{
          *
          */
         ~PDBCUDAMemoryManager(){
-
             for (auto & iter: gpuPageTable){
                 freeGPUMemory(&iter.second);
             }
@@ -54,7 +53,6 @@ class PDBCUDAMemoryManager{
                 cudaFree(availablePosition[frame]);
             }
         }
-
         /**
          *
          * @param pageAddress
@@ -159,7 +157,6 @@ class PDBCUDAMemoryManager{
                 recentlyUsed[frame] = true;
                 return frame;
             } else {
-
                while(recentlyUsed[clock_hand] == true){
                    recentlyUsed[clock_hand] = false;
                    incrementIterator(clock_hand);
@@ -180,16 +177,19 @@ class PDBCUDAMemoryManager{
             }
         }
 
-    private:
 
+        void DeepCopy(void* startLoc, size_t numBytes){
+
+
+        }
+
+    private:
         void incrementIterator(int32_t& it){
             if (++it == poolSize){
                 it = 0;
             }
             return;
         }
-
-
 
     private:
 

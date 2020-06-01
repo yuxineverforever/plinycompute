@@ -35,7 +35,7 @@ public:
   bool process(const MemoryHolderPtr &memory) override {
 
     // if we do not have a sink just finish
-    if(memory->outputSink == nullptr) {
+    if (memory->outputSink == nullptr) {
       return true;
     }
 
