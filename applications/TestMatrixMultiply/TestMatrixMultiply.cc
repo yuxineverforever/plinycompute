@@ -10,11 +10,11 @@ using namespace pdb;
 using namespace pdb::matrix;
 
 // some constants for the test
-const size_t blockSize = 1024;
-const uint32_t matrixRows = 10000;
-const uint32_t matrixColumns = 10000;
-const uint32_t numRows = 16;
-const uint32_t numCols = 16;
+const size_t blockSize = 512;
+const uint32_t matrixRows = 100;
+const uint32_t matrixColumns = 100;
+const uint32_t numRows = 10;
+const uint32_t numCols = 10;
 
 void initMatrix(pdb::PDBClient &pdbClient, const std::string &set) {
 
@@ -50,13 +50,11 @@ void initMatrix(pdb::PDBClient &pdbClient, const std::string &set) {
 }
 
 
-int main(int argc, char* argv[]) {    
+int main(int argc, char* argv[]) {
 
   // make a client
   pdb::PDBClient pdbClient(8108, "localhost");
-
   /// 1. Register the classes
-
   // now, register a type for user data
   pdbClient.registerType("libraries/libMatrixBlock.so");
   pdbClient.registerType("libraries/libMatrixBlockData.so");
@@ -65,10 +63,9 @@ int main(int argc, char* argv[]) {
   pdbClient.registerType("libraries/libMatrixMultiplyJoin.so");
   pdbClient.registerType("libraries/libMatrixScanner.so");
   pdbClient.registerType("libraries/libMatrixWriter.so");
-
   /// 2. Create the set
 
-  // now, create a new database
+  // now, create a new databases
   pdbClient.createDatabase("myData");
 
   // now, create the input and output sets
