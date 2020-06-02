@@ -133,9 +133,9 @@ class PDBCUDAMemoryManager{
             return (void*)((char*)availablePosition[allocatorPage] + start);
         }
 
-        RamPointerReference addRamPointerCollection(void* gpuaddress, void* cpuaddress){
+        RamPointerReference addRamPointerCollection(void* gpuaddress, void* cpuaddress, size_t numbytes){
 
-            RamPointer pt(gpuaddress);
+            RamPointer pt(gpuaddress, numbytes);
             auto iter = ramPointerCollection.find(pt);
 
             if (iter != ramPointerCollection.end()){
@@ -167,7 +167,6 @@ class PDBCUDAMemoryManager{
                auto iter = std::find_if(framePageTable.begin(), framePageTable.end(),[&](const std::pair< pair<void*, size_t>, frame_id_t> &pair){
                     return pair.second == frame;
                });
-
                if (iter->second < 0 || iter->second > poolSize){
                     std::cerr << " frame number is wrong! \n";
                }
@@ -177,9 +176,15 @@ class PDBCUDAMemoryManager{
             }
         }
 
-
         void DeepCopy(void* startLoc, size_t numBytes){
 
+            for (auto & ramPointerPair : ramPointerCollection){
+                for (auto & cpuRamPointer: ramPointerPair.second){
+                    if (cpuRamPointer >= startLoc && cpuRamPointer < (void*)((char*)startLoc + numBytes)){
+                        copyFromDeviceToHost(cpuRamPointer, ramPointerPair.first.ramAddress, ramPointerPair.first.numBytes);
+                    }
+                }
+            }
 
         }
 

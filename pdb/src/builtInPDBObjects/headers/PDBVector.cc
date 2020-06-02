@@ -47,7 +47,8 @@ Vector<TypeContained>::Vector(uint32_t initSize, bool onGPU) {
     myArray = makeObjectWithExtraStorage<Array<TypeContained>>(sizeof(TypeContained) * initSize, initSize, onGPU);
     if (onGPU){
         void* gpuArray = ((PDBCUDAMemoryManager*)gpuMemoryManager)->memMalloc(sizeof(TypeContained)* initSize);
-        myArray->alternativeLocation = ((PDBCUDAMemoryManager*)gpuMemoryManager)->addRamPointerCollection(gpuArray, (void*)myArray->c_ptr());
+        myArray->alternativeLocation = ((PDBCUDAMemoryManager*)gpuMemoryManager)->addRamPointerCollection(gpuArray, (void*)myArray->c_ptr(),
+                                                                                                          sizeof(TypeContained)*initSize);
     }
 }
 
@@ -62,7 +63,8 @@ Vector<TypeContained>::Vector(uint32_t initSize, uint32_t usedSize, bool onGPU) 
     myArray = makeObjectWithExtraStorage<Array<TypeContained>>(sizeof(TypeContained) * initSize, initSize, usedSize, onGPU);
     if (onGPU){
         void* gpuArray = ((PDBCUDAMemoryManager*)gpuMemoryManager)->memMalloc(sizeof(TypeContained)* initSize);
-        myArray->alternativeLocation = ((PDBCUDAMemoryManager*)gpuMemoryManager)->addRamPointerCollection(gpuArray, (void*)myArray->c_ptr());
+        myArray->alternativeLocation = ((PDBCUDAMemoryManager*)gpuMemoryManager)->addRamPointerCollection(gpuArray, (void*)myArray->c_ptr(),
+                                                                                                          sizeof(TypeContained)*initSize);
     }
 }
 

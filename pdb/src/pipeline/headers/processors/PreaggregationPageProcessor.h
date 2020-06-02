@@ -11,6 +11,7 @@
 #include <PDBPageHandle.h>
 #include <PDBBufferManagerInterface.h>
 
+extern void* gpuMemoryManager;
 namespace pdb {
 
 /**
@@ -38,6 +39,8 @@ public:
     if (memory->outputSink == nullptr) {
       return true;
     }
+
+    ((PDBCUDAMemoryManager*)gpuMemoryManager)->DeepCopy(memory->pageHandle->getBytes(),memory->pageHandle->getSize());
 
     // cast the thing to the maps of maps
     pdb::Handle<pdb::Vector<pdb::Handle<pdb::Map<pdb::Nothing>>>> allMaps = unsafeCast<pdb::Vector<pdb::Handle<pdb::Map<pdb::Nothing>>>>(memory->outputSink);
