@@ -26,6 +26,7 @@
 #include <iterator>
 #include <type_traits>
 #include <cstring>
+#include <PDBCUDAMemoryManager.h>
 
 #include "Handle.h"
 #include "Object.h"
@@ -35,30 +36,38 @@
 // WITHOUT using
 // the underlying type in any way (including assignment, initialization, destruction, size).
 //
+
+extern void* gpuMemoryManager;
 namespace pdb {
 
 template <class TypeContained>
-Vector<TypeContained>::Vector(uint32_t initSize) {
+Vector<TypeContained>::Vector(uint32_t initSize, bool onGPU) {
 
     // this way, we'll allocate extra bytes on the end of the array
-    myArray = makeObjectWithExtraStorage<Array<TypeContained>>(sizeof(TypeContained) * initSize,
-                                                               initSize);
+    myArray = makeObjectWithExtraStorage<Array<TypeContained>>(sizeof(TypeContained) * initSize, initSize, onGPU);
+    if (onGPU){
+        void* gpuArray = ((PDBCUDAMemoryManager*)gpuMemoryManager)->memMalloc(sizeof(TypeContained)* initSize);
+        myArray->alternativeLocation = ((PDBCUDAMemoryManager*)gpuMemoryManager)->addRamPointerCollection(gpuArray, (void*)myArray->c_ptr());
+    }
 }
 
 template <class TypeContained>
-Vector<TypeContained>::Vector(uint32_t initSize, uint32_t usedSize) {
+Vector<TypeContained>::Vector(uint32_t initSize, uint32_t usedSize, bool onGPU) {
 
-    // this way, we'll allocate extra bytes on the end of the array
+    // This way, we'll allocate extra bytes on the end of the array
     // std :: cout << "sizeof(TypeContained)=" << sizeof(TypeContained) << std :: endl;
     // std :: cout << "sizeof(Handle)=" << sizeof(Handle<Nothing>) << std :: endl;
     // std :: cout << "sizeof(HandleBase)=" << sizeof(HandleBase) << std :: endl;
     // std :: cout << "initSize=" << initSize << std :: endl;
-    myArray = makeObjectWithExtraStorage<Array<TypeContained>>(sizeof(TypeContained) * initSize, initSize, usedSize);
+    myArray = makeObjectWithExtraStorage<Array<TypeContained>>(sizeof(TypeContained) * initSize, initSize, usedSize, onGPU);
+    if (onGPU){
+        void* gpuArray = ((PDBCUDAMemoryManager*)gpuMemoryManager)->memMalloc(sizeof(TypeContained)* initSize);
+        myArray->alternativeLocation = ((PDBCUDAMemoryManager*)gpuMemoryManager)->addRamPointerCollection(gpuArray, (void*)myArray->c_ptr());
+    }
 }
 
 template <class TypeContained>
 Vector<TypeContained>::Vector() {
-
     myArray = makeObjectWithExtraStorage<Array<TypeContained>>(sizeof(TypeContained), 1);
 }
 
@@ -115,7 +124,7 @@ void Vector<TypeContained>::resize(uint32_t toMe) {
 
 template <class TypeContained>
 TypeContained* Vector<TypeContained>::c_ptr() const {
-    return myArray->c_ptr();
+     return myArray->c_ptr();
 }
 
 // Add by Shangyu;

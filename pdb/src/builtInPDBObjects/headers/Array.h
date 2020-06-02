@@ -27,6 +27,8 @@
 #include <iostream>
 #include <iterator>
 #include <cstring>
+#include "PDBCUDAMemAllocator.h"
+#include "PDBRamPointer.h"
 
 // PRELOAD %Array <Nothing>%
 
@@ -49,7 +51,9 @@ class Array : public Object {
 public:
     // constructor/sdestructor
     Array();
+
     Array(uint32_t numSlots);
+
     Array(const Array& copyFromMe);
     ~Array();
 
@@ -77,6 +81,9 @@ private:
 
     // the array of data
     Nothing data[0];
+
+    // alternative location
+    RamPointerReference alternativeLocation;
 
 public:
     // create a new Array object of size howMany, and copy our contents into it

@@ -53,7 +53,7 @@ public:
       const pdb::UseTemporaryAllocationBlock tempBlock{page->getBytes(), page->getSize()};
 
       // make an object to hold
-      pdb::Handle<pdb::Vector<pdb::Handle<pdb::JoinMap<RecordType>>>> maps = pdb::makeObject<pdb::Vector<pdb::Handle<pdb::JoinMap<RecordType>>>>();
+      pdb::Handle<pdb::Vector<pdb::Handle<pdb ::JoinMap<RecordType>>>> maps = pdb::makeObject<pdb::Vector<pdb::Handle<pdb::JoinMap<RecordType>>>>();
 
       // copy all the maps  that we need to
       for(int t = 0; t < numProcessingThreads; ++t) {

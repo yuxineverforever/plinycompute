@@ -18,10 +18,9 @@ public:
    */
   MatrixBlockData() = default;
 
-  MatrixBlockData(uint32_t numRows, uint32_t numCols) : numRows(numRows), numCols(numCols) {
-
+  MatrixBlockData(uint32_t numRows, uint32_t numCols, bool onGPU) : numRows(numRows), numCols(numCols), isGPU(onGPU){
     // allocate the data
-    data = makeObject<Vector<float>>(numRows * numCols, numRows * numCols);
+    data = makeObject<Vector<float>>(numRows * numCols, numRows * numCols, onGPU);
   }
 
   ENABLE_DEEP_COPY
@@ -37,6 +36,11 @@ public:
   uint32_t numCols = 0;
 
   /**
+   * is the data on GPU
+   */
+  bool isGPU;
+
+  /**
    * The values of the block
    */
   Handle<Vector<float>> data;
@@ -47,6 +51,7 @@ public:
    * @return
    */
   MatrixBlockData& operator+(MatrixBlockData& other) {
+
     // get the data
     float *myData = data->c_ptr();
     float *otherData = other.data->c_ptr();

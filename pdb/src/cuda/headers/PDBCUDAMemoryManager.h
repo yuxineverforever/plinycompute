@@ -8,6 +8,8 @@
 #include "PDBCUDAUtility.h"
 #include "threadSafeMap.h"
 #include <assert.h>
+#include "PDBCUDAMemAllocator.h"
+#include "PDBRamPointer.h"
 
 namespace pdb {
 
@@ -19,7 +21,6 @@ using frame_id_t  = int32_t;
 class PDBCUDAMemoryManager{
 
     public:
-
         /**
          *
          * @param buffer
@@ -30,7 +31,7 @@ class PDBCUDAMemoryManager{
             }
             clock_hand = 0;
             bufferManager = buffer;
-            poolSize = NumOfthread;
+            poolSize = NumOfthread + 2;
             pageSize = buffer->getMaxPageSize();
             for (size_t i = 0; i < poolSize; i++){
                 void* cudaPointer;
@@ -45,7 +46,6 @@ class PDBCUDAMemoryManager{
          *
          */
         ~PDBCUDAMemoryManager(){
-
             for (auto & iter: gpuPageTable){
                 freeGPUMemory(&iter.second);
             }
@@ -53,7 +53,6 @@ class PDBCUDAMemoryManager{
                 cudaFree(availablePosition[frame]);
             }
         }
-
         /**
          *
          * @param pageAddress
@@ -89,28 +88,17 @@ class PDBCUDAMemoryManager{
          */
         void* handleInputObject(pair<void*, size_t> pageInfo, void *objectAddress, cudaStream_t cs) {
             size_t cudaObjectOffset = getObjectOffset(pageInfo.first, objectAddress);
-
             //std::cout << (long) pthread_self() << " : pageInfo: " << pageInfo.first << "bytes: "<< pageInfo.second << std::endl;
-
             std::unique_lock<std::mutex> lock(pageTableMutex);
-
             if (gpuPageTable.count(pageInfo) != 0) {
-
                 return (void*)((char *)(gpuPageTable[pageInfo]) + cudaObjectOffset);
-
             } else {
-
                 //std::cout << (long) pthread_self() << " handleInputObject cannot find the input page ! copy it! \n";
-
                 void* cudaPointer;
-
                 copyFromHostToDeviceAsync((void **) &cudaPointer, pageInfo.first, pageInfo.second, cs);
-
                 gpuPageTable.insert(std::make_pair(pageInfo, cudaPointer));
-
                 return (void*)((char*)cudaPointer + cudaObjectOffset);
             }
-
         }
 
 
@@ -131,6 +119,36 @@ class PDBCUDAMemoryManager{
             }
         }
 
+        void* memMalloc(size_t memSize){
+            if (allocatorPage == -1){
+                frame_id_t oneframe = getAvailableFrame();
+                bytesUsed = 0;
+                allocatorPage = oneframe;
+            }
+            if (memSize > (pageSize - bytesUsed)){
+                std::cerr << "Unable to allocator space : the space on page is not enough!\n";
+            }
+            size_t start = bytesUsed;
+            bytesUsed += memSize;
+            return (void*)((char*)availablePosition[allocatorPage] + start);
+        }
+
+        RamPointerReference addRamPointerCollection(void* gpuaddress, void* cpuaddress){
+
+            RamPointer pt(gpuaddress);
+            auto iter = ramPointerCollection.find(pt);
+
+            if (iter != ramPointerCollection.end()){
+                ramPointerCollection[pt].push_back(cpuaddress);
+                return std::make_shared<RamPointer>(iter->first);
+            }else {
+                std::vector<void*> newList;
+                newList.push_back(cpuaddress);
+                ramPointerCollection.insert(std::make_pair(pt, newList));
+                return std::make_shared<RamPointer>(ramPointerCollection.find(pt)->first);
+            }
+        }
+
         frame_id_t getAvailableFrame(){
             frame_id_t frame;
             if (!freeList.empty()){
@@ -139,7 +157,6 @@ class PDBCUDAMemoryManager{
                 recentlyUsed[frame] = true;
                 return frame;
             } else {
-
                while(recentlyUsed[clock_hand] == true){
                    recentlyUsed[clock_hand] = false;
                    incrementIterator(clock_hand);
@@ -154,7 +171,6 @@ class PDBCUDAMemoryManager{
                if (iter->second < 0 || iter->second > poolSize){
                     std::cerr << " frame number is wrong! \n";
                }
-
                framePageTable.erase(iter);
                gpuPageTable.erase(iter->first);
                return frame;
@@ -162,8 +178,12 @@ class PDBCUDAMemoryManager{
         }
 
 
-    private:
+        void DeepCopy(void* startLoc, size_t numBytes){
 
+
+        }
+
+    private:
         void incrementIterator(int32_t& it){
             if (++it == poolSize){
                 it = 0;
@@ -171,8 +191,8 @@ class PDBCUDAMemoryManager{
             return;
         }
 
-
     private:
+
          /**
           * the buffer manager to help maintain gpu page table
           */
@@ -224,6 +244,15 @@ class PDBCUDAMemoryManager{
            * Clock hand for mimic a LRU algorithm
            */
           int32_t clock_hand;
+
+          /**
+           * ============================================== Here is the part for mem allocator ==============================================
+           */
+          size_t bytesUsed = 0;
+
+          frame_id_t allocatorPage = -1;
+
+          std::map<pdb::RamPointer, std::vector<void*> > ramPointerCollection;
     };
 
 }

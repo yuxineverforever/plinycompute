@@ -41,11 +41,11 @@ namespace pdb{
     }
 
     void PDBCUDAVectorAddInvoker::setOutput(T* output, std::vector<size_t>& outputDim){
-        //std::cout << (long) pthread_self() << " : PDBCUDAVectorAddInvoker setOutput() \n";
+
         assert(outputDim.size()==1);
-        auto PageInfo = ((PDBCUDAMemoryManager*)gpuMemoryManager)->getObjectPage((void*)output);
-        auto cudaObjectPointer =((PDBCUDAMemoryManager*)gpuMemoryManager)->handleOutputObject(PageInfo, (void*)output, cudaStream);
-        outputPara = std::make_pair((T*)cudaObjectPointer, outputDim);
+        // NOTE: the output pointer should point to an address on GPU
+
+        outputPara = std::make_pair((T*)output, outputDim);
         copyBackPara = output;
     }
 

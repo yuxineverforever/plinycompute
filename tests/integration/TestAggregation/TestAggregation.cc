@@ -7,9 +7,6 @@
 #include <FinalQuery.h>
 #include <WriteSalaries.h>
 #include <gtest/gtest.h>
-#include "ScanEmployeeSet.h"
-#include "EmployeeBuiltInIdentitySelection.h"
-#include "WriteBuiltinEmployeeSet.h"
 
 using namespace pdb;
 

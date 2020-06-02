@@ -103,8 +103,7 @@ PDBPageHandle getPageWithData(size_t &numRecords, std::shared_ptr<PDBBufferManag
           if (i % 2 == 0)
             temp = makeObject<Employee>("Steve Stevens", numRecords, myString + std::to_string(numRecords % 720), j * 3.54);
           else
-            temp =
-                makeObject<Employee>("Albert Albertson", numRecords, myString + std::to_string(numRecords % 720), j * 3.54);
+            temp = makeObject<Employee>("Albert Albertson", numRecords, myString + std::to_string(numRecords % 720), j * 3.54);
           (*supers)[i]->addEmp(temp);
         }
 
@@ -133,15 +132,21 @@ PDBPageHandle getPageWithData(size_t &numRecords, std::shared_ptr<PDBBufferManag
 TEST(PipelineTest, TestAggregation) {
 
   // So basically we first get the data from the "pageReader" page set, this data is a vector of pdb::Supervisor objects
-  // you can check out the getPageWithData to get more details. Next we take that page and do the preaggregation,
-  // so that we are grouping by the department and summing up the salary. Now the preaggregation will only aggregate
+  // you can check out the getPageWithData to get more details.
+  //
+  // Next we take that page and do the preaggregation,
+  // so that we are grouping by the department and summing up the salary. Note the preaggregation will only aggregate
   // as much as it can fit of the input page, and because of that they need to be combined in the next step.
+
   // In order to combine them in parallel in the next step we split the preaggregated results into numNodes * threadsPerNode
-  // partitions. Because of that the output of the preaggregation is a vector of maps each map corresponds to a particular thread
+  // partitions.
+  //
+  // Because of that the output of the preaggregation is a vector of maps each map corresponds to a particular thread
   // and each page has only one node it belongs to (has to be sent). The pages are sent into appropriate blocking queues
   // in the real system there are going to be a bunch of threads that are grabbing pages from these queues and sending them to
   // appropriate nodes. The page set that is used as a sink for these pages is the "partitionedHashTable" page set, it will only give
   // the pages for a particular node determined by curNode
+
   // next step is the final aggregation where we combine the partitions of the preaggreation pages into a
   // single hash map, basically each thread on a node grabs the same page and only takes in the map that corresponds
   // to that thread and combines it. The output of this is basically a page for each thread on a node, so numNodes * threadsPerNode
@@ -187,14 +192,14 @@ TEST(PipelineTest, TestAggregation) {
   // now we create the TCAP string
   String myTCAPString =
       "inputData (in) <= SCAN ('myData', 'mySet', 'SetScanner_0', []) \n"
-      "inputWithAtt (in, att) <= APPLY (inputData (in), inputData (in), 'SelectionComp_1', 'methodCall_0', []) \n"
-      "inputWithAttAndMethod (in, att, method) <= APPLY (inputWithAtt (in), inputWithAtt (in, att), 'SelectionComp_1', 'attAccess_1', []) \n"
-      "inputWithBool (in, bool) <= APPLY (inputWithAttAndMethod (att, method), inputWithAttAndMethod (in), 'SelectionComp_1', '==_2', []) \n"
+      "inputWithAtt (in, att) <= APPLY (inputData (in), inputData (in), 'SelectionComp_1', 'methodCall_1', []) \n"
+      "inputWithAttAndMethod (in, att, method) <= APPLY (inputWithAtt (in), inputWithAtt (in, att), 'SelectionComp_1', 'attAccess_2', []) \n"
+      "inputWithBool (in, bool) <= APPLY (inputWithAttAndMethod (att, method), inputWithAttAndMethod (in), 'SelectionComp_1', '==_0', []) \n"
       "filteredInput (in) <= FILTER (inputWithBool (bool), inputWithBool (in), 'SelectionComp_1', []) \n"
-      "projectedInputWithPtr (out) <= APPLY (filteredInput (in), filteredInput (), 'SelectionComp_1', 'methodCall_3', []) \n"
-      "projectedInput (out) <= APPLY (projectedInputWithPtr (out), projectedInputWithPtr (), 'SelectionComp_1', 'deref_4', []) \n"
-      "aggWithKeyWithPtr (out, key) <= APPLY (projectedInput (out), projectedInput (out), 'AggregationComp_2', 'attAccess_0', []) \n"
-      "aggWithKey (out, key) <= APPLY (aggWithKeyWithPtr (key), aggWithKeyWithPtr (out), 'AggregationComp_2', 'deref_1', []) \n"
+      "projectedInputWithPtr (out) <= APPLY (filteredInput (in), filteredInput (), 'SelectionComp_1', 'methodCall_4', []) \n"
+      "projectedInput (out) <= APPLY (projectedInputWithPtr (out), projectedInputWithPtr (), 'SelectionComp_1', 'deref_3', []) \n"
+      "aggWithKeyWithPtr (out, key) <= APPLY (projectedInput (out), projectedInput (out), 'AggregationComp_2', 'attAccess_1', []) \n"
+      "aggWithKey (out, key) <= APPLY (aggWithKeyWithPtr (key), aggWithKeyWithPtr (out), 'AggregationComp_2', 'deref_0', []) \n"
       "aggWithValue (key, value) <= APPLY (aggWithKey (out), aggWithKey (key), 'AggregationComp_2', 'methodCall_2', []) \n"
       "agg (aggOut) <=	AGGREGATE (aggWithValue (key, value), 'AggregationComp_2', []) \n"
       "checkSales (aggOut, isSales) <= APPLY (agg (aggOut), agg (aggOut), 'SelectionComp_3', 'methodCall_0', []) \n"
@@ -244,18 +249,14 @@ TEST(PipelineTest, TestAggregation) {
 
   ON_CALL(*partitionedHashTable, getNextPage(testing::An<size_t>())).WillByDefault(testing::Invoke(
       [&](size_t workerID) {
-
         // wait to get the page
         PDBPageHandle page;
         pageQueues[curNode]->wait_dequeue(page);
-
         if(page == nullptr) {
           return (PDBPageHandle) nullptr;
         }
-
         // repin the page
         page->repin();
-
         // return it
         return page;
       }));
@@ -327,8 +328,10 @@ TEST(PipelineTest, TestAggregation) {
   /// 4. Create the pre-aggregation and run it.
 
   // set the parameters
-  std::map<ComputeInfoType, ComputeInfoPtr> params = { { ComputeInfoType::PAGE_PROCESSOR,  std::make_shared<PreaggregationPageProcessor>(2, 2, pageQueues, myMgr) },
-                                                       { ComputeInfoType::SOURCE_SET_INFO, std::make_shared<pdb::SourceSetArg>(std::make_shared<PDBCatalogSet>("myData", "mySet", "", 0, PDB_CATALOG_SET_VECTOR_CONTAINER)) } };
+  std::map<ComputeInfoType, ComputeInfoPtr> params = {
+                                                       { ComputeInfoType::PAGE_PROCESSOR,  std::make_shared<PreaggregationPageProcessor>(2, 2, pageQueues, myMgr) },
+                                                       { ComputeInfoType::SOURCE_SET_INFO, std::make_shared<pdb::SourceSetArg>(std::make_shared<PDBCatalogSet>("myData", "mySet", "", 0, PDB_CATALOG_SET_VECTOR_CONTAINER)) }
+                                                        };
 
   // now, let's pretend that myPlan has been sent over the network, and we want to execute it... first we build
   // a pipeline into the aggregation operation

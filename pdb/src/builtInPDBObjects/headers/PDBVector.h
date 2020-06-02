@@ -28,6 +28,7 @@
 #include <iostream>
 #include <iterator>
 #include <cstring>
+#include "PDBCUDAMemAllocator.h"
 
 // PRELOAD %Vector <Nothing>%
 
@@ -40,6 +41,7 @@ class JoinMap;
 // The operations have exactly the same interface as std :: vector, except that
 // not all operations are implemented.
 
+
 template <class TypeContained>
 class Vector : public Object {
 
@@ -47,17 +49,18 @@ private:
     // this is where the data are actually stored
     Handle<Array<TypeContained>> myArray;
 
+
 public:
     ENABLE_DEEP_COPY
 
     // this constructor pre-allocates initSize slots, and then initializes
     // numUsed of them, calling a no-arg constructor on each.  Thus, after
     // this call, size () will return numUsed
-    Vector(uint32_t initSize, uint32_t numUsed);
+    Vector(uint32_t initSize, uint32_t numUsed, bool onGPU = false);
 
     // this constructor pre-allocates initSize slots, but does not do anything
     // to them.  Thus, after this call, size () will return zero
-    Vector(uint32_t initSize);
+    Vector(uint32_t initSize, bool onGPU = false);
 
     // these operations all have the same semantics as in std :: vector
     Vector();
@@ -71,6 +74,7 @@ public:
     void clear();
     TypeContained* c_ptr() const;
     void resize(uint32_t toMe);
+
 
     // added by Shangyu
     void print() const;

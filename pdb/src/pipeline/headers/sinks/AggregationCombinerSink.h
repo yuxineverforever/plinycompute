@@ -18,7 +18,6 @@ public:
   explicit AggregationCombinerSink(size_t workerID) : workerID(workerID) {}
 
   Handle<Object> createNewOutputContainer() override {
-
     // we simply create a new map to store the output
     Handle <Map <KeyType, ValueType>> returnVal = makeObject <Map <KeyType, ValueType>> ();
     return returnVal;

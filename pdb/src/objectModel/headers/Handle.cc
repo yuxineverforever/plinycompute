@@ -79,12 +79,9 @@ unsigned Handle<ObjType>::getRefCount() {
 
 template <class ObjType>
 void Handle<ObjType>::emptyOutContainingBlock() {
-
     if (!isNullPtr()) {
-
         // go ahead and free his block
         getAllocator().emptyOutBlock(getTarget());
-
         // and set us so that we are a null pointer
         offset = -1;
     } else {

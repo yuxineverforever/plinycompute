@@ -28,7 +28,6 @@ class PreaggregationSink : public ComputeSink {
  public:
 
   PreaggregationSink(TupleSpec &inputSchema, TupleSpec &attsToOperateOn, size_t numPartitions) : numPartitions(numPartitions) {
-
     // to setup the output tuple set
     TupleSpec empty{};
     TupleSetSetupMachine myMachine(inputSchema, empty);
@@ -38,21 +37,15 @@ class PreaggregationSink : public ComputeSink {
     whichAttToHash = matches[0];
     whichAttToAggregate = matches[1];
   }
-
   ~PreaggregationSink() override = default;
-
   Handle<Object> createNewOutputContainer() override {
-
     // we simply create a new vector of maps to store the stuff
     Handle<Vector<Handle<Map<KeyType, ValueType>>>> returnVal = makeObject<Vector<Handle<Map<KeyType, ValueType>>>>();
-
     // create the maps
     for(auto i = 0; i < numPartitions; ++i) {
-
       // add the map
       returnVal->push_back(makeObject<Map<KeyType, ValueType>>());
     }
-
     // return the output container
     return returnVal;
   }
@@ -115,22 +108,17 @@ class PreaggregationSink : public ComputeSink {
 
         // the key is there
       } else {
-
         // get the value and a copy of it
         ValueType &temp = myMap[keyColumn[i]];
         ValueType copy = temp;
-
         // and add to the old value, producing a new one
         try {
           temp = copy + valueColumn[i];
-
           // if we got here, then it means that we ram out of RAM when we were trying
           // to put the new value into the hash table
         } catch (NotEnoughSpace &n) {
-
           // restore the old value
           temp = copy;
-
           // and erase all of the guys who were processed
           keyColumn.erase(keyColumn.begin(), keyColumn.begin() + i);
           valueColumn.erase(valueColumn.begin(), valueColumn.begin() + i);

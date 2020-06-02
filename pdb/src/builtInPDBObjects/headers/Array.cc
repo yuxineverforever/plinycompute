@@ -71,7 +71,6 @@ void Array<TypeContained>::setUpAndCopyFrom(void* target, void* source) const {
 #ifdef DEBUG_DEEP_COPY
     PDB_COUT << "dataSize=" << dataSize << std::endl;
 #endif
-
     if (!toMe.typeInfo.descendsFromObject()) {
         // in this case, we might have a fundmanetal type... regardless, just do a simple bitwise
         // copy
@@ -99,6 +98,8 @@ Array<TypeContained>::Array(const Array& toMe) {
 
 template <class TypeContained>
 Array<TypeContained>::Array(uint32_t numSlotsIn, uint32_t numUsedSlots) {
+
+    //TODO: add GPU related code
     typeInfo.setup<TypeContained>();
     usedSlots = numUsedSlots;
     numSlots = numSlotsIn;
@@ -117,8 +118,10 @@ Array<TypeContained>::Array(uint32_t numSlotsIn, uint32_t numUsedSlots) {
         bzero(data, numUsedSlots * sizeof(TypeContained));
     }
 }
+
 template <class TypeContained>
 Array<TypeContained>::Array(uint32_t numSlotsIn) {
+    //TODO: add GPU related code
     typeInfo.setup<TypeContained>();
     usedSlots = 0;
     numSlots = numSlotsIn;
@@ -172,23 +175,14 @@ Handle<Array<TypeContained>> Array<TypeContained>::resize(uint32_t howMany) {
 
     // allocate the new Array
     Handle<Array<TypeContained>> tempArray = makeObjectWithExtraStorage<Array<TypeContained>>(sizeof(TypeContained) * howMany, howMany);
-
     // copy everything over
     TypeContained* newLoc = (TypeContained*)(tempArray->data);
 
-    uint32_t max = usedSlots;
-    if (max < howMany)
-        max = howMany;
-
-    uint32_t min = usedSlots;
-    if (min > howMany)
-        min = howMany;
-
+    uint32_t min = usedSlots > howMany ? howMany : usedSlots;
     tempArray->usedSlots = min;
 
     // JiaNote: deep copy may cause exception, and cause usedSlots inconsistent
     size_t myUsedSlots = usedSlots;
-
     for (uint32_t i = 0; i < min || i < myUsedSlots; i++) {
 
         if (i < min) {
@@ -196,18 +190,17 @@ Handle<Array<TypeContained>> Array<TypeContained>::resize(uint32_t howMany) {
             newLoc[i] = ((TypeContained*)(data))[i];
         } else if (i < myUsedSlots) {
             ((TypeContained*)(data))[i].~TypeContained();
-            // JiaNote: we need make usedSlots consistent in cases of exception
+                // JiaNote: we need make usedSlots consistent in cases of exception
             usedSlots--;
         }
     }
-
     // empty out this guy
     return tempArray;
 }
 
 template <class TypeContained>
 TypeContained& Array<TypeContained>::getObj(uint32_t which) {
-    return ((TypeContained*)(data))[which];
+        return ((TypeContained*)(data))[which];
 }
 
 template <class TypeContained>
@@ -222,15 +215,13 @@ void Array<TypeContained>::assign(uint32_t which, const TypeContained& val) {
 template <class TypeContained>
 void Array<TypeContained>::push_back(const TypeContained& val) {
     // need a placement new to correctly initialize before the copy
-    new ((void*)&(((TypeContained*)(data))[usedSlots])) TypeContained();
-    ((((TypeContained*)(data))[usedSlots])) = val;
-    usedSlots++;
+        new ((void*)&(((TypeContained*)(data))[usedSlots])) TypeContained();
+        ((((TypeContained*)(data))[usedSlots])) = val;
+        usedSlots++;
 }
-
 
 template <class TypeContained>
 void Array<TypeContained>::push_back() {
-
     // need a placement new
     new ((void*)&(((TypeContained*)(data))[usedSlots])) TypeContained();
     usedSlots++;
@@ -239,7 +230,11 @@ void Array<TypeContained>::push_back() {
 
 template <class TypeContained>
 TypeContained* Array<TypeContained>::c_ptr() {
-    return ((TypeContained*)(data));
+    if (alternativeLocation == nullptr){
+        return ((TypeContained*)(data));
+    } else {
+        return ((TypeContained*) alternativeLocation.get().ramAddress);
+    }
 }
 
 template <class TypeContained>
