@@ -8,7 +8,6 @@
 #include "PDBCUDAUtility.h"
 #include "threadSafeMap.h"
 #include <assert.h>
-#include "PDBCUDAMemAllocator.h"
 #include "PDBRamPointer.h"
 
 namespace pdb {
@@ -133,9 +132,9 @@ class PDBCUDAMemoryManager{
             return (void*)((char*)availablePosition[allocatorPage] + start);
         }
 
-        RamPointerReference addRamPointerCollection(void* gpuaddress, void* cpuaddress, size_t numbytes){
+        RamPointerReference addRamPointerCollection(void* gpuaddress, void* cpuaddress, size_t numbytes, size_t headerbytes){
 
-            RamPointer pt(gpuaddress, numbytes);
+            RamPointer pt(gpuaddress, numbytes, headerbytes);
             auto iter = ramPointerCollection.find(pt);
 
             if (iter != ramPointerCollection.end()){
@@ -179,13 +178,14 @@ class PDBCUDAMemoryManager{
         void DeepCopy(void* startLoc, size_t numBytes){
 
             for (auto & ramPointerPair : ramPointerCollection){
-                for (auto & cpuRamPointer: ramPointerPair.second){
-                    if (cpuRamPointer >= startLoc && cpuRamPointer < (void*)((char*)startLoc + numBytes)){
+                for (void* cpuRamPointer: ramPointerPair.second){
+                    if (cpuRamPointer >= startLoc && cpuRamPointer < ((char*)startLoc + numBytes)){
                         copyFromDeviceToHost(cpuRamPointer, ramPointerPair.first.ramAddress, ramPointerPair.first.numBytes);
+                        Array<Nothing>* array = (Array<Nothing>*)((char*)cpuRamPointer - ramPointerPair.first.headerBytes);
+                        array->setRamPointerReferenceToNull();
                     }
                 }
             }
-
         }
 
     private:

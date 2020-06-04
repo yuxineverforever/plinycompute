@@ -58,7 +58,6 @@ public:
 
       // copy all the maps that we need to
       for(int t = 0; t < numProcessingThreads; ++t) {
-
         // copy the map
         maps->push_back((*allMaps)[node * numProcessingThreads + t]);
       }

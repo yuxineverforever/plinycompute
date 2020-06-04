@@ -7,10 +7,12 @@ namespace pdb{
 
     public:
 
-        RamPointer(void* physicalAddress, size_t numbytes): ramAddress(physicalAddress), numBytes(numbytes){
+        RamPointer(void* physicalAddress, size_t numbytes, size_t headerbytes): ramAddress(physicalAddress), numBytes(numbytes), headerBytes(headerbytes){
+
         }
 
         RamPointer() = delete;
+
         inline bool operator== (const RamPointer& rp){
             return ramAddress == rp.ramAddress;
         }
@@ -18,6 +20,8 @@ namespace pdb{
     public:
         void* ramAddress;
         size_t numBytes;
+        size_t headerBytes;
     };
+
     using RamPointerReference = std::shared_ptr<RamPointer>;
 };

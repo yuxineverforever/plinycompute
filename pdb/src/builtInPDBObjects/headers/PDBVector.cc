@@ -48,7 +48,8 @@ Vector<TypeContained>::Vector(uint32_t initSize, bool onGPU) {
     if (onGPU){
         void* gpuArray = ((PDBCUDAMemoryManager*)gpuMemoryManager)->memMalloc(sizeof(TypeContained)* initSize);
         myArray->alternativeLocation = ((PDBCUDAMemoryManager*)gpuMemoryManager)->addRamPointerCollection(gpuArray, (void*)myArray->c_ptr(),
-                                                                                                          sizeof(TypeContained)*initSize);
+                                                                                                          sizeof(TypeContained)*initSize,
+                                                                                                          sizeof(Array<TypeContained>));
     }
 }
 
@@ -64,7 +65,8 @@ Vector<TypeContained>::Vector(uint32_t initSize, uint32_t usedSize, bool onGPU) 
     if (onGPU){
         void* gpuArray = ((PDBCUDAMemoryManager*)gpuMemoryManager)->memMalloc(sizeof(TypeContained)* initSize);
         myArray->alternativeLocation = ((PDBCUDAMemoryManager*)gpuMemoryManager)->addRamPointerCollection(gpuArray, (void*)myArray->c_ptr(),
-                                                                                                          sizeof(TypeContained)*initSize);
+                                                                                                          sizeof(TypeContained)*initSize,
+                                                                                                          sizeof(Array<TypeContained>));
     }
 }
 

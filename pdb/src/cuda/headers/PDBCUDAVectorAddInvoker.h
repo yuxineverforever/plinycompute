@@ -34,13 +34,9 @@ namespace pdb {
         std::vector<std::pair<T *, std::vector<size_t> >> inputParas;
         std::pair<T *, std::vector<size_t> > outputPara;
         T *copyBackPara;
-
         PDBCUDAOpType op = PDBCUDAOpType::VectorAdd;
-
         cublasHandle_t cudaHandle;
-
         cudaStream_t cudaStream;
-
     };
 }
 #endif

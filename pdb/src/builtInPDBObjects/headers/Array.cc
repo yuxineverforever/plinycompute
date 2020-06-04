@@ -244,6 +244,7 @@ void Array<TypeContained>::pop_back() {
         usedSlots--;
     }
 }
+}
 
 template <class TypeContained>
 uint32_t Array<TypeContained>::numUsedSlots() {
@@ -269,6 +270,14 @@ size_t Array<TypeContained>::getSize(void* forMe) {
         ((Array<TypeContained>*)forMe)->typeInfo.getSizeOfConstituentObject(forMe) *
         ((Array<TypeContained>*)forMe)->numSlots;
 }
+
+
+template <class TypeContained>
+size_t Array<TypeContained>::void setRamPointerReferenceToNull(){
+    alternativeLocation = nullptr;
+}
+
+
 }
 
 #endif

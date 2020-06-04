@@ -44,7 +44,6 @@ namespace pdb{
 
         assert(outputDim.size()==1);
         // NOTE: the output pointer should point to an address on GPU
-
         outputPara = std::make_pair((T*)output, outputDim);
         copyBackPara = output;
     }

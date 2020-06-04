@@ -69,6 +69,8 @@ public:
     void deleteObject(void* deleteMe);
     size_t getSize(void* forMe);
 
+    void setRamPointerReferenceToNull();
+
 private:
     // and this gives us our info about TypeContained
     PDBTemplateBase typeInfo;
@@ -79,11 +81,11 @@ private:
     // the number of slots
     uint32_t numSlots;
 
-    // the array of data
-    Nothing data[0];
-
     // alternative location
     RamPointerReference alternativeLocation;
+
+    // the array of data
+    Nothing data[0];
 
 public:
     // create a new Array object of size howMany, and copy our contents into it
