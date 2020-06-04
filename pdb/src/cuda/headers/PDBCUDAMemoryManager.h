@@ -250,6 +250,7 @@ class PDBCUDAMemoryManager{
            */
           int32_t clock_hand;
 
+
           /**
            * ============================================== Here is the part for mem allocator ==============================================
            */
@@ -259,7 +260,6 @@ class PDBCUDAMemoryManager{
 
           std::map<pdb::RamPointer, std::vector<void*> > ramPointerCollection;
     };
-
 }
 
 #endif

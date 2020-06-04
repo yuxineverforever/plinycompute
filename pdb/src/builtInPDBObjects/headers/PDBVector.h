@@ -28,7 +28,6 @@
 #include <iostream>
 #include <iterator>
 #include <cstring>
-#include "PDBCUDAMemAllocator.h"
 
 // PRELOAD %Vector <Nothing>%
 

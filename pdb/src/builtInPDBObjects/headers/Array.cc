@@ -233,7 +233,7 @@ TypeContained* Array<TypeContained>::c_ptr() {
     if (alternativeLocation == nullptr){
         return ((TypeContained*)(data));
     } else {
-        return ((TypeContained*) alternativeLocation.get().ramAddress);
+        return ((TypeContained*) alternativeLocation.get()->ramAddress);
     }
 }
 
@@ -243,7 +243,6 @@ void Array<TypeContained>::pop_back() {
         ((TypeContained*)(data))[usedSlots - 1].~TypeContained();
         usedSlots--;
     }
-}
 }
 
 template <class TypeContained>
@@ -273,10 +272,9 @@ size_t Array<TypeContained>::getSize(void* forMe) {
 
 
 template <class TypeContained>
-size_t Array<TypeContained>::void setRamPointerReferenceToNull(){
+void Array<TypeContained>::setRamPointerReferenceToNull(){
     alternativeLocation = nullptr;
 }
-
 
 }
 
