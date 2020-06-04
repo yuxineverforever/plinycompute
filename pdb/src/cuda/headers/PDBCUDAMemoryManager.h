@@ -6,7 +6,6 @@
 #include <set>
 #include <PDBBufferManagerInterface.h>
 #include "PDBCUDAUtility.h"
-#include "threadSafeMap.h"
 #include <assert.h>
 #include "PDBRamPointer.h"
 
@@ -18,7 +17,6 @@ using PDBCUDAMemoryManagerPtr = std::shared_ptr<PDBCUDAMemoryManager>;
 using frame_id_t  = int32_t;
 
 class PDBCUDAMemoryManager{
-
     public:
         /**
          *
@@ -100,7 +98,6 @@ class PDBCUDAMemoryManager{
             }
         }
 
-
         void* handleOutputObject(pair<void*, size_t> pageInfo, void *objectAddress, cudaStream_t cs){
             size_t cudaObjectOffset = getObjectOffset(pageInfo.first, objectAddress);
             long threadID = (long) pthread_self();
@@ -135,16 +132,14 @@ class PDBCUDAMemoryManager{
         RamPointerReference addRamPointerCollection(void* gpuaddress, void* cpuaddress, size_t numbytes, size_t headerbytes){
 
             RamPointer pt(gpuaddress, numbytes, headerbytes);
-            auto iter = ramPointerCollection.find(pt);
-
-            if (iter != ramPointerCollection.end()){
-                ramPointerCollection[pt].push_back(cpuaddress);
-                return std::make_shared<RamPointer>(iter->first);
-            }else {
-                std::vector<void*> newList;
-                newList.push_back(cpuaddress);
-                ramPointerCollection.insert(std::make_pair(pt, newList));
-                return std::make_shared<RamPointer>(ramPointerCollection.find(pt)->first);
+            auto findIter = std::find(ramPointerCollection.begin(), ramPointerCollection.end(), pt);
+            if (findIter != ramPointerCollection.end()){
+                findIter->push_back_pointer(cpuaddress);
+                return std::make_shared<RamPointer>(*findIter);
+            } else {
+                pt.push_back_pointer(cpuaddress);
+                ramPointerCollection.push_back(pt);
+                return std::make_shared<RamPointer>(ramPointerCollection.back());
             }
         }
 
@@ -177,11 +172,13 @@ class PDBCUDAMemoryManager{
 
         void DeepCopy(void* startLoc, size_t numBytes){
 
-            for (auto & ramPointerPair : ramPointerCollection){
-                for (void* cpuRamPointer: ramPointerPair.second){
-                    if (cpuRamPointer >= startLoc && cpuRamPointer < ((char*)startLoc + numBytes)){
-                        copyFromDeviceToHost(cpuRamPointer, ramPointerPair.first.ramAddress, ramPointerPair.first.numBytes);
-                        Array<Nothing>* array = (Array<Nothing>*)((char*)cpuRamPointer - ramPointerPair.first.headerBytes);
+            for (auto& ramPointerPair : ramPointerCollection){
+                for (void* cpuPointer: ramPointerPair.cpuPointers){
+                    if (cpuPointer >= startLoc && cpuPointer < ((char*)startLoc + numBytes)){
+                        copyFromDeviceToHost(cpuPointer, ramPointerPair.ramAddress, ramPointerPair.numBytes);
+
+                        // TODO: here exist a better way
+                        Array<Nothing>* array = (Array<Nothing>*)((char*)cpuPointer - ramPointerPair.headerBytes);
                         array->setRamPointerReferenceToNull();
                     }
                 }
@@ -258,7 +255,7 @@ class PDBCUDAMemoryManager{
 
           frame_id_t allocatorPage = -1;
 
-          std::map<pdb::RamPointer, std::vector<void*> > ramPointerCollection;
+          std::vector<pdb::RamPointer> ramPointerCollection;
     };
 }
 
