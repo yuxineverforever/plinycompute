@@ -70,6 +70,9 @@ public:
 
     void setRamPointerReferenceToNull();
 
+    // alternative location
+    RamPointerReference alternativeLocation;
+
 private:
     // and this gives us our info about TypeContained
     PDBTemplateBase typeInfo;
@@ -80,8 +83,6 @@ private:
     // the number of slots
     uint32_t numSlots;
 
-    // alternative location
-    RamPointerReference alternativeLocation;
 
     // the array of data
     Nothing data[0];

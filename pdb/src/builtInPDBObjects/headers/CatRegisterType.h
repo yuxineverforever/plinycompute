@@ -50,6 +50,7 @@ public:
 
     // copy the bytes
     memcpy(libraryBytes->c_ptr(), requestToCopy->libraryBytes->c_ptr(), requestToCopy->getLibrarySize());
+
   }
 
   /**

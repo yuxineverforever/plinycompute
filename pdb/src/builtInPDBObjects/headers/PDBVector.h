@@ -61,6 +61,10 @@ public:
     // to them.  Thus, after this call, size () will return zero
     Vector(uint32_t initSize, bool onGPU = false);
 
+    Vector(uint32_t initSize, bool onGPU);
+
+    Vector(uint32_t initSize, uint32_t numUsed, bool onGPU);
+
     // these operations all have the same semantics as in std :: vector
     Vector();
     size_t size() const;
