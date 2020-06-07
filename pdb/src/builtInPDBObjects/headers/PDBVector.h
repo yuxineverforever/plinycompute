@@ -55,13 +55,12 @@ public:
     // this constructor pre-allocates initSize slots, and then initializes
     // numUsed of them, calling a no-arg constructor on each.  Thus, after
     // this call, size () will return numUsed
-    Vector(uint32_t initSize, uint32_t numUsed, bool onGPU = false);
+    Vector(uint32_t initSize, uint32_t numUsed);
 
     // this constructor pre-allocates initSize slots, but does not do anything
     // to them.  Thus, after this call, size () will return zero
-    Vector(uint32_t initSize, bool onGPU = false);
+    Vector(uint32_t initSize);
 
-    Vector(uint32_t initSize, bool onGPU);
 
     Vector(uint32_t initSize, uint32_t numUsed, bool onGPU);
 

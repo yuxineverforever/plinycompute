@@ -42,17 +42,20 @@ extern void* gpuMemoryManager;
 namespace pdb {
 
 template <class TypeContained>
-Vector<TypeContained>::Vector(uint32_t initSize, bool onGPU) {
+Vector<TypeContained>::Vector(uint32_t initSize) {
 
     // this way, we'll allocate extra bytes on the end of the array
-    myArray = makeObjectWithExtraStorage<Array<TypeContained>>(sizeof(TypeContained) * initSize, initSize, onGPU);
-    if (onGPU){
+    myArray = makeObjectWithExtraStorage<Array<TypeContained>>(sizeof(TypeContained) * initSize, initSize);
+}
 
-        void* gpuArray = PDBCUDAMemoryAllocator::memMalloc(sizeof(TypeContained)* initSize);
-        myArray->alternativeLocation = PDBCUDAMemoryAllocator::keepMemAddress(gpuArray, (void*)myArray->c_ptr(),
-                                                                                                          sizeof(TypeContained)*initSize,
-                                                                                                          sizeof(Array<TypeContained>));
-    }
+template <class TypeContained>
+Vector<TypeContained>::Vector(uint32_t initSize, uint32_t usedSize) {
+    // This way, we'll allocate extra bytes on the end of the array
+    // std :: cout << "sizeof(TypeContained)=" << sizeof(TypeContained) << std :: endl;
+    // std :: cout << "sizeof(Handle)=" << sizeof(Handle<Nothing>) << std :: endl;
+    // std :: cout << "sizeof(HandleBase)=" << sizeof(HandleBase) << std :: endl;
+    // std :: cout << "initSize=" << initSize << std :: endl;
+    myArray = makeObjectWithExtraStorage<Array<TypeContained>>(sizeof(TypeContained) * initSize, initSize, usedSize);
 }
 
 template <class TypeContained>
@@ -63,7 +66,7 @@ Vector<TypeContained>::Vector(uint32_t initSize, uint32_t usedSize, bool onGPU) 
     // std :: cout << "sizeof(Handle)=" << sizeof(Handle<Nothing>) << std :: endl;
     // std :: cout << "sizeof(HandleBase)=" << sizeof(HandleBase) << std :: endl;
     // std :: cout << "initSize=" << initSize << std :: endl;
-    myArray = makeObjectWithExtraStorage<Array<TypeContained>>(sizeof(TypeContained) * initSize, initSize, usedSize, onGPU);
+    myArray = makeObjectWithExtraStorage<Array<TypeContained>>(sizeof(TypeContained) * initSize, initSize, usedSize);
     if (onGPU){
         void* gpuArray = PDBCUDAMemoryAllocator::memMalloc(sizeof(TypeContained)* initSize);
         myArray->alternativeLocation = PDBCUDAMemoryAllocator::keepMemAddress(gpuArray, (void*)myArray->c_ptr(),
