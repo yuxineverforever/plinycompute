@@ -6,7 +6,6 @@ namespace pdb{
             if (isManager){
                 return;
             }
-
             streams = new cudaStream_t[2*threadNum+1];
             handles = new cublasHandle_t[2*threadNum+1];
             for (int32_t i = 0; i < 2*threadNum+1; i++){
@@ -34,7 +33,7 @@ namespace pdb{
                  return std::make_pair(streams[threadStreamMap[threadID]], handles[threadStreamMap[threadID]]);
              } else {
                  uint64_t counter = threadStreamMap.size();
-                 threadStreamMap.insert(std::make_pair(threadID,counter));
+                 threadStreamMap.insert(std::make_pair(threadID, counter));
                  //std::cout << "thread ID: " << threadID << " not find in map stream: " << streams[counter] << std::endl;
                  return std::make_pair(streams[counter], handles[counter]);
              }

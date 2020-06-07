@@ -17,11 +17,14 @@ using PDBCUDAMemoryManagerPtr = std::shared_ptr<PDBCUDAMemoryManager>;
 using frame_id_t  = int32_t;
 
 class PDBCUDAMemoryManager{
+
     public:
+
         /**
          *
          * @param buffer
          */
+
         PDBCUDAMemoryManager(PDBBufferManagerInterfacePtr buffer, int32_t NumOfthread, bool isManager) {
             if (isManager){
                 return;
@@ -171,12 +174,10 @@ class PDBCUDAMemoryManager{
         }
 
         void DeepCopy(void* startLoc, size_t numBytes){
-
             for (auto& ramPointerPair : ramPointerCollection){
                 for (void* cpuPointer: ramPointerPair.cpuPointers){
                     if (cpuPointer >= startLoc && cpuPointer < ((char*)startLoc + numBytes)){
                         copyFromDeviceToHost(cpuPointer, ramPointerPair.ramAddress, ramPointerPair.numBytes);
-
                         // TODO: here exist a better way
                         Array<Nothing>* array = (Array<Nothing>*)((char*)cpuPointer - ramPointerPair.headerBytes);
                         array->setRamPointerReferenceToNull();
@@ -256,6 +257,7 @@ class PDBCUDAMemoryManager{
           frame_id_t allocatorPage = -1;
 
           std::vector<pdb::RamPointer> ramPointerCollection;
+
     };
 }
 

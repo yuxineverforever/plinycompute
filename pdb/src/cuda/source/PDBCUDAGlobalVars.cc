@@ -7,6 +7,5 @@
 
 void* gpuMemoryManager = nullptr;
 void* gpuTaskManager = nullptr;
-void* gpuMemoryAllocator = nullptr;
 
 #endif

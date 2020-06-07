@@ -4,8 +4,6 @@
 #include <list>
 
 namespace pdb{
-
-
     // TODO: add comment
     // Here is the Ram Pointer which can point to both CPU/GPU RAM
     /**
@@ -44,6 +42,5 @@ namespace pdb{
         size_t headerBytes;
         std::list<void*> cpuPointers;
     };
-
     using RamPointerReference = std::shared_ptr<RamPointer>;
 };
