@@ -24,7 +24,7 @@ void initMatrix(pdb::PDBClient &pdbClient, const std::string &set) {
   // put the chunks here
   Handle<Vector<Handle<MatrixBlock>>> data = pdb::makeObject<Vector<Handle<MatrixBlock>>>();
 
-  bool onGPU = true;
+  bool onGPU = false;
   // fill the vector up
   for (uint32_t r = 0; r < numRows; r++) {
     for (uint32_t c = 0; c < numCols; c++) {
@@ -112,7 +112,7 @@ int main(int argc, char* argv[]) {
 
     for(int i = 0; i < r->data.numRows; ++i) {
       for(int j = 0; j < r->data.numCols; ++j) {
-            //std::cout << values[i * r->data.numCols + j] << ", ";
+            std::cout << values[i * r->data.numCols + j] << ", ";
       }
       std::cout << "\n";
     }
