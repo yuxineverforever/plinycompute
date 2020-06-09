@@ -230,6 +230,7 @@ void Array<TypeContained>::push_back() {
 
 template <class TypeContained>
 TypeContained* Array<TypeContained>::c_ptr() {
+
     if (alternativeLocation == nullptr){
         return ((TypeContained*)(data));
     } else {

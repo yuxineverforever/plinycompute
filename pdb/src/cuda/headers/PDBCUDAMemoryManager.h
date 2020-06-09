@@ -142,6 +142,7 @@ class PDBCUDAMemoryManager{
             } else {
                 pt.push_back_pointer(cpuaddress);
                 ramPointerCollection.push_back(pt);
+                //std::cout << ramPointerCollection.back().cpuPointers.size() << std::endl;
                 return std::make_shared<RamPointer>(ramPointerCollection.back());
             }
         }
