@@ -4,20 +4,16 @@
 
 extern void* gpuMemoryManager;
 
-namespace pdb{
+void* memMalloc(size_t size) {
+        return ((pdb::PDBCUDAMemoryManager*)gpuMemoryManager)->memMalloc(size);
+}
 
-    void* PDBCUDAMemoryAllocator::memMalloc(size_t size) {
-        return ((PDBCUDAMemoryManager*)gpuMemoryManager)->memMalloc(size);
-    }
+void memFree(void* ptr) {
+}
 
-    void PDBCUDAMemoryAllocator::memFree(void* ptr) {
-    }
-
-    RamPointerReference keepMemAddress(void* gpuaddress, void* cpuaddress, size_t numbytes, size_t headerbytes){
-        return ((PDBCUDAMemoryManager*)gpuMemoryManager)->addRamPointerCollection(gpuaddress, cpuaddress, numbytes, headerbytes);
-    }
-
-};
+pdb::RamPointerReference keepMemAddress(void* gpuaddress, void* cpuaddress, size_t numbytes, size_t headerbytes){
+    return ((pdb::PDBCUDAMemoryManager*)gpuMemoryManager)->addRamPointerCollection(gpuaddress, cpuaddress, numbytes, headerbytes);
+}
 
 /**
  *

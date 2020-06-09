@@ -2,24 +2,9 @@
 #include <iostream>
 #include "PDBRamPointer.h"
 
-namespace pdb{
+    void* memMalloc(size_t size);
 
-    class PDBCUDAMemoryAllocator{
+    void memFree(void* ptr);
 
-        public:
+    pdb::RamPointerReference keepMemAddress(void* gpuaddress, void* cpuaddress, size_t numbytes, size_t headerbytes);
 
-            PDBCUDAMemoryAllocator() = default;
-
-            static void* memMalloc(size_t size);
-
-            static void memFree(void* ptr);
-
-            static RamPointerReference keepMemAddress(void* gpuaddress, void* cpuaddress, size_t numbytes, size_t headerbytes);
-
-        private:
-
-            // Interactions with GPU Buffer Manager
-
-    };
-
-};

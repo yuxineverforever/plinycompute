@@ -68,8 +68,8 @@ Vector<TypeContained>::Vector(uint32_t initSize, uint32_t usedSize, bool onGPU) 
     // std :: cout << "initSize=" << initSize << std :: endl;
     myArray = makeObjectWithExtraStorage<Array<TypeContained>>(sizeof(TypeContained) * initSize, initSize, usedSize);
     if (onGPU){
-        void* gpuArray = PDBCUDAMemoryAllocator::memMalloc(sizeof(TypeContained)* initSize);
-        myArray->alternativeLocation = PDBCUDAMemoryAllocator::keepMemAddress(gpuArray, (void*)myArray->c_ptr(),
+        void* gpuArray = memMalloc(sizeof(TypeContained)* initSize);
+        myArray->alternativeLocation = keepMemAddress(gpuArray, (void*)myArray->c_ptr(),
                                                                               sizeof(TypeContained)*initSize,
                                                                               sizeof(Array<TypeContained>));
     }

@@ -160,7 +160,7 @@ file(GLOB SERVER_SOURCE "${PROJECT_SOURCE_DIR}/pdb/src/server/source/*.cc")
 file(GLOB OBJECT_MODEL_SOURCE "${PROJECT_SOURCE_DIR}/pdb/src/objectModel/source/*.cc")
 file(GLOB WORK_SOURCE "${PROJECT_SOURCE_DIR}/pdb/src/work/source/*.cc")
 file(GLOB STORAGE_MANAGER_SOURCE "${PROJECT_SOURCE_DIR}/pdb/src/storageManager/source/*.cc")
-file(GLOB BUILT_OBJECTS_SOURCE "${PROJECT_SOURCE_DIR}/pdb/src/builtInPDBObjects/source/*.cc")
+file(GLOB BUILT_OBJECTS_SOURCE "${PROJECT_SOURCE_DIR}/pdb/src/builtInPDBObjects/source/*.cc" "${PROJECT_SOURCE_DIR}/pdb/src/cuda/source/*.cc")
 
 file(GLOB PIPELINE_SOURCE "${PROJECT_SOURCE_DIR}/pdb/src/pipeline/source/*.cc" "${PROJECT_SOURCE_DIR}/pdb/src/pipeline/source/pipeline/*.cc")
 
