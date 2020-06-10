@@ -35,9 +35,15 @@ namespace pdb{
     void PDBCUDAVectorAddInvoker::setInput(T* input, std::vector<size_t>& inputDim){
         //std::cout << (long) pthread_self() << " : PDBCUDAVectorAddInvoker setInput() \n";
         assert(inputDim.size() == 1);
-        auto PageInfo = ((PDBCUDAMemoryManager*)gpuMemoryManager)->getObjectPage((void*)input);
-        auto cudaObjectPointer =((PDBCUDAMemoryManager*)gpuMemoryManager)->handleInputObject(PageInfo, (void*)input, cudaStream);
-        inputParas.push_back(std::make_pair((T*)cudaObjectPointer, inputDim));
+
+        int isDevice = isDevicePointer((void*)input);
+        if (isDevice){
+            inputParas.push_back(std::make_pair((T*)input, inputDim));
+        } else {
+            auto PageInfo = ((PDBCUDAMemoryManager*)gpuMemoryManager)->getObjectPage((void*)input);
+            auto cudaObjectPointer =((PDBCUDAMemoryManager*)gpuMemoryManager)->handleInputObject(PageInfo, (void*)input, cudaStream);
+            inputParas.push_back(std::make_pair((T*)cudaObjectPointer, inputDim));
+        }
     }
 
     void PDBCUDAVectorAddInvoker::setOutput(T* output, std::vector<size_t>& outputDim){
@@ -46,6 +52,7 @@ namespace pdb{
         outputPara = std::make_pair((T*)output, outputDim);
         copyBackPara = output;
     }
+
 
     void PDBCUDAVectorAddInvoker::cleanup(){
         inputParas.clear();

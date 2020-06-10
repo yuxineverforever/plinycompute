@@ -23,6 +23,6 @@ void initGPUMemoryToZero(void **memdata, size_t bytesNum);
 
 void freeGPUMemory(void ** memdata);
 
-int is_device_pointer(const void *ptr);
+int isDevicePointer(const void *ptr);
 
 #endif

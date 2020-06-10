@@ -104,6 +104,7 @@ int main(int argc, char* argv[]) {
 
   // grab the iterator
   auto it = pdbClient.getSetIterator<MatrixBlock>("myData", "C");
+
   while(it->hasNextRecord()) {
     // grab the record
     auto r = it->getNextRecord();

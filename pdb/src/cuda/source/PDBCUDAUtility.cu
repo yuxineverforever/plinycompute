@@ -51,16 +51,15 @@ void launchKernel(float *in1data,
     //matrixMulGPU <<< number_of_blocks, threads_per_block >>> (in1data, in1NumRow, in1NumCol, in2data, in2NumRow, in2NumCol, outdataGPU);
 }
 
-int is_device_pointer(const void *ptr)
-{
-    int is_device_ptr = 0;
+int isDevicePointer(const void *ptr){
     cudaPointerAttributes attributes;
-    CUDA_ERROR_CHECK(cudaPointerGetAttributes(&attributes, ptr));
-    if(attributes.devicePointer != NULL)
-    {
-        is_device_ptr = 1;
+    cudaPointerGetAttributes(&attributes, ptr);
+    cudaError_t err = cudaGetLastError();
+    if(attributes.devicePointer != nullptr && err == 0){
+        return 1;
+    } else {
+        return 0;
     }
-    return is_device_ptr;
 }
 
 

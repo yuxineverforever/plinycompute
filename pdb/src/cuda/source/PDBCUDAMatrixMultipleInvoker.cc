@@ -14,13 +14,17 @@ namespace pdb{
 
     void PDBCUDAMatrixMultipleInvoker::setInput(T* input, std::vector<size_t>& inputDim){
         //std::cout<< (long) pthread_self() << ": PDBCUDAMatrixMultipleInvoker setInput() \n";
-        auto PageInfo = ((PDBCUDAMemoryManager*)gpuMemoryManager)->getObjectPage((void*)input);
-        auto cudaObjectPointer =((PDBCUDAMemoryManager*)gpuMemoryManager)->handleInputObject(PageInfo, (void*)input, cudaStream);
-        inputParas.push_back(std::make_pair((T*)cudaObjectPointer, inputDim));
+        int isDevice = isDevicePointer((void*)input);
+        if (isDevice){
+            inputParas.push_back(std::make_pair((T*)input, inputDim));
+        } else {
+            auto PageInfo = ((PDBCUDAMemoryManager*)gpuMemoryManager)->getObjectPage((void*)input);
+            auto cudaObjectPointer =((PDBCUDAMemoryManager*)gpuMemoryManager)->handleInputObject(PageInfo, (void*)input, cudaStream);
+            inputParas.push_back(std::make_pair((T*)cudaObjectPointer, inputDim));
+        }
     }
 
     void PDBCUDAMatrixMultipleInvoker::setOutput(T* output, std::vector<size_t>& outputDim){
-
         // NOTE: the output pointer should point to an address on GPU
         outputPara = std::make_pair((T*)output, outputDim);
         copyBackPara = output;
