@@ -17,14 +17,11 @@ using PDBCUDAMemoryManagerPtr = std::shared_ptr<PDBCUDAMemoryManager>;
 using frame_id_t  = int32_t;
 
 class PDBCUDAMemoryManager{
-
     public:
-
         /**
          *
          * @param buffer
          */
-
         PDBCUDAMemoryManager(PDBBufferManagerInterfacePtr buffer, int32_t NumOfthread, bool isManager) {
             if (isManager){
                 return;
@@ -80,6 +77,8 @@ class PDBCUDAMemoryManager{
             return pageInfo;
         }
 
+
+        // TODO: replace the pageTableMutex to ReadWriteLock
         /**
          *
          * @param pageInfo
@@ -101,19 +100,31 @@ class PDBCUDAMemoryManager{
             }
         }
 
+        // TODO: replace the pageTableMutex to ReadWriteLock
         void* handleOutputObject(pair<void*, size_t> pageInfo, void *objectAddress, cudaStream_t cs){
+
             size_t cudaObjectOffset = getObjectOffset(pageInfo.first, objectAddress);
+
             long threadID = (long) pthread_self();
+
             std::unique_lock<std::mutex> lock(pageTableMutex);
+
             if (gpuPageTable.count(pageInfo) != 0) {
+
                 recentlyUsed[framePageTable[pageInfo]] = true;
                 //std::cout << "thread ID :" << threadID <<" frame : " << framePageTable[pageInfo] << " has been used recently! \n";
                 return (void*)((char *)(gpuPageTable[pageInfo]) + cudaObjectOffset);
+
             } else {
+
                 assert(pageInfo.second == pageSize);
+
                 frame_id_t frame = getAvailableFrame();
+
                 gpuPageTable.insert(std::make_pair(pageInfo, availablePosition[frame]));
+
                 framePageTable.insert(std::make_pair(pageInfo, frame));
+
                 return (void*)((char*)availablePosition[frame] + cudaObjectOffset);
             }
         }
@@ -187,6 +198,15 @@ class PDBCUDAMemoryManager{
             }
         }
 
+
+        void swapPage(){
+
+            PDBPageHandle cpuPage = bufferManager->getPage();
+
+            cpuPage->getBytes();
+
+        }
+
     private:
         void incrementIterator(int32_t& it){
             if (++it == poolSize){
@@ -217,6 +237,8 @@ class PDBCUDAMemoryManager{
         /**
          * one mutex to protect the gpuPageTable access
          */
+
+         //TODO: replace the pageTableMutex to ReadWriteLock
          std::mutex pageTableMutex;
 
          /**
