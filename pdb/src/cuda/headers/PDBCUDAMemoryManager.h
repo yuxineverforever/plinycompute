@@ -130,17 +130,24 @@ class PDBCUDAMemoryManager{
         }
 
         void* memMalloc(size_t memSize){
-            if (allocatorPage == -1){
+
+            if (allocatorPages.size() == 0 && currFrame == -1){
                 frame_id_t oneframe = getAvailableFrame();
                 bytesUsed = 0;
-                allocatorPage = oneframe;
+                allocatorPages.push_back(oneframe);
+                currFrame = oneframe;
             }
+
             if (memSize > (pageSize - bytesUsed)){
-                std::cerr << "Unable to allocator space : the space on page is not enough!\n";
+                frame_id_t oneframe = getAvailableFrame();
+                bytesUsed = 0;
+                allocatorPages.push_back(oneframe);
+                currFrame = oneframe;
+                //std::cerr << "Unable to allocator space : the space on page is not enough!\n";
             }
             size_t start = bytesUsed;
             bytesUsed += memSize;
-            return (void*)((char*)availablePosition[allocatorPage] + start);
+            return (void*)((char*)availablePosition[currFrame] + start);
         }
 
         RamPointerReference addRamPointerCollection(void* gpuaddress, void* cpuaddress, size_t numbytes, size_t headerbytes){
@@ -277,7 +284,9 @@ class PDBCUDAMemoryManager{
            */
           size_t bytesUsed = 0;
 
-          frame_id_t allocatorPage = -1;
+          frame_id_t currFrame = -1;
+
+          std::vector<frame_id_t> allocatorPages;
 
           std::vector<pdb::RamPointer> ramPointerCollection;
 
