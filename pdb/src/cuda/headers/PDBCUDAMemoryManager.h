@@ -4,10 +4,11 @@
 #include <map>
 #include <list>
 #include <set>
+#include <assert.h>
 #include <PDBBufferManagerInterface.h>
 #include "PDBCUDAUtility.h"
-#include <assert.h>
 #include "PDBRamPointer.h"
+#include "ReaderWriterLatch.h"
 
 namespace pdb {
 
@@ -116,15 +117,10 @@ class PDBCUDAMemoryManager{
                 return (void*)((char *)(gpuPageTable[pageInfo]) + cudaObjectOffset);
 
             } else {
-
                 assert(pageInfo.second == pageSize);
-
                 frame_id_t frame = getAvailableFrame();
-
                 gpuPageTable.insert(std::make_pair(pageInfo, availablePosition[frame]));
-
                 framePageTable.insert(std::make_pair(pageInfo, frame));
-
                 return (void*)((char*)availablePosition[frame] + cudaObjectOffset);
             }
         }
@@ -143,44 +139,26 @@ class PDBCUDAMemoryManager{
                 bytesUsed = 0;
                 allocatorPages.push_back(oneframe);
                 currFrame = oneframe;
-                //std::cerr << "Unable to allocator space : the space on page is not enough!\n";
             }
             size_t start = bytesUsed;
             bytesUsed += memSize;
             return (void*)((char*)availablePosition[currFrame] + start);
         }
 
-
-
         RamPointerReference addRamPointerCollection(void* gpuaddress, void* cpuaddress, size_t numbytes, size_t headerbytes){
-
-            //RamPointer pt(gpuaddress, numbytes, headerbytes);
-
-            if (ramPointerCollection.count(gpuaddress) == 0){
+            mutex.WLock();
+            if (ramPointerCollection.count(gpuaddress) != 0){
+                ramPointerCollection[gpuaddress]->push_back_pointer(cpuaddress);
+                mutex.WUnlock();
+                return std::make_shared<RamPointerBase>(ramPointerCollection[gpuaddress]);
+            } else {
                 RamPointerPtr ptr = std::make_shared<RamPointer>(gpuaddress, numbytes, headerbytes);
                 ptr->push_back_pointer(cpuaddress);
                 ramPointerCollection[gpuaddress] = ptr;
-
-            } else {
-                ramPointerCollection[gpuaddress]->push_back_pointer(cpuaddress);
-                return
-            }
-
-
-            auto findIter = ramPointerCollection.find(pt);
-            if (findIter != ramPointerCollection.end()){
-                findIter->push_back_pointer(cpuaddress);
-                return std::make_shared<RamPointer>(*findIter);
-            } else {
-                pt.push_back_pointer(cpuaddress);
-                auto res = ramPointerCollection.insert(pt);
-                //std::cout << ramPointerCollection.back().cpuPointers.size() << std::endl;
-                //std::cout << ramPointerCollection.size() << std::endl;
-                return std::make_shared<RamPointer>(*(res.first));
+                mutex.WUnlock();
+                return std::make_shared<RamPointerBase>(ptr);
             }
         }
-
-
 
         frame_id_t getAvailableFrame(){
             frame_id_t frame;
@@ -209,22 +187,20 @@ class PDBCUDAMemoryManager{
             }
         }
 
-
-
         void DeepCopy(void* startLoc, size_t numBytes){
             for (auto& ramPointerPair : ramPointerCollection){
-                for (void* cpuPointer: ramPointerPair.cpuPointers){
+                for (void* cpuPointer: ramPointerPair.second->cpuPointers){
                     if (cpuPointer >= startLoc && cpuPointer < ((char*)startLoc + numBytes)){
-                        copyFromDeviceToHost(cpuPointer, ramPointerPair.ramAddress, ramPointerPair.numBytes);
+                        copyFromDeviceToHost(cpuPointer, ramPointerPair.second->ramAddress, ramPointerPair.second->numBytes);
                         // TODO: here exist a better way
-                        Array<Nothing>* array = (Array<Nothing>*)((char*)cpuPointer - ramPointerPair.headerBytes);
+                        Array<Nothing>* array = (Array<Nothing>*)((char*)cpuPointer - ramPointerPair.second->headerBytes);
                         array->setRamPointerReferenceToNull();
                     }
                 }
             }
         }
 
-
+        /**
         void swapPage(){
 
             PDBPageHandle cpuPage = bufferManager->getPage();
@@ -232,6 +208,8 @@ class PDBCUDAMemoryManager{
             cpuPage->getBytes();
 
         }
+        */
+
 
     private:
         void incrementIterator(int32_t& it){
@@ -300,12 +278,19 @@ class PDBCUDAMemoryManager{
           /**
            * ============================================== Here is the part for mem allocator ==============================================
            */
+
+          ReaderWriterLatch mutex{};
+
           size_t bytesUsed = 0;
 
           frame_id_t currFrame = -1;
 
           std::vector<frame_id_t> allocatorPages;
 
+          /**
+           * This is a map between gpu memory address and the RamPointer object.
+           * It keeps all the ramPointers we create using the RamPointerPtr
+           */
           std::map<void*, pdb::RamPointerPtr> ramPointerCollection;
     };
 }

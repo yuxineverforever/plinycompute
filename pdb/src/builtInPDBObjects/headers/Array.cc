@@ -234,7 +234,7 @@ TypeContained* Array<TypeContained>::c_ptr() {
     if (alternativeLocation == nullptr){
         return ((TypeContained*)(data));
     } else {
-        return ((TypeContained*) alternativeLocation.get()->ramAddress);
+        return ((TypeContained*) alternativeLocation.get()->get_address());
     }
 }
 

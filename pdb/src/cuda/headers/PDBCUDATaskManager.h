@@ -5,7 +5,7 @@
 #include <pthread.h>
 #include "PDBCUDAUtility.h"
 #include <map>
-#include "threadSafeMap.h"
+#include "ReaderWriterLatch.h"
 
 namespace pdb{
 
