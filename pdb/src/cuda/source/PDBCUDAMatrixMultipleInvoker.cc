@@ -25,7 +25,7 @@ namespace pdb{
     }
 
     void PDBCUDAMatrixMultipleInvoker::setOutput(T* output, std::vector<size_t>& outputDim){
-        // NOTE: the output pointer should point to an address on GPU
+        // The output pointer should point to an address on GPU
         outputPara = std::make_pair((T*)output, outputDim);
         copyBackPara = output;
     }

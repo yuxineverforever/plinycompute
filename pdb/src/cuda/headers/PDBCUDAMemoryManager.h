@@ -78,8 +78,6 @@ class PDBCUDAMemoryManager{
             return pageInfo;
         }
 
-
-        // TODO: replace the pageTableMutex to ReadWriteLock
         /**
          *
          * @param pageInfo
@@ -87,53 +85,37 @@ class PDBCUDAMemoryManager{
          * @return
          */
         void* handleInputObject(pair<void*, size_t> pageInfo, void *objectAddress, cudaStream_t cs) {
-            size_t cudaObjectOffset = getObjectOffset(pageInfo.first, objectAddress);
             //std::cout << (long) pthread_self() << " : pageInfo: " << pageInfo.first << "bytes: "<< pageInfo.second << std::endl;
-            std::unique_lock<std::mutex> lock(pageTableMutex);
-            if (gpuPageTable.count(pageInfo) != 0) {
-                return (void*)((char *)(gpuPageTable[pageInfo]) + cudaObjectOffset);
-            } else {
-                //std::cout << (long) pthread_self() << " handleInputObject cannot find the input page ! copy it! \n";
-                void* cudaPointer;
-                copyFromHostToDeviceAsync((void **) &cudaPointer, pageInfo.first, pageInfo.second, cs);
-                gpuPageTable.insert(std::make_pair(pageInfo, cudaPointer));
-                return (void*)((char*)cudaPointer + cudaObjectOffset);
-            }
-        }
-
-        // TODO: replace the pageTableMutex to ReadWriteLock
-        void* handleOutputObject(pair<void*, size_t> pageInfo, void *objectAddress, cudaStream_t cs){
-
             size_t cudaObjectOffset = getObjectOffset(pageInfo.first, objectAddress);
-
-            long threadID = (long) pthread_self();
-
-            std::unique_lock<std::mutex> lock(pageTableMutex);
-
-            if (gpuPageTable.count(pageInfo) != 0) {
-
-                recentlyUsed[framePageTable[pageInfo]] = true;
-                //std::cout << "thread ID :" << threadID <<" frame : " << framePageTable[pageInfo] << " has been used recently! \n";
-                return (void*)((char *)(gpuPageTable[pageInfo]) + cudaObjectOffset);
-
+            if (gpuPageTable.find(pageInfo) != gpuPageTable.end()) {
+                pageTableMutex.RLock();
+                void * cudaObjectAddress = static_cast<char*>(gpuPageTable[pageInfo]) + cudaObjectOffset;
+                pageTableMutex.RUnlock();
+                return cudaObjectAddress;
             } else {
-                assert(pageInfo.second == pageSize);
-                frame_id_t frame = getAvailableFrame();
-                gpuPageTable.insert(std::make_pair(pageInfo, availablePosition[frame]));
-                framePageTable.insert(std::make_pair(pageInfo, frame));
-                return (void*)((char*)availablePosition[frame] + cudaObjectOffset);
+                pageTableMutex.WLock();
+                if (gpuPageTable.find(pageInfo) != gpuPageTable.end()){
+                    void * cudaObjectAddress = static_cast<char*>(gpuPageTable[pageInfo]) + cudaObjectOffset;
+                    pageTableMutex.WUnlock();
+                    return cudaObjectAddress;
+                } else {
+                    void* cudaPointer = nullptr;
+                    copyFromHostToDeviceAsync((void **) &cudaPointer, pageInfo.first, pageInfo.second, cs);
+                    gpuPageTable.insert(std::make_pair(pageInfo, cudaPointer));
+                    pageTableMutex.WUnlock();
+                    void * cudaObjectAddress = static_cast<char*>(cudaPointer) + cudaObjectOffset;
+                    return cudaObjectAddress;
+                }
             }
         }
 
         void* memMalloc(size_t memSize){
-
             if (allocatorPages.size() == 0 && currFrame == -1){
                 frame_id_t oneframe = getAvailableFrame();
                 bytesUsed = 0;
                 allocatorPages.push_back(oneframe);
                 currFrame = oneframe;
             }
-
             if (memSize > (pageSize - bytesUsed)){
                 frame_id_t oneframe = getAvailableFrame();
                 bytesUsed = 0;
@@ -142,20 +124,20 @@ class PDBCUDAMemoryManager{
             }
             size_t start = bytesUsed;
             bytesUsed += memSize;
-            return (void*)((char*)availablePosition[currFrame] + start);
+            return static_cast<char*>(availablePosition[currFrame]) + start;
         }
 
         RamPointerReference addRamPointerCollection(void* gpuaddress, void* cpuaddress, size_t numbytes, size_t headerbytes){
-            mutex.WLock();
+            RamPointerMutex.WLock();
             if (ramPointerCollection.count(gpuaddress) != 0){
                 ramPointerCollection[gpuaddress]->push_back_pointer(cpuaddress);
-                mutex.WUnlock();
+                RamPointerMutex.WUnlock();
                 return std::make_shared<RamPointerBase>(ramPointerCollection[gpuaddress]);
             } else {
                 RamPointerPtr ptr = std::make_shared<RamPointer>(gpuaddress, numbytes, headerbytes);
                 ptr->push_back_pointer(cpuaddress);
                 ramPointerCollection[gpuaddress] = ptr;
-                mutex.WUnlock();
+                RamPointerMutex.WUnlock();
                 return std::make_shared<RamPointerBase>(ptr);
             }
         }
@@ -202,14 +184,10 @@ class PDBCUDAMemoryManager{
 
         /**
         void swapPage(){
-
             PDBPageHandle cpuPage = bufferManager->getPage();
-
             cpuPage->getBytes();
-
         }
         */
-
 
     private:
         void incrementIterator(int32_t& it){
@@ -239,11 +217,9 @@ class PDBCUDAMemoryManager{
 
 
         /**
-         * one mutex to protect the gpuPageTable access
+         * one latch to protect the gpuPageTable access
          */
-
-         //TODO: replace the pageTableMutex to ReadWriteLock
-         std::mutex pageTableMutex;
+        ReaderWriterLatch pageTableMutex;
 
          /**
           * the size of the pool
@@ -279,12 +255,15 @@ class PDBCUDAMemoryManager{
            * ============================================== Here is the part for mem allocator ==============================================
            */
 
-          ReaderWriterLatch mutex{};
+          ReaderWriterLatch RamPointerMutex{};
 
           size_t bytesUsed = 0;
 
           frame_id_t currFrame = -1;
 
+          /**
+           * This is a vector of all the pages for out parameter
+           */
           std::vector<frame_id_t> allocatorPages;
 
           /**

@@ -35,7 +35,6 @@ namespace pdb{
     void PDBCUDAVectorAddInvoker::setInput(T* input, std::vector<size_t>& inputDim){
         //std::cout << (long) pthread_self() << " : PDBCUDAVectorAddInvoker setInput() \n";
         assert(inputDim.size() == 1);
-
         int isDevice = isDevicePointer((void*)input);
         if (isDevice){
             inputParas.push_back(std::make_pair((T*)input, inputDim));
