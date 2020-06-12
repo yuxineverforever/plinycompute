@@ -1,4 +1,5 @@
 #include "PDBCUDAUtility.h"
+
 void printCudaVersion() {
     std::cout << "CUDA Compiled version: " << __CUDACC_VER__ << std::endl;
     int runtime_ver;
@@ -14,20 +15,20 @@ void copyFromHostToDevice(void **targetDevice, void *sourceHost, size_t bytesNum
     checkCudaErrors(cudaMemcpy(*targetDevice, sourceHost, bytesNum, cudaMemcpyHostToDevice));
 }
 
-void copyFromHostToDeviceAsync(void ** targetDevice, void * sourceHost, size_t bytesNum, cudaStream_t cs){
+void copyFromHostToDeviceAsync(void **targetDevice, void *sourceHost, size_t bytesNum, cudaStream_t cs) {
     checkCudaErrors(cudaMalloc((void **) targetDevice, bytesNum));
     checkCudaErrors(cudaMemcpyAsync(*targetDevice, sourceHost, bytesNum, cudaMemcpyHostToDevice, cs));
 }
 
-void copyFromDeviceToHost(void *targetHost, void * sourceDevice, size_t bytesNum) {
+void copyFromDeviceToHost(void *targetHost, void *sourceDevice, size_t bytesNum) {
     checkCudaErrors(cudaMemcpy(targetHost, sourceDevice, bytesNum, cudaMemcpyDeviceToHost));
 }
 
-void copyFromDeviceToHostAsync(void *targetHost, void* sourceDevice, size_t bytesNum, cudaStream_t cs){
-    checkCudaErrors(cudaMemcpyAsync(targetHost,sourceDevice, bytesNum,cudaMemcpyDeviceToHost, cs));
+void copyFromDeviceToHostAsync(void *targetHost, void *sourceDevice, size_t bytesNum, cudaStream_t cs) {
+    checkCudaErrors(cudaMemcpyAsync(targetHost, sourceDevice, bytesNum, cudaMemcpyDeviceToHost, cs));
 }
 
-void freeGPUMemory(void ** memdata){
+void freeGPUMemory(void **memdata) {
     checkCudaErrors(cudaFree(*memdata));
 }
 
@@ -45,17 +46,19 @@ void launchKernel(float *in1data,
                   float *outdataGPU) {
     cublasHandle_t handle;
     const float alpha = 1.0f;
-    const float beta  = 0.0f;
+    const float beta = 0.0f;
     checkCudaErrors(cublasCreate(&handle));
-    checkCudaErrors(cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, in2NumCol, in1NumRow, in1NumCol, &alpha, in2data, in2NumCol, in1data, in1NumCol, &beta, outdataGPU, in2NumCol));
+    checkCudaErrors(
+            cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, in2NumCol, in1NumRow, in1NumCol, &alpha, in2data, in2NumCol,
+                        in1data, in1NumCol, &beta, outdataGPU, in2NumCol));
     //matrixMulGPU <<< number_of_blocks, threads_per_block >>> (in1data, in1NumRow, in1NumCol, in2data, in2NumRow, in2NumCol, outdataGPU);
 }
 
-int isDevicePointer(const void *ptr){
+int isDevicePointer(const void *ptr) {
     cudaPointerAttributes attributes;
     cudaPointerGetAttributes(&attributes, ptr);
     cudaError_t err = cudaGetLastError();
-    if(attributes.devicePointer != nullptr && err == 0){
+    if (attributes.devicePointer != nullptr && err == 0) {
         return 1;
     } else {
         return 0;

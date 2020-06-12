@@ -23,8 +23,11 @@
  * @return bool - successful or not
  */
 template<typename InvokerType, typename InputType, typename OutputType>
-typename std::enable_if_t<is_base_of<pdb::PDBCUDAOpInvoker, InvokerType>::value && std::is_trivially_copyable<OutputType>::value && std::is_trivially_copyable<InputType>::value, bool>
-SimpleTypeGPUInvoke(InvokerType& f, OutputType* Out, std::vector<size_t>& OutDim, InputType* In1, std::vector<size_t>& In1Dim, InputType* In2, std::vector<size_t>& In2Dim);
+typename std::enable_if_t<
+        is_base_of<pdb::PDBCUDAOpInvoker, InvokerType>::value && std::is_trivially_copyable<OutputType>::value &&
+        std::is_trivially_copyable<InputType>::value, bool>
+SimpleTypeGPUInvoke(InvokerType &f, OutputType *Out, std::vector<size_t> &OutDim, InputType *In1,
+                    std::vector<size_t> &In1Dim, InputType *In2, std::vector<size_t> &In2Dim);
 
 /** SimpleTypeGPUInvoke deals with all the primitive types and invoke the gpu kernel for the input/output
  * `Out` vector should be reserved before passing as parameter
@@ -39,8 +42,11 @@ SimpleTypeGPUInvoke(InvokerType& f, OutputType* Out, std::vector<size_t>& OutDim
  * @return bool - successful or not
  */
 template<typename InvokerType, typename InputType, typename OutputType>
-typename std::enable_if_t<is_base_of<pdb::PDBCUDAOpInvoker, InvokerType>::value && std::is_trivially_copyable<OutputType>::value && std::is_trivially_copyable<InputType>::value, bool>
-SimpleTypeGPUInvoke(InvokerType& f, OutputType* Out, std::vector<size_t>& OutDim, InputType* In1, std::vector<size_t>& In1Dim);
+typename std::enable_if_t<
+        is_base_of<pdb::PDBCUDAOpInvoker, InvokerType>::value && std::is_trivially_copyable<OutputType>::value &&
+        std::is_trivially_copyable<InputType>::value, bool>
+SimpleTypeGPUInvoke(InvokerType &f, OutputType *Out, std::vector<size_t> &OutDim, InputType *In1,
+                    std::vector<size_t> &In1Dim);
 
 /**
  * GPUInvoke for handling the case that both input/output param is Handle<SimpleType>
@@ -53,9 +59,9 @@ SimpleTypeGPUInvoke(InvokerType& f, OutputType* Out, std::vector<size_t>& OutDim
  * @param In2 - input param 2
  * @return bool - successful or not
  */
-template <typename InvokerType, typename InputType, typename OutputType>
-typename std::enable_if_t <is_base_of<pdb::PDBCUDAOpInvoker, InvokerType>::value, bool>
-GPUInvoke(InvokerType& f, pdb::Handle<OutputType> Output, pdb::Handle<InputType> In1, pdb::Handle<InputType> In2);
+template<typename InvokerType, typename InputType, typename OutputType>
+typename std::enable_if_t<is_base_of<pdb::PDBCUDAOpInvoker, InvokerType>::value, bool>
+GPUInvoke(InvokerType &f, pdb::Handle<OutputType> Output, pdb::Handle<InputType> In1, pdb::Handle<InputType> In2);
 
 
 /**
@@ -69,9 +75,10 @@ GPUInvoke(InvokerType& f, pdb::Handle<OutputType> Output, pdb::Handle<InputType>
  * @param In2 - input param 2
  * @return bool - successful or not
  */
-template <typename InvokerType, typename InputType, typename OutputType>
-typename std::enable_if_t <is_base_of<pdb::PDBCUDAOpInvoker, InvokerType>::value, bool>
-GPUInvoke(InvokerType& f, pdb::Handle<pdb::Vector<OutputType>> Out, pdb::Handle<pdb::Vector<InputType>> In1, pdb::Handle<pdb::Vector<InputType>> In2);
+template<typename InvokerType, typename InputType, typename OutputType>
+typename std::enable_if_t<is_base_of<pdb::PDBCUDAOpInvoker, InvokerType>::value, bool>
+GPUInvoke(InvokerType &f, pdb::Handle<pdb::Vector<OutputType>> Out, pdb::Handle<pdb::Vector<InputType>> In1,
+          pdb::Handle<pdb::Vector<InputType>> In2);
 
 /**
  * GPUInvoke just allow trivial copyable types. Handle 1 input param case.
@@ -86,9 +93,10 @@ GPUInvoke(InvokerType& f, pdb::Handle<pdb::Vector<OutputType>> Out, pdb::Handle<
  * @return bool - successful or not
  *
 */
-template <typename InvokerType, typename InputType, typename OutputType>
-typename std::enable_if_t <is_base_of<pdb::PDBCUDAOpInvoker, InvokerType>::value, bool>
-GPUInvoke(InvokerType& f, pdb::Handle<pdb::Vector<OutputType>> Out, std::vector<size_t>& OutDim, pdb::Handle<pdb::Vector<InputType>> In1, std::vector<size_t>& In1Dim);
+template<typename InvokerType, typename InputType, typename OutputType>
+typename std::enable_if_t<is_base_of<pdb::PDBCUDAOpInvoker, InvokerType>::value, bool>
+GPUInvoke(InvokerType &f, pdb::Handle<pdb::Vector<OutputType>> Out, std::vector<size_t> &OutDim,
+          pdb::Handle<pdb::Vector<InputType>> In1, std::vector<size_t> &In1Dim);
 
 
 /**
@@ -105,13 +113,18 @@ GPUInvoke(InvokerType& f, pdb::Handle<pdb::Vector<OutputType>> Out, std::vector<
  * @param In2Dim - input param 2 dimension
  * @return bool - successful or not
  */
-template <typename InvokerType, typename InputType, typename OutputType>
-typename std::enable_if_t <is_base_of<pdb::PDBCUDAOpInvoker, InvokerType>::value, bool>
-GPUInvoke(InvokerType& f, pdb::Handle<pdb::Vector<OutputType>> Out, std::vector<size_t>& OutDim, pdb::Handle<pdb::Vector<InputType>> In1, std::vector<size_t>& In1Dim, pdb::Handle<pdb::Vector<InputType> > In2, std::vector<size_t>& In2Dim);
+template<typename InvokerType, typename InputType, typename OutputType>
+typename std::enable_if_t<is_base_of<pdb::PDBCUDAOpInvoker, InvokerType>::value, bool>
+GPUInvoke(InvokerType &f, pdb::Handle<pdb::Vector<OutputType>> Out, std::vector<size_t> &OutDim,
+          pdb::Handle<pdb::Vector<InputType>> In1, std::vector<size_t> &In1Dim,
+          pdb::Handle<pdb::Vector<InputType> > In2, std::vector<size_t> &In2Dim);
 
-bool GPUInvoke(pdb::PDBCUDAMatrixMultipleInvoker& f, pdb::Handle<pdb::Vector<float>> Out, std::vector<size_t>& OutDim, pdb::Handle<pdb::Vector<float>> In1, std::vector<size_t>& In1Dim, pdb::Handle<pdb::Vector<float> > In2, std::vector<size_t>& In2Dim);
+bool GPUInvoke(pdb::PDBCUDAMatrixMultipleInvoker &f, pdb::Handle<pdb::Vector<float>> Out, std::vector<size_t> &OutDim,
+               pdb::Handle<pdb::Vector<float>> In1, std::vector<size_t> &In1Dim, pdb::Handle<pdb::Vector<float> > In2,
+               std::vector<size_t> &In2Dim);
 
-bool GPUInvoke(pdb::PDBCUDAVectorAddInvoker& f, pdb::Handle<pdb::Vector<float>> Out, std::vector<size_t>& OutDim, pdb::Handle<pdb::Vector<float>> In1, std::vector<size_t>& In1Dim);
+bool GPUInvoke(pdb::PDBCUDAVectorAddInvoker &f, pdb::Handle<pdb::Vector<float>> Out, std::vector<size_t> &OutDim,
+               pdb::Handle<pdb::Vector<float>> In1, std::vector<size_t> &In1Dim);
 
 /** By default, this GPUInvoke will handle the matrix multiple case for join.
  * @param op
@@ -122,7 +135,8 @@ bool GPUInvoke(pdb::PDBCUDAVectorAddInvoker& f, pdb::Handle<pdb::Vector<float>> 
  * @return
  */
 
-bool GPUInvoke(pdb::PDBCUDAOpType& op, pdb::Handle<pdb::Vector<float>> Out, std::vector<size_t>& OutDim, pdb::Handle<pdb::Vector<float>> In1, std::vector<size_t>& In1Dim);
+bool GPUInvoke(pdb::PDBCUDAOpType &op, pdb::Handle<pdb::Vector<float>> Out, std::vector<size_t> &OutDim,
+               pdb::Handle<pdb::Vector<float>> In1, std::vector<size_t> &In1Dim);
 
 /** By default, this GPUInvoke will handle the vector add case for aggregation.
  * @param op
@@ -135,7 +149,9 @@ bool GPUInvoke(pdb::PDBCUDAOpType& op, pdb::Handle<pdb::Vector<float>> Out, std:
  * @return
  */
 
-bool GPUInvoke(pdb::PDBCUDAOpType& op, pdb::Handle<pdb::Vector<float>> Out, std::vector<size_t>& OutDim, pdb::Handle<pdb::Vector<float>> In1, std::vector<size_t>& In1Dim, pdb::Handle<pdb::Vector<float> > In2, std::vector<size_t>& In2Dim);
+bool GPUInvoke(pdb::PDBCUDAOpType &op, pdb::Handle<pdb::Vector<float>> Out, std::vector<size_t> &OutDim,
+               pdb::Handle<pdb::Vector<float>> In1, std::vector<size_t> &In1Dim, pdb::Handle<pdb::Vector<float> > In2,
+               std::vector<size_t> &In2Dim);
 
 
 #endif

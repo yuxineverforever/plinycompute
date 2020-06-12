@@ -1,4 +1,4 @@
- #ifndef PDB_CUDA_MM_INVOKER
+#ifndef PDB_CUDA_MM_INVOKER
 #define PDB_CUDA_MM_INVOKER
 
 #include <iostream>
@@ -12,50 +12,50 @@
 #include "PDBCUDAOpInvoker.h"
 
 // simply support two kind of operations
-namespace pdb{
+namespace pdb {
 
 /**
  * PDBCUDAMatrixMultipleInvoker - A wrapper for cublas sgemm
  */
-class PDBCUDAMatrixMultipleInvoker: public PDBCUDAOpInvoker{
-    using T = float;
+    class PDBCUDAMatrixMultipleInvoker : public PDBCUDAOpInvoker {
+        using T = float;
 
-public:
+    public:
 
-    PDBCUDAMatrixMultipleInvoker();
+        PDBCUDAMatrixMultipleInvoker();
 
-    bool invoke();
+        bool invoke();
 
-    void cublasRouting(T* in1data, T* in2data, T* outdata, size_t in1NumRow, size_t in1NumCol, size_t in2NumCol);
+        void cublasRouting(T *in1data, T *in2data, T *outdata, size_t in1NumRow, size_t in1NumCol, size_t in2NumCol);
 
-    void setInput(T* input, std::vector<size_t>& inputDim);
+        void setInput(T *input, std::vector<size_t> &inputDim);
 
-    void setOutput(T* output, std::vector<size_t>& outputDim);
+        void setOutput(T *output, std::vector<size_t> &outputDim);
 
-    void cleanup();
+        void cleanup();
 
-public:
+    public:
 
-    /**
-     * input para for computation on device
-     */
-    std::vector<std::pair<T*, std::vector<size_t> >> inputParas;
+        /**
+         * input para for computation on device
+         */
+        std::vector<std::pair<T *, std::vector<size_t> >> inputParas;
 
-    /**
-     * output para for computation on device
-     */
-    std::pair<T *, std::vector<size_t> > outputPara;
+        /**
+         * output para for computation on device
+         */
+        std::pair<T *, std::vector<size_t> > outputPara;
 
-    /**
-     * copyBackPara on host
-     */
-    T* copyBackPara;
+        /**
+         * copyBackPara on host
+         */
+        T *copyBackPara;
 
-    PDBCUDAOpType op = PDBCUDAOpType::MatrixMultiple;
+        PDBCUDAOpType op = PDBCUDAOpType::MatrixMultiple;
 
-    cublasHandle_t cudaHandle;
+        cublasHandle_t cudaHandle;
 
-    cudaStream_t cudaStream;
-};
+        cudaStream_t cudaStream;
+    };
 }
 #endif

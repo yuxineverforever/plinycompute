@@ -1,50 +1,56 @@
 #include "PDBCUDAMatrixMultipleInvoker.h"
 #include "PDBCUDATaskManager.h"
 
-extern void* gpuMemoryManager;
-extern void* gpuTaskManager;
+extern void *gpuMemoryManager;
+extern void *gpuTaskManager;
 
-namespace pdb{
+namespace pdb {
 
-    PDBCUDAMatrixMultipleInvoker::PDBCUDAMatrixMultipleInvoker(){
-        auto threadInfo = ((PDBCUDATaskManager*)gpuTaskManager)->getThreadInfoFromPool();
+    PDBCUDAMatrixMultipleInvoker::PDBCUDAMatrixMultipleInvoker() {
+        auto threadInfo = ((PDBCUDATaskManager *) gpuTaskManager)->getThreadInfoFromPool();
         cudaStream = threadInfo.first;
         cudaHandle = threadInfo.second;
     }
 
-    void PDBCUDAMatrixMultipleInvoker::setInput(T* input, std::vector<size_t>& inputDim){
+    void PDBCUDAMatrixMultipleInvoker::setInput(T *input, std::vector<size_t> &inputDim) {
         //std::cout<< (long) pthread_self() << ": PDBCUDAMatrixMultipleInvoker setInput() \n";
-        int isDevice = isDevicePointer((void*)input);
-        if (isDevice){
-            inputParas.push_back(std::make_pair((T*)input, inputDim));
+        int isDevice = isDevicePointer((void *) input);
+        if (isDevice) {
+            inputParas.push_back(std::make_pair((T *) input, inputDim));
         } else {
-            auto PageInfo = ((PDBCUDAMemoryManager*)gpuMemoryManager)->getObjectPage((void*)input);
-            auto cudaObjectPointer =((PDBCUDAMemoryManager*)gpuMemoryManager)->handleInputObject(PageInfo, (void*)input, cudaStream);
-            inputParas.push_back(std::make_pair((T*)cudaObjectPointer, inputDim));
+            auto PageInfo = ((PDBCUDAMemoryManager *) gpuMemoryManager)->getObjectPage((void *) input);
+            auto cudaObjectPointer = ((PDBCUDAMemoryManager *) gpuMemoryManager)->handleInputObject(PageInfo,
+                                                                                                    (void *) input,
+                                                                                                    cudaStream);
+            inputParas.push_back(std::make_pair((T *) cudaObjectPointer, inputDim));
         }
     }
 
-    void PDBCUDAMatrixMultipleInvoker::setOutput(T* output, std::vector<size_t>& outputDim){
+    void PDBCUDAMatrixMultipleInvoker::setOutput(T *output, std::vector<size_t> &outputDim) {
         // The output pointer should point to an address on GPU
-        outputPara = std::make_pair((T*)output, outputDim);
+        outputPara = std::make_pair((T *) output, outputDim);
         copyBackPara = output;
     }
 
-    bool PDBCUDAMatrixMultipleInvoker::invoke(){
+    bool PDBCUDAMatrixMultipleInvoker::invoke() {
         //std::cout << (long) pthread_self() << " :PDBCUDAMatrixMultipleInvoker invoke() \n";
-        cublasRouting(inputParas[0].first, inputParas[1].first, outputPara.first, inputParas[0].second[0], inputParas[0].second[1], inputParas[1].second[0]);
+        cublasRouting(inputParas[0].first, inputParas[1].first, outputPara.first, inputParas[0].second[0],
+                      inputParas[0].second[1], inputParas[1].second[0]);
         //cleanup();
         return true;
     }
 
-    void PDBCUDAMatrixMultipleInvoker::cublasRouting(T* in1data, T* in2data, T* outdata, size_t in1NumRow, size_t in1NumCol, size_t in2NumCol){
+    void
+    PDBCUDAMatrixMultipleInvoker::cublasRouting(T *in1data, T *in2data, T *outdata, size_t in1NumRow, size_t in1NumCol,
+                                                size_t in2NumCol) {
         const float alpha = 1.0f;
-        const float beta  = 0.0f;
-        cublasSgemm(cudaHandle, CUBLAS_OP_N, CUBLAS_OP_N, in1NumRow, in2NumCol, in1NumCol, &alpha, in1data, in1NumRow, in2data, in1NumCol, &beta, outdata, in1NumRow);
+        const float beta = 0.0f;
+        cublasSgemm(cudaHandle, CUBLAS_OP_N, CUBLAS_OP_N, in1NumRow, in2NumCol, in1NumCol, &alpha, in1data, in1NumRow,
+                    in2data, in1NumCol, &beta, outdata, in1NumRow);
         //copyFromDeviceToHostAsync((void*)copyBackPara, (void*)outputPara.first, outputPara.second[0] * outputPara.second[1] * sizeof(float), cudaStream);
     }
 
-    void PDBCUDAMatrixMultipleInvoker::cleanup(){
+    void PDBCUDAMatrixMultipleInvoker::cleanup() {
         inputParas.clear();
     }
 

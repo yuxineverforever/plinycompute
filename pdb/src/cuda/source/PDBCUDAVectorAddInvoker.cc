@@ -2,18 +2,18 @@
 #include "PDBCUDAVectorAddInvoker.h"
 #include "PDBCUDATaskManager.h"
 
-extern void* gpuMemoryManager;
-extern void* gpuTaskManager;
+extern void *gpuMemoryManager;
+extern void *gpuTaskManager;
 
-namespace pdb{
+namespace pdb {
 
-    PDBCUDAVectorAddInvoker::PDBCUDAVectorAddInvoker(){
-        auto threadInfo = ((PDBCUDATaskManager*)gpuTaskManager)->getThreadInfoFromPool();
+    PDBCUDAVectorAddInvoker::PDBCUDAVectorAddInvoker() {
+        auto threadInfo = ((PDBCUDATaskManager *) gpuTaskManager)->getThreadInfoFromPool();
         cudaStream = threadInfo.first;
         cudaHandle = threadInfo.second;
     }
 
-    bool PDBCUDAVectorAddInvoker::invoke(){
+    bool PDBCUDAVectorAddInvoker::invoke() {
         //std::cout << (long) pthread_self() << " : PDBCUDAVectorAddInvoker invoke() \n";
         cublasRouting(outputPara.first, inputParas[0].first, inputParas[0].second[0]);
         return true;
@@ -26,34 +26,37 @@ namespace pdb{
      * @param outdata
      * @param N
      */
-    void PDBCUDAVectorAddInvoker::cublasRouting(T* outdata, T* in1data, size_t N){
+    void PDBCUDAVectorAddInvoker::cublasRouting(T *outdata, T *in1data, size_t N) {
         const float alpha = 1.0;
         cublasSaxpy(cudaHandle, N, &alpha, in1data, 1, outdata, 1);
-        copyFromDeviceToHostAsync((void*)copyBackPara, (void*)outputPara.first, outputPara.second[0] * sizeof(float), cudaStream);
+        copyFromDeviceToHostAsync((void *) copyBackPara, (void *) outputPara.first,
+                                  outputPara.second[0] * sizeof(float), cudaStream);
     }
 
-    void PDBCUDAVectorAddInvoker::setInput(T* input, std::vector<size_t>& inputDim){
+    void PDBCUDAVectorAddInvoker::setInput(T *input, std::vector<size_t> &inputDim) {
         //std::cout << (long) pthread_self() << " : PDBCUDAVectorAddInvoker setInput() \n";
         assert(inputDim.size() == 1);
-        int isDevice = isDevicePointer((void*)input);
-        if (isDevice){
-            inputParas.push_back(std::make_pair((T*)input, inputDim));
+        int isDevice = isDevicePointer((void *) input);
+        if (isDevice) {
+            inputParas.push_back(std::make_pair((T *) input, inputDim));
         } else {
-            auto PageInfo = ((PDBCUDAMemoryManager*)gpuMemoryManager)->getObjectPage((void*)input);
-            auto cudaObjectPointer =((PDBCUDAMemoryManager*)gpuMemoryManager)->handleInputObject(PageInfo, (void*)input, cudaStream);
-            inputParas.push_back(std::make_pair((T*)cudaObjectPointer, inputDim));
+            auto PageInfo = ((PDBCUDAMemoryManager *) gpuMemoryManager)->getObjectPage((void *) input);
+            auto cudaObjectPointer = ((PDBCUDAMemoryManager *) gpuMemoryManager)->handleInputObject(PageInfo,
+                                                                                                    (void *) input,
+                                                                                                    cudaStream);
+            inputParas.push_back(std::make_pair((T *) cudaObjectPointer, inputDim));
         }
     }
 
-    void PDBCUDAVectorAddInvoker::setOutput(T* output, std::vector<size_t>& outputDim){
-        assert(outputDim.size()==1);
+    void PDBCUDAVectorAddInvoker::setOutput(T *output, std::vector<size_t> &outputDim) {
+        assert(outputDim.size() == 1);
         // NOTE: the output pointer should point to an address on GPU
-        outputPara = std::make_pair((T*)output, outputDim);
+        outputPara = std::make_pair((T *) output, outputDim);
         copyBackPara = output;
     }
 
 
-    void PDBCUDAVectorAddInvoker::cleanup(){
+    void PDBCUDAVectorAddInvoker::cleanup() {
         inputParas.clear();
     }
 };

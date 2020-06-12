@@ -7,11 +7,11 @@
 #include <map>
 #include "ReaderWriterLatch.h"
 
-namespace pdb{
+namespace pdb {
 
-    using PDBCUDAThreadInfo = std::pair < cudaStream_t, cublasHandle_t >;
+    using PDBCUDAThreadInfo = std::pair<cudaStream_t, cublasHandle_t>;
 
-    class PDBCUDATaskManager{
+    class PDBCUDATaskManager {
     public:
 
         PDBCUDATaskManager();
@@ -28,21 +28,21 @@ namespace pdb{
          *  streams and handles
          */
         cudaStream_t *streams;
-        cublasHandle_t * handles;
+        cublasHandle_t *handles;
 
         /**
          * number of threads
          */
-        int32_t  threadNum;
+        int32_t threadNum;
 
         /**
          * mutex for protection
          */
-         std::mutex m;
+        std::mutex m;
 
         /**
          * mapping the cpu thread id to gpu stream id / handle id
          */
-         std::map<long, uint64_t> threadStreamMap;
+        std::map<long, uint64_t> threadStreamMap;
     };
 }
