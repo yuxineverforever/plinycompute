@@ -150,20 +150,37 @@ class PDBCUDAMemoryManager{
             return (void*)((char*)availablePosition[currFrame] + start);
         }
 
+
+
         RamPointerReference addRamPointerCollection(void* gpuaddress, void* cpuaddress, size_t numbytes, size_t headerbytes){
 
-            RamPointer pt(gpuaddress, numbytes, headerbytes);
-            auto findIter = std::find(ramPointerCollection.begin(), ramPointerCollection.end(), pt);
+            //RamPointer pt(gpuaddress, numbytes, headerbytes);
+
+            if (ramPointerCollection.count(gpuaddress) == 0){
+                RamPointerPtr ptr = std::make_shared<RamPointer>(gpuaddress, numbytes, headerbytes);
+                ptr->push_back_pointer(cpuaddress);
+                ramPointerCollection[gpuaddress] = ptr;
+
+            } else {
+                ramPointerCollection[gpuaddress]->push_back_pointer(cpuaddress);
+                return
+            }
+
+
+            auto findIter = ramPointerCollection.find(pt);
             if (findIter != ramPointerCollection.end()){
                 findIter->push_back_pointer(cpuaddress);
                 return std::make_shared<RamPointer>(*findIter);
             } else {
                 pt.push_back_pointer(cpuaddress);
-                ramPointerCollection.push_back(pt);
+                auto res = ramPointerCollection.insert(pt);
                 //std::cout << ramPointerCollection.back().cpuPointers.size() << std::endl;
-                return std::make_shared<RamPointer>(ramPointerCollection.back());
+                //std::cout << ramPointerCollection.size() << std::endl;
+                return std::make_shared<RamPointer>(*(res.first));
             }
         }
+
+
 
         frame_id_t getAvailableFrame(){
             frame_id_t frame;
@@ -191,6 +208,8 @@ class PDBCUDAMemoryManager{
                return frame;
             }
         }
+
+
 
         void DeepCopy(void* startLoc, size_t numBytes){
             for (auto& ramPointerPair : ramPointerCollection){
@@ -278,7 +297,6 @@ class PDBCUDAMemoryManager{
            */
           int32_t clock_hand;
 
-
           /**
            * ============================================== Here is the part for mem allocator ==============================================
            */
@@ -288,8 +306,7 @@ class PDBCUDAMemoryManager{
 
           std::vector<frame_id_t> allocatorPages;
 
-          std::vector<pdb::RamPointer> ramPointerCollection;
-
+          std::map<void*, pdb::RamPointerPtr> ramPointerCollection;
     };
 }
 
