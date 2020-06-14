@@ -42,7 +42,7 @@ endforeach()
 
 include_directories(${CUDA_INCLUDE_DIR})
 enable_language("CUDA")
-add_library(cuda-obj SHARED ${cuda_source_files})
+add_library(CUDA_LIBRARIES SHARED ${cuda_source_files})
 
 # link target to CUDA
 target_link_libraries(MatrixBlockData cuda-obj)
@@ -61,4 +61,4 @@ add_dependencies(TestMatrixMultiply MatrixWriter)
 target_link_libraries(TestMatrixMultiply ${MKL_LIBRARIES})
 target_link_libraries(TestMatrixMultiply ${CUDA_DART_LIB})
 target_link_libraries(TestMatrixMultiply ${CUDA_BLAS_LIB})
-target_link_libraries(TestMatrixMultiply cuda-obj)
+target_link_libraries(TestMatrixMultiply CUDA_LIBRARIES)

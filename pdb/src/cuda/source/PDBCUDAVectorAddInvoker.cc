@@ -29,8 +29,7 @@ namespace pdb {
     void PDBCUDAVectorAddInvoker::cublasRouting(T *outdata, T *in1data, size_t N) {
         const float alpha = 1.0;
         cublasSaxpy(cudaHandle, N, &alpha, in1data, 1, outdata, 1);
-        copyFromDeviceToHostAsync((void *) copyBackPara, (void *) outputPara.first,
-                                  outputPara.second[0] * sizeof(float), cudaStream);
+        //copyFromDeviceToHostAsync((void *) copyBackPara, (void *) outputPara.first, outputPara.second[0] * sizeof(float), cudaStream);
     }
 
     void PDBCUDAVectorAddInvoker::setInput(T *input, std::vector<size_t> &inputDim) {

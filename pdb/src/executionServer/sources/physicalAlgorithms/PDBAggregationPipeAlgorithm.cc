@@ -395,7 +395,6 @@ bool pdb::PDBAggregationPipeAlgorithm::run(std::shared_ptr<pdb::PDBStorageManage
       success = false;
       break;
     }
-
     // materialize the page set
     sinkPageSet->resetPageSet();
     success = storage->materializePageSet(sinkPageSet, std::make_pair<std::string, std::string>((*setsToMaterialize)[j].database, (*setsToMaterialize)[j].set)) && success;

@@ -62,14 +62,12 @@ public:
 
     pdb::PDBCUDAOpType op = pdb::PDBCUDAOpType ::VectorAdd;
     GPUInvoke(op, data, outdim, other.data, in1dim);
-
     /*
     // sum up the data
     for (int i = 0; i < numRows * numCols; i++) {
     (myData)[i] += (otherData)[i];
     }
     */
-
     // return me
     return *this;
 }

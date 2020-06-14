@@ -257,7 +257,7 @@ namespace pdb {
         int32_t clock_hand;
 
         /**
-         * ============================================== Here is the part for mem allocator ==============================================
+         * === Here is the part for mem allocator ===
          */
 
         ReaderWriterLatch RamPointerMutex{};

@@ -5,7 +5,6 @@ set(CMAKE_C_COMPILER "clang")
 set(CMAKE_CXX_COMPILER "clang++")
 set(CMAKE_CUDA_COMPILER "/usr/local/cuda-10.0/bin/nvcc")
 set(CMAKE_CUDA_FLAGS "-arch=sm_75")
-
 set(BOOST_POSSIBLE_LOCATIONS
         /home/yuxin/snap/boost
         /home/ubuntu/pdb/boost_1_72_0
@@ -31,6 +30,7 @@ foreach (i ${BOOST_POSSIBLE_LOCATIONS})
 endforeach()
 
 set (CUDA_INCLUDE_DIR "/usr/local/cuda/include")
+set (CUDA_HELPER_INCLUDE_DIR "/usr/local/cuda/samples/common/inc")
 set (CUDA_BLAS_LIB "/usr/local/cuda-10.0/lib64/libcublas.so")
 set (CUDA_DART_LIB "/usr/local/cuda-10.0/lib64/libcudart.so")
 
@@ -378,42 +378,21 @@ target_link_libraries(pdb-tests-common PRIVATE ${Boost_LIBRARIES})
 # form the parsers for the logical plan
 add_library(logical-plan-parser OBJECT ${LogicalPlanFlexOutput} ${LogicalPlanParserOutput})
 
-
-
-# Find CUDA and compile all the .cu to pdb-gpu
-if (("${CMAKE_VERSION}" VERSION_EQUAL 3.8) OR
-        ("${CMAKE_VERSION}" VERSION_GREATER 3.8))
-    # Modern CMake
-    if (USE_CUDA)
-        include_directories(${CUDA_INCLUDE_DIR})
-        enable_language("CUDA")
-        add_library(pdb-gpu SHARED ${CUDA_SOURCE})
-    endif ()
-else ()
-    # Old CMake
-    if (USE_CUDA)
-        find_package(CUDA REQUIRED)
-        if (NOT CUDA_FOUND)
-            message(STATUS "CUDA not found")
-            set(USE_CUDA OFF)
-        else ()
-            message(STATUS "CUDA found")
-            CUDA_ADD_LIBRARY(pdb-gpu ${CUDA_SOURCE} SHARED)
-        endif ()
-    endif ()
+# Modern CMake
+if (USE_CUDA)
+    include_directories(${CUDA_INCLUDE_DIR})
+    include_directories(${CUDA_HELPER_INCLUDE_DIR})
+    enable_language("CUDA")
+    add_library(pdb-gpu SHARED ${CUDA_SOURCE})
 endif ()
 
 # check if the target is unit tests
 if(CMAKE_BUILD_TYPE MATCHES UNIT_TESTS)
-
     # include the unit tests
     include(tests/unit/CMakeLists.txt)
-
     # include benchmarks that are in the benchmarks directory
     include(benchmarks/Benchmarks.cmake)
-
 else()
-
     # set the pdb-worker build target
     set(SOURCE_FILES_PDB_CLUSTER ${PROJECT_SOURCE_DIR}/pdb/src/mainServer/source/NodeMain.cc $<TARGET_OBJECTS:logical-plan-parser>)
     add_executable(pdb-node ${SOURCE_FILES_PDB_CLUSTER})
@@ -440,7 +419,6 @@ else()
 
     # include tests that are in applications directory
     include(applications/Applications.cmake)
-
     add_dependencies(pdb-node pdb-gpu)
     target_link_libraries(pdb-node pdb-gpu)
     target_link_libraries(pdb-node ${CUDA_BLAS_LIB})

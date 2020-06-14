@@ -389,16 +389,12 @@ TEST(PipelineTest, TestAggregation) {
   /// 5. Check the results
 
   for(auto &page : writePages) {
-
     page.second->repin();
-
     Handle<Vector<Handle<double>>> myHashTable = ((Record<Vector<Handle<double>>> *) page.second->getBytes())->getRootObject();
-
     // expect all 3.0 doubles
     for (int i = 0; i < myHashTable->size(); i++) {
       EXPECT_EQ((int) *((*myHashTable)[i]) , 3);
     }
-
     page.second->unpin();
   }
 
