@@ -15,6 +15,7 @@ namespace pdb {
     // simply support vector-add operation and vector-add kernel for GPU
     class PDBCUDAVectorAddInvoker : public PDBCUDAOpInvoker {
         using T = float;
+
     public:
 
         PDBCUDAVectorAddInvoker();

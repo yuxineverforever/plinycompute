@@ -21,6 +21,8 @@
 
 #include "InterfaceFunctions.h"
 #include "PDBMap.h"
+#include "PDBCUDAMemoryAllocator.h"
+
 
 namespace pdb {
 
@@ -88,6 +90,26 @@ Map<KeyType, ValueType>::Map(uint32_t initSize) {
     MapRecordClass<KeyType, ValueType> temp;
     size_t size = temp.getObjSize();
     myArray = makeObjectWithExtraStorage<PairArray<KeyType, ValueType>>(size * initSize, initSize);
+}
+
+template<class KeyType, class ValueType>
+Map<KeyType, ValueType>::Map(uint32_t initSize, bool isGPU) {
+    if (initSize < 2) {
+        std::cout << "Fatal Error: Map initialization:" << initSize
+                  << " too small; must be at least one.\n";
+
+        initSize = 2;
+    }
+    // this way, we'll allocate extra bytes on the end of the array
+    MapRecordClass<KeyType, ValueType> temp;
+    size_t size = temp.getObjSize();
+    myArray = makeObjectWithExtraStorage<PairArray<KeyType, ValueType>>(size * initSize, initSize);
+    if (isGPU){
+        void* gpuArray = memMalloc(size*initSize);
+        myArray->alternativeLocation = keepMemAddress(gpuArray, (void*)myArray->c_ptr(),
+                                                      size*initSize,
+                                                      sizeof(PairArray<KeyType, ValueType>));
+    }
 }
 
 template <class KeyType, class ValueType>

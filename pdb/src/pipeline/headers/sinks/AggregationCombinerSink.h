@@ -32,6 +32,7 @@ public:
 
     // grab the hash table
     Handle<Object> hashTable = ((Record<Object> *) page->getBytes())->getRootObject();
+
     auto mergeMe = (*unsafeCast<Vector<Handle<Map<KeyType, ValueType>>>>(hashTable))[workerID];
 
     // go through each key, value pair in the hash map we want to merge
@@ -39,22 +40,17 @@ public:
 
       // if this key is not already there...
       if (mergeToMe.count ((*it).key) == 0) {
-
         // this point will record where the value is located
         ValueType *temp = nullptr;
-
         // try to add the key... this will cause an allocation for a new key/val pair
         try {
           // get the location that we need to write to...
           temp = &(mergeToMe[(*it).key]);
-
           // if we get an exception, then we could not fit a new key/value pair
         } catch (NotEnoughSpace &n) {
-
           // we do not deal with this, it must fit into a single hash table
           throw n;
         }
-
         // we were able to fit a new key/value pair, so copy over the value
         try {
           *temp = (*it).value;
@@ -68,25 +64,20 @@ public:
 
         // the key is there
       } else {
-
         // get the value and a copy of it
         ValueType &temp = mergeToMe[(*it).key];
         ValueType copy = temp;
-
         // and add to the old value, producing a new one
         try {
           temp = copy + (*it).value;
-
           // if we got here, then it means that we ram out of RAM when we were trying
           // to put the new value into the hash table
         } catch (NotEnoughSpace &n) {
-
           // we do not deal with this, it must fit into a single hash table
           throw n;
         }
       }
     }
-
   }
 
 private:

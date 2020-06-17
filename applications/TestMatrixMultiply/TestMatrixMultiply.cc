@@ -11,10 +11,10 @@ using namespace pdb::matrix;
 
 // some constants for the test
 const size_t blockSize = 512;
-const uint32_t matrixRows = 1000;
-const uint32_t matrixColumns = 1000;
-const uint32_t numRows = 2;
-const uint32_t numCols = 2;
+const uint32_t matrixRows = 5000;
+const uint32_t matrixColumns = 5000;
+const uint32_t numRows = 10;
+const uint32_t numCols = 10;
 
 void initMatrix(pdb::PDBClient &pdbClient, const std::string &set) {
 
@@ -28,7 +28,6 @@ void initMatrix(pdb::PDBClient &pdbClient, const std::string &set) {
   // fill the vector up
   for (uint32_t r = 0; r < numRows; r++) {
     for (uint32_t c = 0; c < numCols; c++) {
-
       // allocate a matrix
       Handle<MatrixBlock> myInt = makeObject<MatrixBlock>(r, c, matrixRows / numRows, matrixColumns / numCols, onGPU);
       // init the values

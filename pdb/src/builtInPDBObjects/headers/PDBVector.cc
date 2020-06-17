@@ -38,7 +38,6 @@
 // the underlying type in any way (including assignment, initialization, destruction, size).
 //
 
-extern void* gpuMemoryManager;
 namespace pdb {
 
 template <class TypeContained>

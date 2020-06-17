@@ -45,8 +45,8 @@ enable_language("CUDA")
 add_library(CUDA_LIBRARIES SHARED ${cuda_source_files})
 
 # link target to CUDA
-target_link_libraries(MatrixBlockData cuda-obj)
-target_link_libraries(MatrixMultiplyJoin cuda-obj)
+target_link_libraries(MatrixBlockData CUDA_LIBRARIES)
+target_link_libraries(MatrixMultiplyJoin CUDA_LIBRARIES)
 
 # add build dependencies to shared libraries it uses
 add_dependencies(TestMatrixMultiply MatrixBlock)

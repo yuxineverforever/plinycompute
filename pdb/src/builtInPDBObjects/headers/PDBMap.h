@@ -42,6 +42,10 @@ public:
     // this constructor pre-allocates initSize slots... initSize must be a power of two
     Map(uint32_t initSize);
 
+    // this constructor pre-allocates initSize slots... initSize must be a power of two
+    // With GPU option
+    Map(uint32_t initSize, bool isGPU);
+
     // this constructor creates a map with a single pos
     Map();
 

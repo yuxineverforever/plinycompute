@@ -15,10 +15,12 @@ namespace pdb {
     class PDBCUDAMemoryManager;
 
     using PDBCUDAMemoryManagerPtr = std::shared_ptr<PDBCUDAMemoryManager>;
+    using page_id_t = int32_t;
     using frame_id_t  = int32_t;
 
     class PDBCUDAMemoryManager {
     public:
+
         /**
          *
          * @param buffer
@@ -44,7 +46,7 @@ namespace pdb {
          *
          */
         ~PDBCUDAMemoryManager() {
-            for (auto &iter: gpuPageTable) {
+            for (auto &iter: PageTable) {
                 freeGPUMemory(&iter.second);
             }
             for (auto &frame: freeList) {
@@ -79,6 +81,7 @@ namespace pdb {
             return pageInfo;
         }
 
+
         /**
          *
          * @param pageInfo
@@ -88,21 +91,21 @@ namespace pdb {
         void *handleInputObject(pair<void *, size_t> pageInfo, void *objectAddress, cudaStream_t cs) {
             //std::cout << (long) pthread_self() << " : pageInfo: " << pageInfo.first << "bytes: "<< pageInfo.second << std::endl;
             size_t cudaObjectOffset = getObjectOffset(pageInfo.first, objectAddress);
-            if (gpuPageTable.find(pageInfo) != gpuPageTable.end()) {
+            if (PageTable.find(pageInfo) != PageTable.end()) {
                 pageTableMutex.RLock();
-                void *cudaObjectAddress = static_cast<char *>(gpuPageTable[pageInfo]) + cudaObjectOffset;
+                void *cudaObjectAddress = static_cast<char *>(PageTable[pageInfo]) + cudaObjectOffset;
                 pageTableMutex.RUnlock();
                 return cudaObjectAddress;
             } else {
                 pageTableMutex.WLock();
-                if (gpuPageTable.find(pageInfo) != gpuPageTable.end()) {
-                    void *cudaObjectAddress = static_cast<char *>(gpuPageTable[pageInfo]) + cudaObjectOffset;
+                if (PageTable.find(pageInfo) != PageTable.end()) {
+                    void *cudaObjectAddress = static_cast<char *>(PageTable[pageInfo]) + cudaObjectOffset;
                     pageTableMutex.WUnlock();
                     return cudaObjectAddress;
                 } else {
-                    void *cudaPointer = nullptr;
-                    copyFromHostToDeviceAsync((void **) &cudaPointer, pageInfo.first, pageInfo.second, cs);
-                    gpuPageTable.insert(std::make_pair(pageInfo, cudaPointer));
+                    void* cudaPointer = nullptr;
+                    copyFromHostToDeviceAsync((void **)&cudaPointer, pageInfo.first, pageInfo.second, cs);
+                    PageTable.insert(std::make_pair(pageInfo, cudaPointer));
                     pageTableMutex.WUnlock();
                     void *cudaObjectAddress = static_cast<char *>(cudaPointer) + cudaObjectOffset;
                     return cudaObjectAddress;
@@ -144,6 +147,7 @@ namespace pdb {
             }
         }
 
+
         frame_id_t getAvailableFrame() {
             frame_id_t frame;
             if (!freeList.empty()) {
@@ -159,15 +163,15 @@ namespace pdb {
                 recentlyUsed[clock_hand] = true;
                 frame = clock_hand;
                 incrementIterator(clock_hand);
-                auto iter = std::find_if(framePageTable.begin(), framePageTable.end(),
+                auto iter = std::find_if(frameTable.begin(), frameTable.end(),
                                          [&](const std::pair<pair<void *, size_t>, frame_id_t> &pair) {
                                              return pair.second == frame;
                                          });
                 if (iter->second < 0 || iter->second > poolSize) {
                     std::cerr << " frame number is wrong! \n";
                 }
-                framePageTable.erase(iter);
-                gpuPageTable.erase(iter->first);
+                frameTable.erase(iter);
+                PageTable.erase(iter->first);
                 return frame;
             }
         }
@@ -178,7 +182,7 @@ namespace pdb {
                     if (cpuPointer >= startLoc && cpuPointer < ((char *) startLoc + numBytes)) {
                         copyFromDeviceToHost(cpuPointer, ramPointerPair.second->ramAddress,
                                              ramPointerPair.second->numBytes);
-                        // TODO: here exist a better way
+                        // TODO: here should have a better way
                         Array<Nothing> *array = (Array<Nothing> *) ((char *) cpuPointer -
                                                                     ramPointerPair.second->headerBytes);
                         array->setRamPointerReferenceToNull();
@@ -212,13 +216,13 @@ namespace pdb {
         /**
          * gpu_page_table for mapping CPU bufferManager page address to GPU bufferManager page address
          */
-        //std::map<pair<void*,size_t>, void*> gpuPageTable;
-        std::map<pair<void *, size_t>, void *> gpuPageTable;
+        //std::map<pair<void*,size_t>, void*> PageTable;
+        std::map<pair<void *, size_t>, void *> PageTable;
 
         /**
          * framePageTable for mapping CPU bufferManager page address to GPU frame.
          */
-        std::map<pair<void *, size_t>, frame_id_t> framePageTable;
+        std::map<pair<void *, size_t>, frame_id_t> frameTable;
 
 
         /**

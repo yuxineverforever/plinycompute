@@ -83,7 +83,6 @@ private:
     // the number of slots
     uint32_t numSlots;
 
-
     // the array of data
     Nothing data[0];
 

@@ -27,6 +27,8 @@
 #include <iostream>
 #include <iterator>
 #include <cstring>
+#include "PDBRamPointer.h"
+
 
 // PRELOAD %PairArray <Nothing>%
 
@@ -88,6 +90,8 @@ public:
     void deleteObject(void* deleteMe);
     size_t getSize(void* forMe);
 
+    RamPointerReference alternativeLocation;
+
 private:
     // and this gives us our info about TypeContained
     PDBTemplateBase keyTypeInfo;
@@ -118,6 +122,9 @@ private:
 public:
     // create a new PairArray via doubling
     Handle<PairArray<KeyType, ValueType>> doubleArray();
+
+    // by yuxin: get a pointer to the data
+    MapRecordClass<KeyType, ValueType>* c_ptr();
 
     // access the value at which; if this is undefined, define it and return a reference
     // to a newly-creaated value

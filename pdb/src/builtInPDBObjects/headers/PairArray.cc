@@ -519,6 +519,11 @@ Handle<PairArray<KeyType, ValueType>> PairArray<KeyType, ValueType>::doubleArray
 }
 
 template <class KeyType, class ValueType>
+MapRecordClass<KeyType, ValueType>* PairArray<KeyType, ValueType>::c_ptr() {
+    return (MapRecordClass<KeyType, ValueType>*)data;
+}
+
+template <class KeyType, class ValueType>
 uint32_t PairArray<KeyType, ValueType>::numUsedSlots() {
     return usedSlots;
 }
