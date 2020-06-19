@@ -71,6 +71,7 @@ Vector<TypeContained>::Vector(uint32_t initSize, uint32_t usedSize, bool onGPU) 
         myArray->alternativeLocation = keepMemAddress(gpuArray, (void*)myArray->c_ptr(),
                                                                               sizeof(TypeContained)*initSize,
                                                                               sizeof(Array<TypeContained>));
+        std::cout << "header bytes: " << sizeof(Array<TypeContained>) << std::endl;
     }
 }
 

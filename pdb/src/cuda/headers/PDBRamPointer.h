@@ -22,7 +22,9 @@ namespace pdb {
             isDirty = false;
         }
 
-        ~RamPointer() {}
+        ~RamPointer() {
+            std::cout << "RamPointer destructor!\n";
+        }
 
         void push_back_pointer(void *pointer) {
             cpuPointers.push_back(pointer);
@@ -76,6 +78,10 @@ namespace pdb {
     public:
         RamPointerBase(RamPointerPtr useMe) {
             ptr = useMe;
+        }
+
+        ~RamPointerBase(){
+            std::cout << "RamPointerBase destructor!\n";
         }
 
         void push_back_pointer(void *pointer) {

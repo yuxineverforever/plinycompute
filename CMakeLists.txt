@@ -91,7 +91,7 @@ elseif(CMAKE_BUILD_TYPE MATCHES UNIT_TESTS)
 endif ()
 
 #set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fsanitize=thread -fPIE -g")
-#set (CMAKE_LINKER_FLAGS_DEBUG "${CMAKE_LINKER_FLAGS_DEBUG} -fsanitize=thread -fPIE -g")
+#set (CMAKE_LINKER_FLAGS_DEBUG "${CMAKE_LINKER_FLAGS_DEBUG} -fsanitize=address -fPIE -g")
 
 # set the definitions for the compiler
 ADD_DEFINITIONS(-DINITIALIZE_ALLOCATOR_BLOCK)
