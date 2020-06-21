@@ -11,12 +11,15 @@ namespace pdb {
 namespace matrix {
 
 class MatrixBlockData : public pdb::Object {
+
 public:
 
   /**
    * The default constructor
    */
-  MatrixBlockData() = default;
+  MatrixBlockData(){
+      isGPU = true;
+  };
 
   MatrixBlockData(uint32_t numRows, uint32_t numCols, bool onGPU) : numRows(numRows), numCols(numCols), isGPU(onGPU){
     // allocate the data
@@ -38,7 +41,7 @@ public:
   /**
    * is the data on GPU
    */
-  bool isGPU;
+  bool isGPU = false;
 
   /**
    * The values of the block
@@ -51,26 +54,40 @@ public:
    * @return
    */
   MatrixBlockData& operator+(MatrixBlockData& other) {
-
-    // get the data
     float *myData = data->c_ptr();
     float *otherData = other.data->c_ptr();
-
     size_t length = numRows * numCols;
     vector<size_t> outdim = {length};
     vector<size_t> in1dim = {length};
-
     pdb::PDBCUDAOpType op = pdb::PDBCUDAOpType ::VectorAdd;
     GPUInvoke(op, data, outdim, other.data, in1dim);
-    /*
-    // sum up the data
-    for (int i = 0; i < numRows * numCols; i++) {
-    (myData)[i] += (otherData)[i];
-    }
-    */
-    // return me
     return *this;
-}
+  }
+
+  MatrixBlockData& operator= (const MatrixBlockData& other){
+
+      if (other.isGPU== true && isGPU == false){
+            numCols = other.numCols;
+            numRows = other.numRows;
+            data = other.data;
+        } else if (other.isGPU== false && isGPU == false){
+
+            numCols = other.numCols;
+            numRows = other.numRows;
+            data = other.data;
+            //data = makeObject<Vector<float>>(numRows * numCols, numRows * numCols, false);
+
+       } else if (other.isGPU == true && isGPU == true){
+            numCols = other.numCols;
+            numRows = other.numRows;
+            data = other.data;
+        } else if (other.isGPU == false && isGPU == true){
+            numCols = other.numCols;
+            numRows = other.numRows;
+            data = makeObject<Vector<float>>(numRows * numCols, numRows * numCols, isGPU);
+        }
+        return *this;
+  }
 };
 
 }

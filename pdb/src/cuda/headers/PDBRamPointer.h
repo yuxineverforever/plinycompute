@@ -101,4 +101,5 @@ namespace pdb {
     };
 
     using RamPointerReference = std::shared_ptr<RamPointerBase>;
+
 }

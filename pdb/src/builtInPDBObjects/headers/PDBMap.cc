@@ -92,29 +92,9 @@ Map<KeyType, ValueType>::Map(uint32_t initSize) {
     myArray = makeObjectWithExtraStorage<PairArray<KeyType, ValueType>>(size * initSize, initSize);
 }
 
-template<class KeyType, class ValueType>
-Map<KeyType, ValueType>::Map(uint32_t initSize, bool isGPU) {
-    if (initSize < 2) {
-        std::cout << "Fatal Error: Map initialization:" << initSize
-                  << " too small; must be at least one.\n";
-
-        initSize = 2;
-    }
-    // this way, we'll allocate extra bytes on the end of the array
-    MapRecordClass<KeyType, ValueType> temp;
-    size_t size = temp.getObjSize();
-    myArray = makeObjectWithExtraStorage<PairArray<KeyType, ValueType>>(size * initSize, initSize);
-    if (isGPU){
-        void* gpuArray = memMalloc(size*initSize);
-        myArray->alternativeLocation = keepMemAddress(gpuArray, (void*)myArray->c_ptr(),
-                                                      size*initSize,
-                                                      sizeof(PairArray<KeyType, ValueType>));
-    }
-}
 
 template <class KeyType, class ValueType>
 Map<KeyType, ValueType>::Map() {
-
     MapRecordClass<KeyType, ValueType> temp;
     size_t size = temp.getObjSize();
     myArray = makeObjectWithExtraStorage<PairArray<KeyType, ValueType>>(size * 2, 2);
@@ -132,7 +112,6 @@ void Map<KeyType, ValueType>::setUnused(const KeyType& clearMe) {
 
 template <class KeyType, class ValueType>
 ValueType& Map<KeyType, ValueType>::operator[](const KeyType& which) {
-
     // JiaNote: each time we increase size only when key doesn't exist.
     // so that we can make sure usedSlot < maxSlots each time before we invoke[] for insertion
     // and for read-only data, we will not invoke doubleArray(), if we always invoke count() before

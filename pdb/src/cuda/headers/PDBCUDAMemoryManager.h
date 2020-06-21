@@ -179,7 +179,7 @@ namespace pdb {
         void DeepCopy(void *startLoc, size_t numBytes) {
             for (auto &ramPointerPair : ramPointerCollection) {
                 for (void *cpuPointer: ramPointerPair.second->cpuPointers) {
-                    if (cpuPointer >= startLoc && cpuPointer < (static_cast<char*> startLoc + numBytes)) {
+                    if (cpuPointer >= startLoc && cpuPointer < (static_cast<char*> (startLoc) + numBytes)) {
                         copyFromDeviceToHost(cpuPointer, ramPointerPair.second->ramAddress,
                                              ramPointerPair.second->numBytes);
                         // TODO: here should have a better way

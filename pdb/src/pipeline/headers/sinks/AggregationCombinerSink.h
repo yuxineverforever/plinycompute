@@ -40,32 +40,36 @@ public:
 
       // if this key is not already there...
       if (mergeToMe.count ((*it).key) == 0) {
+
         // this point will record where the value is located
         ValueType *temp = nullptr;
+
         // try to add the key... this will cause an allocation for a new key/val pair
         try {
+
           // get the location that we need to write to...
           temp = &(mergeToMe[(*it).key]);
+
           // if we get an exception, then we could not fit a new key/value pair
         } catch (NotEnoughSpace &n) {
-          // we do not deal with this, it must fit into a single hash table
-          throw n;
+
+            // we do not deal with this, it must fit into a single hash table
+            throw n;
         }
         // we were able to fit a new key/value pair, so copy over the value
         try {
           *temp = (*it).value;
-
           // if we could not fit the value...
         } catch (NotEnoughSpace &n) {
 
           // we do not deal with this, it must fit into a single hash table
           throw n;
         }
-
         // the key is there
       } else {
         // get the value and a copy of it
-        ValueType &temp = mergeToMe[(*it).key];
+        ValueType& temp = mergeToMe[(*it).key];
+
         ValueType copy = temp;
         // and add to the old value, producing a new one
         try {

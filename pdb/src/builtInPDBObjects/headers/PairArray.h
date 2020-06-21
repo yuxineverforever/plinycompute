@@ -90,8 +90,6 @@ public:
     void deleteObject(void* deleteMe);
     size_t getSize(void* forMe);
 
-    RamPointerReference alternativeLocation;
-
 private:
     // and this gives us our info about TypeContained
     PDBTemplateBase keyTypeInfo;

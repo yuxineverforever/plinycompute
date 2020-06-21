@@ -42,7 +42,6 @@ namespace pdb {
 
 template <class TypeContained>
 Vector<TypeContained>::Vector(uint32_t initSize) {
-
     // this way, we'll allocate extra bytes on the end of the array
     myArray = makeObjectWithExtraStorage<Array<TypeContained>>(sizeof(TypeContained) * initSize, initSize);
 }

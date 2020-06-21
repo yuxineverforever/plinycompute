@@ -37,7 +37,9 @@ class PreaggregationSink : public ComputeSink {
     whichAttToHash = matches[0];
     whichAttToAggregate = matches[1];
   }
+
   ~PreaggregationSink() override = default;
+
   Handle<Object> createNewOutputContainer() override {
     // we simply create a new vector of maps to store the stuff
     Handle<Vector<Handle<Map<KeyType, ValueType>>>> returnVal = makeObject<Vector<Handle<Map<KeyType, ValueType>>>>();
