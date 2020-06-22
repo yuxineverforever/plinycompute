@@ -89,7 +89,7 @@ namespace pdb {
          * @param objectAddress
          * @return
          */
-        void *handleInputObject(pair<void *, size_t> pageInfo, void *objectAddress, cudaStream_t cs) {
+        void* handleInputObject(pair<void *, size_t> pageInfo, void *objectAddress, cudaStream_t cs) {
             //std::cout << (long) pthread_self() << " : pageInfo: " << pageInfo.first << "bytes: "<< pageInfo.second << std::endl;
             size_t cudaObjectOffset = getObjectOffset(pageInfo.first, objectAddress);
             if (PageTable.find(pageInfo) != PageTable.end()) {
@@ -110,6 +110,32 @@ namespace pdb {
                     pageTableMutex.WUnlock();
                     void *cudaObjectAddress = static_cast<char *>(cudaPointer) + cudaObjectOffset;
                     return cudaObjectAddress;
+                }
+            }
+        }
+
+        RamPointerReference handleInputObjectWithRamPointer(pair<void *, size_t> pageInfo, void *objectAddress, cudaStream_t cs){
+
+            size_t cudaObjectOffset = getObjectOffset(pageInfo.first, objectAddress);
+            if (PageTable.find(pageInfo) != PageTable.end()){
+                pageTableMutex.RLock();
+                void *cudaObjectAddress = static_cast<char *>(PageTable[pageInfo]) + cudaObjectOffset;
+                pageTableMutex.RUnlock();
+                return addRamPointerCollection(cudaObjectAddress, objectAddress);
+            } else {
+                pageTableMutex.WLock();
+                if (PageTable.find(pageInfo) != PageTable.end()){
+                    void * cudaObjectAddress = static_cast<char*>(PageTable[pageInfo]) + cudaObjectOffset;
+                    pageTableMutex.WUnlock();
+                    return addRamPointerCollection(cudaObjectAddress, objectAddress);
+                } else {
+                    void* cudaPointer = nullptr;
+                    copyFromHostToDeviceAsync((void **)&cudaPointer, pageInfo.first, pageInfo.second, cs);
+                    PageTable.insert(std::make_pair(pageInfo, cudaPointer));
+                    pageTableMutex.WUnlock();
+
+                    void *cudaObjectAddress = static_cast<char *>(cudaPointer) + cudaObjectOffset;
+                    return addRamPointerCollection(cudaObjectAddress, objectAddress);
                 }
             }
         }
@@ -137,7 +163,7 @@ namespace pdb {
         }
 
         RamPointerReference
-        addRamPointerCollection(void *gpuaddress, void *cpuaddress, size_t numbytes, size_t headerbytes) {
+        addRamPointerCollection(void *gpuaddress, void *cpuaddress, size_t numbytes = 0, size_t headerbytes = 0) {
             RamPointerMutex.WLock();
             if (ramPointerCollection.count(gpuaddress) != 0) {
                 ramPointerCollection[gpuaddress]->push_back_cpu_pointer(cpuaddress);

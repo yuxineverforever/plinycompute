@@ -1,13 +1,6 @@
 #include "PDBCUDAGPUInvoke.h"
 #include "PDBRamPointer.h"
 
-template<typename InvokerType>
-typename std::enable_if_t <is_base_of<pdb::PDBCUDAOpInvoker, InvokerType>::value, std::shared_ptr<pdb::RamPointerBase>>
-GPULazyAllocationHandler(InvokerType &f, void* pointer) {
-    return f.LazyAllocationHandler(pointer);
-}
-
-
 /** SimpleTypeGPUInvoke deals with all the primitive types and invoke the gpu kernel for the input/output
  * `Out` vector should be reserved before passing as parameter
  * @tparam InvokerType - operator type (should be a derived type from PDBCUDAOp)
@@ -171,6 +164,12 @@ bool GPUInvoke(pdb::PDBCUDAVectorAddInvoker &f, pdb::Handle<pdb::Vector<float>> 
     return SimpleTypeGPUInvoke(f, OutObject, OutDim, In1Object, In1Dim);
 }
 
+std::shared_ptr<pdb::RamPointerBase>
+GPULazyAllocationHandler(pdb::PDBCUDAVectorAddInvoker &f, void* pointer) {
+    return f.LazyAllocationHandler(pointer);
+}
+
+
 /** By default, this GPUInvoke will handle the matrix multiple case for join.
  * @param op
  * @param Out
@@ -187,12 +186,15 @@ bool GPUInvoke(pdb::PDBCUDAOpType &op, pdb::Handle<pdb::Vector<float>> Out, std:
     }
     pdb::PDBCUDAVectorAddInvoker vectorAddInvoker;
     auto In1Object = In1->c_ptr();
+
     // for handling the case of lazy allocation
     if (In1Object == nullptr){
-        auto NewRamPointer = GPULazyAllocationHandler(op, static_cast<void*>(In1->cpu_ptr()));
+        std::shared_ptr<pdb::RamPointerBase> NewRamPointer = GPULazyAllocationHandler(vectorAddInvoker, static_cast<void*>(In1->cpu_ptr()));
         In1->setRamPointerReference(NewRamPointer);
+        In1Object = In1->c_ptr();
     }
-    In1Object = In1->c_ptr();
+    assert(In1Object != nullptr);
+
     auto OutObject = Out->c_ptr();
     return SimpleTypeGPUInvoke(vectorAddInvoker, OutObject, OutDim, In1Object, In1Dim);
 }

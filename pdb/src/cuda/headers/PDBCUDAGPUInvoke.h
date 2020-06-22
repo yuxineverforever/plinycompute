@@ -6,7 +6,8 @@
 #include "PDBCUDAVectorAddInvoker.h"
 #include <vector>
 
-#include "PDBCUDAGPUInvoke.h"
+std::shared_ptr<pdb::RamPointerBase>
+GPULazyAllocationHandler(pdb::PDBCUDAVectorAddInvoker &f, void* pointer);
 
 /** SimpleTypeGPUInvoke deals with all the primitive types and invoke the gpu kernel for the input/output
  * `Out` vector should be reserved before passing as parameter

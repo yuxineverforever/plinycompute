@@ -30,6 +30,8 @@ namespace pdb {
 
         void cleanup();
 
+        std::shared_ptr<pdb::RamPointerBase> LazyAllocationHandler(void* pointer);
+
     public:
         // raw pointer and the dimension for the vector
         std::vector<std::pair<T *, std::vector<size_t> >> inputParas;

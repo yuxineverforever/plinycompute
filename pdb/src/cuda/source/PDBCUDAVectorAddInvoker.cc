@@ -49,10 +49,8 @@ namespace pdb {
     }
 
     std::shared_ptr<pdb::RamPointerBase> PDBCUDAVectorAddInvoker::LazyAllocationHandler(void* pointer){
-        auto PageInfo = (static_cast<PDBCUDAMemoryManager *>(gpuMemoryManager))->getObjectPage((void *)pointer);
-        auto cudaObjectPointer = (static_cast<PDBCUDAMemoryManager *>(gpuMemoryManager))->handleInputObject(PageInfo, (void*) input, cudaStream);
-
-
+        pair<void *, size_t> PageInfo = (static_cast<PDBCUDAMemoryManager *>(gpuMemoryManager))->getObjectPage((void *)pointer);
+        return (static_cast<PDBCUDAMemoryManager *>(gpuMemoryManager))->handleInputObjectWithRamPointer(PageInfo, (void*)pointer, cudaStream);
     }
 
     void PDBCUDAVectorAddInvoker::setOutput(T *output, std::vector<size_t> &outputDim) {

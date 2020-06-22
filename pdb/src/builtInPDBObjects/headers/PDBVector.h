@@ -82,7 +82,6 @@ public:
 
     void resize(uint32_t toMe);
 
-
     // added by Shangyu
     void print() const;
     void fill(const TypeContained& val);
