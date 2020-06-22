@@ -93,6 +93,10 @@ public:
     // get a pointer to the data
     TypeContained* c_ptr();
 
+    TypeContained* cpu_ptr();
+
+    TypeContained* gpu_ptr();
+
     // access a particular object in the array, by index
     TypeContained& getObj(uint32_t which);
 

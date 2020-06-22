@@ -29,6 +29,7 @@
 #include <iterator>
 #include <cstring>
 #include <PDBCUDAMemoryAllocatorState.h>
+#include <PDBRamPointer.h>
 
 // PRELOAD %Vector <Nothing>%
 
@@ -75,6 +76,10 @@ public:
     void pop_back();
     void clear();
     TypeContained* c_ptr() const;
+    TypeContained* cpu_ptr() const;
+
+    void setRamPointerReference(std::shared_ptr<RamPointerBase> toMe);
+
     void resize(uint32_t toMe);
 
 

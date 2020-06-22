@@ -136,6 +136,16 @@ TypeContained* Vector<TypeContained>::c_ptr() const {
      return myArray->c_ptr();
 }
 
+template <class TypeContained>
+TypeContained* Vector<TypeContained>::cpu_ptr() const{
+    return myArray->cpu_ptr();
+}
+
+template <class TypeContained>
+void Vector<TypeContained>::setRamPointerReference(std::shared_ptr<RamPointerBase> toMe){
+    myArray->alternativeLocation = toMe;
+}
+
 // Add by Shangyu;
 // Use std::cout to print out the elements in a Vector
 template <class TypeContained>

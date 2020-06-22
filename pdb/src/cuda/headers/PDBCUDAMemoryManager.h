@@ -119,7 +119,6 @@ namespace pdb {
             if (state == memAllocateState::LAZY){
                 return nullptr;
             }
-
             if (allocatorPages.size() == 0 && currFrame == -1) {
                 frame_id_t oneframe = getAvailableFrame();
                 bytesUsed = 0;

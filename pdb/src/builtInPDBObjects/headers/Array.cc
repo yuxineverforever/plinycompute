@@ -233,12 +233,16 @@ void Array<TypeContained>::push_back() {
 
 template <class TypeContained>
 TypeContained* Array<TypeContained>::c_ptr() {
-
     if (alternativeLocation == nullptr){
         return ((TypeContained*)(data));
     } else {
         return ((TypeContained*) alternativeLocation.get()->get_address());
     }
+}
+
+template <class TypeContained>
+TypeContained* Array<TypeContained>::cpu_ptr(){
+    return ((TypeContained*)(data));
 }
 
 template <class TypeContained>
