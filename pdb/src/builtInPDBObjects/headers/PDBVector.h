@@ -28,6 +28,7 @@
 #include <iostream>
 #include <iterator>
 #include <cstring>
+#include <PDBCUDAMemoryAllocatorState.h>
 
 // PRELOAD %Vector <Nothing>%
 
@@ -61,8 +62,7 @@ public:
     // to them.  Thus, after this call, size () will return zero
     Vector(uint32_t initSize);
 
-
-    Vector(uint32_t initSize, uint32_t numUsed, bool onGPU);
+    Vector(uint32_t initSize, uint32_t usedSize, bool onGPU, memAllocateState state = memAllocateState::INSTANT);
 
     // these operations all have the same semantics as in std :: vector
     Vector();

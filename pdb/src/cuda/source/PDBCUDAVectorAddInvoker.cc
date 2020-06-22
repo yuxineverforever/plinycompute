@@ -8,7 +8,7 @@ extern void *gpuTaskManager;
 namespace pdb {
 
     PDBCUDAVectorAddInvoker::PDBCUDAVectorAddInvoker() {
-        auto threadInfo = ((PDBCUDATaskManager *) gpuTaskManager)->getThreadInfoFromPool();
+        auto threadInfo = (static_cast<PDBCUDATaskManager *>(gpuTaskManager))->getThreadInfoFromPool();
         cudaStream = threadInfo.first;
         cudaHandle = threadInfo.second;
     }
@@ -34,15 +34,20 @@ namespace pdb {
     void PDBCUDAVectorAddInvoker::setInput(T *input, std::vector<size_t> &inputDim) {
         //std::cout << (long) pthread_self() << " : PDBCUDAVectorAddInvoker setInput() \n";
         assert(inputDim.size() == 1);
-        int isDevice = isDevicePointer((void *) input);
-        if (isDevice) {
-            inputParas.push_back(std::make_pair((T *) input, inputDim));
+        if (input != nullptr){
+            int isDevice = isDevicePointer((void *) input);
+            if (isDevice) {
+                inputParas.push_back(std::make_pair((T *) input, inputDim));
+            } else {
+                auto PageInfo = (static_cast<PDBCUDAMemoryManager *>(gpuMemoryManager))->getObjectPage((void *) input);
+                auto cudaObjectPointer = (static_cast<PDBCUDAMemoryManager *>(gpuMemoryManager))->handleInputObject(PageInfo,
+                                                                                                        (void *) input,
+                                                                                                        cudaStream);
+                inputParas.push_back(std::make_pair((T *) cudaObjectPointer, inputDim));
+            }
         } else {
-            auto PageInfo = ((PDBCUDAMemoryManager *) gpuMemoryManager)->getObjectPage((void *) input);
-            auto cudaObjectPointer = ((PDBCUDAMemoryManager *) gpuMemoryManager)->handleInputObject(PageInfo,
-                                                                                                    (void *) input,
-                                                                                                    cudaStream);
-            inputParas.push_back(std::make_pair((T *) cudaObjectPointer, inputDim));
+            //TODO: think about how to handle the lazy allocation? nullptr
+
         }
     }
 

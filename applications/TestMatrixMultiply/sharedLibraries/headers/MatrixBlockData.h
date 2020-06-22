@@ -88,7 +88,7 @@ public:
         } else if (other.isGPU == false && isGPU == true){
             numCols = other.numCols;
             numRows = other.numRows;
-            data = makeObject<Vector<float>>(numRows * numCols, numRows * numCols, isGPU);
+            data = makeObject<Vector<float>>(numRows * numCols, numRows * numCols, isGPU, memAllocateState::LAZY);
         }
         return *this;
   }
