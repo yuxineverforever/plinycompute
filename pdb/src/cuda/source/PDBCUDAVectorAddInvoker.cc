@@ -12,7 +12,6 @@ namespace pdb {
         cudaStream = threadInfo.first;
         cudaHandle = threadInfo.second;
     }
-
     bool PDBCUDAVectorAddInvoker::invoke() {
         //std::cout << (long) pthread_self() << " : PDBCUDAVectorAddInvoker invoke() \n";
         cublasRouting(outputPara.first, inputParas[0].first, inputParas[0].second[0]);

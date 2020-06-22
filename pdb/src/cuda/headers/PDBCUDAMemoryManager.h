@@ -9,6 +9,7 @@
 #include "PDBCUDAUtility.h"
 #include "PDBRamPointer.h"
 #include "ReaderWriterLatch.h"
+#include "PDBCUDAMemoryAllocatorState.h"
 
 namespace pdb {
 
@@ -113,7 +114,12 @@ namespace pdb {
             }
         }
 
-        void *memMalloc(size_t memSize) {
+        void *memMalloc(size_t memSize, memAllocateState state) {
+
+            if (state == memAllocateState::LAZY){
+                return nullptr;
+            }
+
             if (allocatorPages.size() == 0 && currFrame == -1) {
                 frame_id_t oneframe = getAvailableFrame();
                 bytesUsed = 0;
@@ -135,12 +141,12 @@ namespace pdb {
         addRamPointerCollection(void *gpuaddress, void *cpuaddress, size_t numbytes, size_t headerbytes) {
             RamPointerMutex.WLock();
             if (ramPointerCollection.count(gpuaddress) != 0) {
-                ramPointerCollection[gpuaddress]->push_back_pointer(cpuaddress);
+                ramPointerCollection[gpuaddress]->push_back_cpu_pointer(cpuaddress);
                 RamPointerMutex.WUnlock();
                 return std::make_shared<RamPointerBase>(ramPointerCollection[gpuaddress]);
             } else {
                 RamPointerPtr ptr = std::make_shared<RamPointer>(gpuaddress, numbytes, headerbytes);
-                ptr->push_back_pointer(cpuaddress);
+                ptr->push_back_cpu_pointer(cpuaddress);
                 ramPointerCollection[gpuaddress] = ptr;
                 RamPointerMutex.WUnlock();
                 return std::make_shared<RamPointerBase>(ptr);
@@ -176,7 +182,7 @@ namespace pdb {
             }
         }
 
-        void DeepCopy(void *startLoc, size_t numBytes) {
+        void DeepCopyD2H(void *startLoc, size_t numBytes) {
             for (auto &ramPointerPair : ramPointerCollection) {
                 for (void *cpuPointer: ramPointerPair.second->cpuPointers) {
                     if (cpuPointer >= startLoc && cpuPointer < (static_cast<char*> (startLoc) + numBytes)) {
@@ -191,6 +197,15 @@ namespace pdb {
             }
         }
 
+        void DeepCopyH2D(void* startLoc, size_t numBytes) {
+            for (auto &ramPointerPair : ramPointerCollection) {
+                for (void *cpuPointer: ramPointerPair.second->cpuPointers) {
+                    if (cpuPointer >= startLoc && cpuPointer < (static_cast<char*> (startLoc) + numBytes)){
+
+                    }
+                }
+            }
+        }
         /**
         void swapPage(){
             PDBPageHandle cpuPage = bufferManager->getPage();

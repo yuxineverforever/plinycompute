@@ -10,7 +10,6 @@ namespace pdb {
     /**
      *
      */
-
     class RamPointer {
 
     public:
@@ -26,12 +25,16 @@ namespace pdb {
             std::cout << "RamPointer destructor!\n";
         }
 
-        void push_back_pointer(void *pointer) {
+        void push_back_cpu_pointer(void *pointer) {
             cpuPointers.push_back(pointer);
         }
 
-        void delete_pointer(void *pointer) {
+        void delete_cpu_pointer(void* pointer) {
             cpuPointers.remove(pointer);
+        }
+
+        void set_ram_pointer(void* pointer){
+            ramAddress = pointer;
         }
 
         void setDirty() {
@@ -61,7 +64,9 @@ namespace pdb {
         }
 
     public:
-        void *ramAddress;
+        // if the ramAddress == nullptr, it means the space is lazy allocated
+        // and the ramAddress will be changed in the future
+        void* ramAddress;
         size_t numBytes;
         size_t headerBytes;
         std::list<void *> cpuPointers;
@@ -84,12 +89,12 @@ namespace pdb {
             std::cout << "RamPointerBase destructor!\n";
         }
 
-        void push_back_pointer(void *pointer) {
-            ptr->push_back_pointer(pointer);
+        void push_back_cpu_pointer(void *pointer) {
+            ptr->push_back_cpu_pointer(pointer);
         }
 
-        void delete_pointer(void *pointer) {
-            ptr->delete_pointer(pointer);
+        void delete_cpu_pointer(void *pointer) {
+            ptr->delete_cpu_pointer(pointer);
         }
 
         void* get_address() {

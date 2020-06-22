@@ -23,6 +23,7 @@
 #include <iostream>
 #include <vector>
 #include "PDBCUDAMemoryAllocator.h"
+#include "PDBCUDAMemoryAllocatorState.h"
 
 #include <algorithm>
 #include <iterator>
@@ -57,7 +58,7 @@ Vector<TypeContained>::Vector(uint32_t initSize, uint32_t usedSize) {
 }
 
 template <class TypeContained>
-Vector<TypeContained>::Vector(uint32_t initSize, uint32_t usedSize, bool onGPU) {
+Vector<TypeContained>::Vector(uint32_t initSize, uint32_t usedSize, bool onGPU, memAllocateState state) {
 
     // This way, we'll allocate extra bytes on the end of the array
     // std :: cout << "sizeof(TypeContained)=" << sizeof(TypeContained) << std :: endl;
@@ -66,7 +67,7 @@ Vector<TypeContained>::Vector(uint32_t initSize, uint32_t usedSize, bool onGPU) 
     // std :: cout << "initSize=" << initSize << std :: endl;
     myArray = makeObjectWithExtraStorage<Array<TypeContained>>(sizeof(TypeContained) * initSize, initSize, usedSize);
     if (onGPU){
-        void* gpuArray = memMalloc(sizeof(TypeContained)* initSize);
+        void* gpuArray = memMalloc(sizeof(TypeContained)* initSize, state);
         myArray->alternativeLocation = keepMemAddress(gpuArray, (void*)myArray->c_ptr(),
                                                                               sizeof(TypeContained)*initSize,
                                                                               sizeof(Array<TypeContained>));

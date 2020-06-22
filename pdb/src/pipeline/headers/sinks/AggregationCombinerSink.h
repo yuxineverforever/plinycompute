@@ -46,7 +46,6 @@ public:
 
         // try to add the key... this will cause an allocation for a new key/val pair
         try {
-
           // get the location that we need to write to...
           temp = &(mergeToMe[(*it).key]);
 
@@ -69,7 +68,7 @@ public:
       } else {
         // get the value and a copy of it
         ValueType& temp = mergeToMe[(*it).key];
-
+        // here, we call the copy constructor, not assign operator.
         ValueType copy = temp;
         // and add to the old value, producing a new one
         try {
