@@ -165,8 +165,8 @@ bool GPUInvoke(pdb::PDBCUDAVectorAddInvoker &f, pdb::Handle<pdb::Vector<float>> 
 }
 
 std::shared_ptr<pdb::RamPointerBase>
-GPULazyAllocationHandler(pdb::PDBCUDAVectorAddInvoker &f, void* pointer) {
-    return f.LazyAllocationHandler(pointer);
+GPULazyAllocationHandler(pdb::PDBCUDAVectorAddInvoker &f, void* pointer, size_t size) {
+    return f.LazyAllocationHandler(pointer, size);
 }
 
 
@@ -198,7 +198,7 @@ bool GPUInvoke(pdb::PDBCUDAOpType &op, pdb::Handle<pdb::Vector<float>> Out, std:
     // This situation has two cases: 1. data should not on GPU. 2. data should on GPU but is lazy allocated.
     // We check the onGPU flag to see which case.
     if (In1Ptr == In1CPUPtr && onGPU){
-        std::shared_ptr<pdb::RamPointerBase> NewRamPointer = GPULazyAllocationHandler(vectorAddInvoker, static_cast<void*>(In1CPUPtr));
+        std::shared_ptr<pdb::RamPointerBase> NewRamPointer = GPULazyAllocationHandler(vectorAddInvoker, static_cast<void*>(In1CPUPtr), In1Dim[0]);
         In1->setRamPointerReference(NewRamPointer);
         In1Ptr = In1->c_ptr();
     }

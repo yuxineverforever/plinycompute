@@ -16,6 +16,7 @@
 #include <StoMaterializePageResult.h>
 #include <PDBBufferManagerBackEnd.h>
 #include <StoStartFeedingPageSetRequest.h>
+#include <PDBCUDAMemoryManager.h>
 
 void pdb::PDBStorageManagerBackend::init() {
 
@@ -156,6 +157,8 @@ bool pdb::PDBStorageManagerBackend::removePageSet(const std::pair<uint64_t, std:
   return pageSets.erase(pageSetID) == 1;
 }
 
+
+extern void* gpuMemoryManager;
 bool pdb::PDBStorageManagerBackend::materializePageSet(const pdb::PDBAbstractPageSetPtr& pageSet, const std::pair<std::string, std::string> &set) {
 
   // if the page set is empty no need materialize stuff
@@ -269,6 +272,8 @@ bool pdb::PDBStorageManagerBackend::materializePageSet(const pdb::PDBAbstractPag
 
     // repin the page
     page->repin();
+
+    ((PDBCUDAMemoryManager*)gpuMemoryManager)->DeepCopyD2H(page->getBytes(),page->getSize());
 
     // grab a page
     auto setPage = bufferManager->expectPage(comm);

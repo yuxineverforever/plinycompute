@@ -113,27 +113,27 @@ namespace pdb {
             }
         }
 
-        RamPointerReference handleInputObjectWithRamPointer(pair<void *, size_t> pageInfo, void *objectAddress, cudaStream_t cs){
+        RamPointerReference handleInputObjectWithRamPointer(pair<void *, size_t> pageInfo, void *objectAddress, size_t size, cudaStream_t cs){
 
             size_t cudaObjectOffset = getObjectOffset(pageInfo.first, objectAddress);
             if (PageTable.find(pageInfo) != PageTable.end()){
                 pageTableMutex.RLock();
                 void *cudaObjectAddress = static_cast<char *>(PageTable[pageInfo]) + cudaObjectOffset;
                 pageTableMutex.RUnlock();
-                return addRamPointerCollection(cudaObjectAddress, objectAddress);
+                return addRamPointerCollection(cudaObjectAddress, objectAddress, size);
             } else {
                 pageTableMutex.WLock();
                 if (PageTable.find(pageInfo) != PageTable.end()){
                     void * cudaObjectAddress = static_cast<char*>(PageTable[pageInfo]) + cudaObjectOffset;
                     pageTableMutex.WUnlock();
-                    return addRamPointerCollection(cudaObjectAddress, objectAddress);
+                    return addRamPointerCollection(cudaObjectAddress, objectAddress, size);
                 } else {
                     void* cudaPointer = nullptr;
                     copyFromHostToDeviceAsync((void **)&cudaPointer, pageInfo.first, pageInfo.second, cs);
                     PageTable.insert(std::make_pair(pageInfo, cudaPointer));
                     pageTableMutex.WUnlock();
                     void *cudaObjectAddress = static_cast<char *>(cudaPointer) + cudaObjectOffset;
-                    return addRamPointerCollection(cudaObjectAddress, objectAddress);
+                    return addRamPointerCollection(cudaObjectAddress, objectAddress, size);
                 }
             }
         }
@@ -216,15 +216,6 @@ namespace pdb {
             }
         }
 
-        void DeepCopyH2D(void* startLoc, size_t numBytes) {
-            for (auto &ramPointerPair : ramPointerCollection) {
-                for (void *cpuPointer: ramPointerPair.second->cpuPointers) {
-                    if (cpuPointer >= startLoc && cpuPointer < (static_cast<char*> (startLoc) + numBytes)){
-
-                    }
-                }
-            }
-        }
         /**
         void swapPage(){
             PDBPageHandle cpuPage = bufferManager->getPage();
