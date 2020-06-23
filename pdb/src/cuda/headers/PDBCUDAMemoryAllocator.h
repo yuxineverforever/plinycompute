@@ -2,7 +2,6 @@
 
 #include <iostream>
 #include "PDBRamPointer.h"
-#include "PDBCUDAMemoryAllocatorState.h"
 /**
  * here is one State flag for memory allocation.
  * INSTANT: get GPU space allocated instantly
@@ -10,7 +9,7 @@
  */
 
 
-void *memMalloc(size_t size, memAllocateState state);
+void *memMalloc(size_t size);
 
 void memFree(void *ptr);
 

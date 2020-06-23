@@ -28,7 +28,6 @@
 #include <iostream>
 #include <iterator>
 #include <cstring>
-#include <PDBCUDAMemoryAllocatorState.h>
 #include <PDBRamPointer.h>
 
 // PRELOAD %Vector <Nothing>%
@@ -49,7 +48,7 @@ class Vector : public Object {
 private:
     // this is where the data are actually stored
     Handle<Array<TypeContained>> myArray;
-
+    bool isGPU = false;
 
 public:
     ENABLE_DEEP_COPY
@@ -63,7 +62,7 @@ public:
     // to them.  Thus, after this call, size () will return zero
     Vector(uint32_t initSize);
 
-    Vector(uint32_t initSize, uint32_t usedSize, bool onGPU, memAllocateState state = memAllocateState::INSTANT);
+    Vector(uint32_t initSize, uint32_t usedSize, bool onGPU);
 
     // these operations all have the same semantics as in std :: vector
     Vector();
@@ -75,8 +74,12 @@ public:
     void push_back();
     void pop_back();
     void clear();
+
+
     TypeContained* c_ptr() const;
     TypeContained* cpu_ptr() const;
+    bool onGPU();
+    void setGPU(bool where);
 
     void setRamPointerReference(std::shared_ptr<RamPointerBase> toMe);
 

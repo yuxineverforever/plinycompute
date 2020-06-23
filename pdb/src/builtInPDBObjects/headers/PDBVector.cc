@@ -23,7 +23,6 @@
 #include <iostream>
 #include <vector>
 #include "PDBCUDAMemoryAllocator.h"
-#include "PDBCUDAMemoryAllocatorState.h"
 
 #include <algorithm>
 #include <iterator>
@@ -58,7 +57,7 @@ Vector<TypeContained>::Vector(uint32_t initSize, uint32_t usedSize) {
 }
 
 template <class TypeContained>
-Vector<TypeContained>::Vector(uint32_t initSize, uint32_t usedSize, bool onGPU, memAllocateState state) {
+Vector<TypeContained>::Vector(uint32_t initSize, uint32_t usedSize, bool onGPU) {
 
     // This way, we'll allocate extra bytes on the end of the array
     // std :: cout << "sizeof(TypeContained)=" << sizeof(TypeContained) << std :: endl;
@@ -66,8 +65,9 @@ Vector<TypeContained>::Vector(uint32_t initSize, uint32_t usedSize, bool onGPU, 
     // std :: cout << "sizeof(HandleBase)=" << sizeof(HandleBase) << std :: endl;
     // std :: cout << "initSize=" << initSize << std :: endl;
     myArray = makeObjectWithExtraStorage<Array<TypeContained>>(sizeof(TypeContained) * initSize, initSize, usedSize);
+    isGPU = onGPU;
     if (onGPU){
-        void* gpuArray = memMalloc(sizeof(TypeContained)* initSize, state);
+        void* gpuArray = memMalloc(sizeof(TypeContained)* initSize);
         myArray->alternativeLocation = keepMemAddress(gpuArray, (void*)myArray->c_ptr(),
                                                                               sizeof(TypeContained)*initSize,
                                                                               sizeof(Array<TypeContained>));
@@ -139,6 +139,16 @@ TypeContained* Vector<TypeContained>::c_ptr() const {
 template <class TypeContained>
 TypeContained* Vector<TypeContained>::cpu_ptr() const{
     return myArray->cpu_ptr();
+}
+
+template <class TypeContained>
+bool Vector<TypeContained>::onGPU() {
+    return isGPU;
+}
+
+template <class TypeContained>
+void Vector<TypeContained>::setGPU(bool where) {
+    isGPU = where;
 }
 
 template <class TypeContained>

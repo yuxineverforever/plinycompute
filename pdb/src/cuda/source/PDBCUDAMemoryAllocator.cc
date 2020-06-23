@@ -4,8 +4,8 @@
 
 extern void *gpuMemoryManager;
 
-void *memMalloc(size_t size, memAllocateState state) {
-    return ((pdb::PDBCUDAMemoryManager *) gpuMemoryManager)->memMalloc(size, state);
+void *memMalloc(size_t size) {
+    return ((pdb::PDBCUDAMemoryManager *) gpuMemoryManager)->memMalloc(size);
 }
 
 void memFree(void *ptr) {

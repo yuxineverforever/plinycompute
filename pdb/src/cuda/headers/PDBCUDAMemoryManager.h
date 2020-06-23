@@ -9,7 +9,6 @@
 #include "PDBCUDAUtility.h"
 #include "PDBRamPointer.h"
 #include "ReaderWriterLatch.h"
-#include "PDBCUDAMemoryAllocatorState.h"
 
 namespace pdb {
 
@@ -133,18 +132,13 @@ namespace pdb {
                     copyFromHostToDeviceAsync((void **)&cudaPointer, pageInfo.first, pageInfo.second, cs);
                     PageTable.insert(std::make_pair(pageInfo, cudaPointer));
                     pageTableMutex.WUnlock();
-
                     void *cudaObjectAddress = static_cast<char *>(cudaPointer) + cudaObjectOffset;
                     return addRamPointerCollection(cudaObjectAddress, objectAddress);
                 }
             }
         }
 
-        void *memMalloc(size_t memSize, memAllocateState state) {
-
-            if (state == memAllocateState::LAZY){
-                return nullptr;
-            }
+        void *memMalloc(size_t memSize) {
             if (allocatorPages.size() == 0 && currFrame == -1) {
                 frame_id_t oneframe = getAvailableFrame();
                 bytesUsed = 0;
