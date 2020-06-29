@@ -99,10 +99,6 @@ Array<TypeContained>::Array(const Array& toMe) {
 
 template <class TypeContained>
 Array<TypeContained>::Array(uint32_t numSlotsIn, uint32_t numUsedSlots) {
-    std::cout << "this pointer address: " << (void*)this << std::endl;
-    std::cout << "this pointer data address: " << (void*)(this->data) << std::endl;
-
-    //TODO: add GPU related code
     typeInfo.setup<TypeContained>();
     usedSlots = numUsedSlots;
     numSlots = numSlotsIn;

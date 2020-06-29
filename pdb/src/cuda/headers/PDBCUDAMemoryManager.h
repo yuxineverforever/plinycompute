@@ -162,12 +162,14 @@ namespace pdb {
             if (ramPointerCollection.count(gpuaddress) != 0) {
                 ramPointerCollection[gpuaddress]->push_back_cpu_pointer(cpuaddress);
                 RamPointerMutex.WUnlock();
+                //std::cout << " already exist RamPointerCollection size: " << ramPointerCollection.size() << std::endl;
                 return std::make_shared<RamPointerBase>(ramPointerCollection[gpuaddress]);
             } else {
                 RamPointerPtr ptr = std::make_shared<RamPointer>(gpuaddress, numbytes, headerbytes);
                 ptr->push_back_cpu_pointer(cpuaddress);
                 ramPointerCollection[gpuaddress] = ptr;
                 RamPointerMutex.WUnlock();
+                //std::cout << " non exist RamPointerCollection size: " << ramPointerCollection.size() << std::endl;
                 return std::make_shared<RamPointerBase>(ptr);
             }
         }
@@ -202,11 +204,16 @@ namespace pdb {
         }
 
         void DeepCopyD2H(void *startLoc, size_t numBytes) {
+            int count = 0;
             for (auto &ramPointerPair : ramPointerCollection) {
                 for (void *cpuPointer: ramPointerPair.second->cpuPointers) {
                     if (cpuPointer >= startLoc && cpuPointer < (static_cast<char*> (startLoc) + numBytes)) {
+                        std::cout <<  " thread info: " <<(long) pthread_self()  << " count: " << ++count << std::endl;
+
+                        // TODO: optimize this with async way
                         copyFromDeviceToHost(cpuPointer, ramPointerPair.second->ramAddress,
                                              ramPointerPair.second->numBytes);
+
                         // TODO: here should have a better way
                         //Array<Nothing> *array = (Array<Nothing> *) ((char *) cpuPointer -
                         //                                            ramPointerPair.second->headerBytes);
@@ -222,7 +229,6 @@ namespace pdb {
             cpuPage->getBytes();
         }
         */
-
     private:
         void incrementIterator(int32_t &it) {
             if (++it == poolSize) {

@@ -41,7 +41,7 @@ public:
       return true;
     }
 
-    ((PDBCUDAMemoryManager*)gpuMemoryManager)->DeepCopyD2H(memory->pageHandle->getBytes(),memory->pageHandle->getSize());
+    ((PDBCUDAMemoryManager*)gpuMemoryManager)->DeepCopyD2H(memory->pageHandle->getBytes(), memory->pageHandle->getSize());
 
     // cast the thing to the maps of maps
     pdb::Handle<pdb::Vector<pdb::Handle<pdb::Map<pdb::Nothing>>>> allMaps = unsafeCast<pdb::Vector<pdb::Handle<pdb::Map<pdb::Nothing>>>>(memory->outputSink);

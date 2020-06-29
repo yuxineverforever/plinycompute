@@ -6,14 +6,12 @@ extern void *gpuMemoryManager;
 extern void *gpuTaskManager;
 
 namespace pdb {
-
-
-
     PDBCUDAVectorAddInvoker::PDBCUDAVectorAddInvoker() {
         auto threadInfo = (static_cast<PDBCUDATaskManager *>(gpuTaskManager))->getThreadInfoFromPool();
         cudaStream = threadInfo.first;
         cudaHandle = threadInfo.second;
     }
+
     bool PDBCUDAVectorAddInvoker::invoke() {
         //std::cout << (long) pthread_self() << " : PDBCUDAVectorAddInvoker invoke() \n";
         cublasRouting(outputPara.first, inputParas[0].first, inputParas[0].second[0]);
@@ -50,7 +48,7 @@ namespace pdb {
 
     std::shared_ptr<pdb::RamPointerBase> PDBCUDAVectorAddInvoker::LazyAllocationHandler(void* pointer, size_t size){
         pair<void *, size_t> PageInfo = (static_cast<PDBCUDAMemoryManager *>(gpuMemoryManager))->getObjectPage((void *)pointer);
-        return (static_cast<PDBCUDAMemoryManager *>(gpuMemoryManager))->handleInputObjectWithRamPointer(PageInfo, (void*)pointer, cudaStream);
+        return (static_cast<PDBCUDAMemoryManager *>(gpuMemoryManager))->handleInputObjectWithRamPointer(PageInfo, (void*)pointer, size, cudaStream);
     }
 
     void PDBCUDAVectorAddInvoker::setOutput(T *output, std::vector<size_t> &outputDim) {

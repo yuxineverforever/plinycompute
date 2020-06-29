@@ -87,7 +87,7 @@ void pdb::PDBAnonymousPageSet::resetPageSet() {
   nextPageForWorker.clear();
 }
 
-void pdb::PDBAnonymousPageSet::setAccessOrder(PDBAnonymousPageSetAccessPattern pattern) {
+void pdb::PDBAnonymousPageSet::setAccessOrder(PDBAnonymousPageSetAccessPattern pattern) { 
 
   // lock the pages struct
   std::unique_lock<std::mutex> lck(m);
