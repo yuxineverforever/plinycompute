@@ -3,9 +3,19 @@
 
 #include <iostream>
 #include <cstdio>
+#include <boost/stacktrace.hpp>
 #include "cublas_v2.h"
 #include "cuda_runtime.h"
 #include "helper_cuda.h"
+
+#define cublasErrCheck(condition) \
+    do { \
+        cublasStatus_t status = condition; \
+        if (status != CUBLAS_STATUS_SUCCESS) { \
+            fprintf(stderr, "cublas Error: error code : %d %s %d\n", status, __FILE__, __LINE__); \
+            exit(-1); \
+                        } \
+            } while (0)
 
 void copyFromHostToDevice(void **targetDevice, void *sourceHost, size_t bytesNum);
 

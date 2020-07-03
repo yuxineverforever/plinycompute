@@ -18,6 +18,7 @@ void copyFromHostToDevice(void **targetDevice, void *sourceHost, size_t bytesNum
 
 void copyFromHostToDeviceAsync(void **targetDevice, void *sourceHost, size_t bytesNum, cudaStream_t cs) {
     checkCudaErrors(cudaMalloc((void **) targetDevice, bytesNum));
+    std::cout << boost::stacktrace::stacktrace();
     checkCudaErrors(cudaMemcpyAsync((*targetDevice), sourceHost, bytesNum, cudaMemcpyHostToDevice, cs));
 }
 

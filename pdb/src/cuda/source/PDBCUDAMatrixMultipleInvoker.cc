@@ -45,8 +45,9 @@ namespace pdb {
                                                 size_t in2NumCol) {
         const float alpha = 1.0f;
         const float beta = 0.0f;
-        cublasSgemm(cudaHandle, CUBLAS_OP_N, CUBLAS_OP_N, in1NumRow, in2NumCol, in1NumCol, &alpha, in1data, in1NumRow,
-                    in2data, in1NumCol, &beta, outdata, in1NumRow);
+        cublasStatus_t cublas_status = cublasSgemm(cudaHandle, CUBLAS_OP_N, CUBLAS_OP_N, in1NumRow, in2NumCol, in1NumCol, &alpha, in1data, in1NumRow,
+                                                   in2data, in1NumCol, &beta, outdata, in1NumRow);
+        cublasErrCheck(cublas_status);
         //copyFromDeviceToHostAsync((void*)copyBackPara, (void*)outputPara.first, outputPara.second[0] * outputPara.second[1] * sizeof(float), cudaStream);
     }
 
