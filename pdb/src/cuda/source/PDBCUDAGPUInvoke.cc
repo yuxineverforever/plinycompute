@@ -187,9 +187,10 @@ bool GPUInvoke(pdb::PDBCUDAOpType &op, pdb::Handle<pdb::Vector<float>> Out, std:
     pdb::PDBCUDAVectorAddInvoker vectorAddInvoker;
 
     auto OutPtr = Out->c_ptr();
+    auto OutCPUPtr = Out->cpu_ptr();
+    bool onGPU = Out->onGPU();
+
     auto In1Ptr = In1->c_ptr();
-    auto In1CPUPtr = In1->cpu_ptr();
-    bool onGPU = In1->onGPU();
 
     // For handling the case of lazy allocation
 
@@ -197,10 +198,10 @@ bool GPUInvoke(pdb::PDBCUDAOpType &op, pdb::Handle<pdb::Vector<float>> Out, std:
     // means the situation that pointer address in cpu ram is equal to pointer address in gpu/cpu ram.
     // This situation has two cases: 1. data should not on GPU. 2. data should on GPU but is lazy allocated.
     // We check the onGPU flag to see which case.
-    if (In1Ptr == In1CPUPtr && onGPU){
-        std::shared_ptr<pdb::RamPointerBase> NewRamPointer = GPULazyAllocationHandler(vectorAddInvoker, static_cast<void*>(In1CPUPtr), In1Dim[0]);
-        In1->setRamPointerReference(NewRamPointer);
-        In1Ptr = In1->c_ptr();
+    if (OutCPUPtr == OutPtr && onGPU){
+        std::shared_ptr<pdb::RamPointerBase> NewRamPointer = GPULazyAllocationHandler(vectorAddInvoker, static_cast<void*>(OutCPUPtr), OutDim[0]);
+        Out->setRamPointerReference(NewRamPointer);
+        OutPtr = Out->c_ptr();
     }
     assert(In1Ptr != nullptr);
     assert(OutPtr != nullptr);

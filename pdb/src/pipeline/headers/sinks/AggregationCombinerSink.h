@@ -34,6 +34,7 @@ public:
     Handle<Object> hashTable = ((Record<Object> *) page->getBytes())->getRootObject();
 
     auto mergeMe = (*unsafeCast<Vector<Handle<Map<KeyType, ValueType>>>>(hashTable))[workerID];
+    
 
     // go through each key, value pair in the hash map we want to merge
     for(auto it = mergeMe->begin(); it != mergeMe->end(); ++it) {

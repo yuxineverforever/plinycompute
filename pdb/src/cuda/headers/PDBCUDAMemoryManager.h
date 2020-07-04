@@ -129,7 +129,8 @@ namespace pdb {
                     return addRamPointerCollection(cudaObjectAddress, objectAddress, size);
                 } else {
                     void* cudaPointer = nullptr;
-                    copyFromHostToDeviceAsync((void **)&cudaPointer, pageInfo.first, pageInfo.second, cs);
+                    frame_id_t oneframe = getAvailableFrame();
+                    copyFromHostToDeviceAsyncWithOutMalloc((void **)&availablePosition[oneframe], pageInfo.first, pageInfo.second, cs);
                     PageTable.insert(std::make_pair(pageInfo, cudaPointer));
                     pageTableMutex.WUnlock();
                     void *cudaObjectAddress = static_cast<char *>(cudaPointer) + cudaObjectOffset;
