@@ -11,8 +11,8 @@ using namespace pdb::matrix;
 
 // some constants for the test
 const size_t blockSize = 512;
-const uint32_t matrixRows = 100;
-const uint32_t matrixColumns = 100;
+const uint32_t matrixRows = 5000;
+const uint32_t matrixColumns = 5000;
 const uint32_t numRows = 4;
 const uint32_t numCols = 4;
 
@@ -108,7 +108,7 @@ int main(int argc, char* argv[]) {
     // grab the record
     auto r = it->getNextRecord();
     // write out the values
-    float *values = r->data.data->c_ptr();
+    float *values = r->data.data->cpu_ptr();
 
     for(int i = 0; i < r->data.numRows; ++i) {
       for(int j = 0; j < r->data.numCols; ++j) {

@@ -2,13 +2,13 @@
 
 namespace pdb {
 
-    PDBCUDATaskManager::PDBCUDATaskManager(int32_t NumOfthread, bool isManager) : threadNum(NumOfthread) {
+    PDBCUDATaskManager::PDBCUDATaskManager(uint32_t threadNum, bool isManager) : streamNum(threadNum) {
         if (isManager) {
             return;
         }
-        streams = new cudaStream_t[2 * threadNum + 1];
-        handles = new cublasHandle_t[2 * threadNum + 1];
-        for (int32_t i = 0; i < 2 * threadNum + 1; i++) {
+        streams = new cudaStream_t[threadNum];
+        handles = new cublasHandle_t[threadNum];
+        for (int32_t i = 0; i < streamNum; i++) {
             checkCudaErrors(cudaStreamCreate(&streams[i]));
             checkCudaErrors(cublasCreate(&handles[i]));
             checkCudaErrors(cublasSetStream(handles[i], streams[i]));
@@ -16,7 +16,7 @@ namespace pdb {
     }
 
     PDBCUDATaskManager::~PDBCUDATaskManager() {
-        for (int i = 0; i < 2 * threadNum + 1; i++) {
+        for (int i = 0; i <streamNum; i++) {
             cudaStreamDestroy(streams[i]);
             cublasDestroy(handles[i]);
         }

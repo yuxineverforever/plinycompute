@@ -39,7 +39,7 @@ namespace pdb {
         if (isDevice) {
             inputParas.push_back(std::make_pair((T *) input, inputDim));
         } else {
-            auto PageInfo = (static_cast<PDBCUDAMemoryManager *>(gpuMemoryManager))->getObjectPage((void *) input);
+            auto PageInfo = (static_cast<PDBCUDAMemoryManager *>(gpuMemoryManager))->getObjectCPUPage((void *) input);
             auto cudaObjectPointer = (static_cast<PDBCUDAMemoryManager *>(gpuMemoryManager))->handleInputObject(PageInfo,
                                                                                                         (void *) input,
                                                                                                         cudaStream);
@@ -48,7 +48,8 @@ namespace pdb {
     }
 
     std::shared_ptr<pdb::RamPointerBase> PDBCUDAVectorAddInvoker::LazyAllocationHandler(void* pointer, size_t size){
-        pair<void *, size_t> PageInfo = (static_cast<PDBCUDAMemoryManager *>(gpuMemoryManager))->getObjectPage((void *)pointer);
+        pair<void *, size_t> PageInfo = (static_cast<PDBCUDAMemoryManager *>(gpuMemoryManager))->getObjectCPUPage(
+                (void *) pointer);
         return (static_cast<PDBCUDAMemoryManager *>(gpuMemoryManager))->handleInputObjectWithRamPointer(PageInfo, (void*)pointer, size, cudaStream);
     }
 

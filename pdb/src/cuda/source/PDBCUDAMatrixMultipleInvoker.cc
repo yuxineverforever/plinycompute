@@ -18,7 +18,7 @@ namespace pdb {
         if (isDevice) {
             inputParas.push_back(std::make_pair((T *) input, inputDim));
         } else {
-            auto PageInfo = ((PDBCUDAMemoryManager *) gpuMemoryManager)->getObjectPage((void *) input);
+            auto PageInfo = ((PDBCUDAMemoryManager *) gpuMemoryManager)->getObjectCPUPage((void *) input);
             auto cudaObjectPointer = ((PDBCUDAMemoryManager *) gpuMemoryManager)->handleInputObject(PageInfo,
                                                                                                     (void *) input,
                                                                                                     cudaStream);

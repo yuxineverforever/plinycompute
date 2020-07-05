@@ -16,16 +16,8 @@ void copyFromHostToDevice(void **targetDevice, void *sourceHost, size_t bytesNum
     checkCudaErrors(cudaMemcpy(*targetDevice, sourceHost, bytesNum, cudaMemcpyHostToDevice));
 }
 
-void copyFromHostToDeviceAsync(void **targetDevice, void *sourceHost, size_t bytesNum, cudaStream_t cs) {
-    checkCudaErrors(cudaMalloc((void **) targetDevice, bytesNum));
-    checkCudaErrors(cudaMemcpyAsync((*targetDevice), sourceHost, bytesNum, cudaMemcpyHostToDevice, cs));
-}
-
-void copyFromHostToDeviceAsyncWithOutMalloc(void *targetDevice, void *sourceHost, size_t bytesNum, cudaStream_t cs) {
-    cudaError_t err = cudaMemcpyAsync(targetDevice, sourceHost, bytesNum, cudaMemcpyHostToDevice, cs);
-    if (err!=cudaSuccess){
-        exit(-1);
-    }
+void copyFromHostToDeviceAsync(void *targetDevice, void *sourceHost, size_t bytesNum, cudaStream_t cs) {
+    checkCudaErrors(cudaMemcpyAsync(targetDevice, sourceHost, bytesNum, cudaMemcpyHostToDevice, cs));
 }
 
 void copyFromDeviceToHost(void *targetHost, void *sourceDevice, size_t bytesNum) {

@@ -83,6 +83,16 @@ struct NodeConfig {
    */
   std::string catalogFile = "";
 
+  /**
+   * The size of gpu Buffer Manaager
+   */
+   uint32_t gpuBufferManagerPoolSize = 0;
+
+   /**
+    * The size of gpu Task Manager
+    */
+    uint32_t  gpuTaskManagerPoolSize = 0;
+
 };
 
 }

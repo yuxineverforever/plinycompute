@@ -18,7 +18,7 @@ namespace pdb {
 
         ~PDBCUDATaskManager();
 
-        PDBCUDATaskManager(int32_t streamNum, bool isManager);
+        PDBCUDATaskManager(uint32_t threadNum, bool isManager);
 
         PDBCUDAThreadInfo getThreadInfoFromPool();
 
@@ -33,7 +33,7 @@ namespace pdb {
         /**
          * number of threads
          */
-        int32_t threadNum;
+        uint32_t streamNum;
 
         /**
          * mutex for protection

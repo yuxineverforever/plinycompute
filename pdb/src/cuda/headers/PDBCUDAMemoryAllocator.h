@@ -2,12 +2,12 @@
 
 #include <iostream>
 #include "PDBRamPointer.h"
+
 /**
  * here is one State flag for memory allocation.
  * INSTANT: get GPU space allocated instantly
  * LAZY: get GPU space allocated later
  */
-
 
 void *memMalloc(size_t size);
 

@@ -42,13 +42,13 @@ namespace fs = boost::filesystem;
 using namespace pdb;
 
 
-void setGPUTaskManager(void ** gpuTaskMgr, int32_t numThreads, bool isManager){
-    PDBCUDATaskManager * tmp = new PDBCUDATaskManager(numThreads, isManager);
+void setGPUTaskManager(void ** gpuTaskMgr, uint32_t gpuTaskManagerPoolSize, bool isManager){
+    PDBCUDATaskManager * tmp = new PDBCUDATaskManager(gpuTaskManagerPoolSize, isManager);
     *gpuTaskMgr = (void*)tmp;
 }
 
-void setGPUMemoryManager(void ** gpuMgr, pdb::PDBBufferManagerInterfacePtr myMgr, int32_t numThreads, bool isManager){
-    PDBCUDAMemoryManager* tmp = new PDBCUDAMemoryManager(myMgr, numThreads, isManager);
+void setGPUMemoryManager(void ** gpuMgr, pdb::PDBBufferManagerInterfacePtr myMgr, uint32_t gpuBufferManagerPoolSize, bool isManager){
+    PDBCUDAMemoryManager* tmp = new PDBCUDAMemoryManager(myMgr, gpuBufferManagerPoolSize, isManager);
     *gpuMgr = (void*)tmp;
 }
 
@@ -122,6 +122,10 @@ int main(int argc, char *argv[]) {
     desc.add_options()("rootDirectory,r", po::value<std::string>(&config->rootDirectory)->default_value("./pdbRoot"), "The root directory we want to use.");
     desc.add_options()("maxRetries", po::value<uint32_t>(&config->maxRetries)->default_value(5), "The maximum number of retries before we give up.");
 
+    // These are the options for GPU Buffer Manager / GPU Task Manager, the value may depends on the numThreads
+    desc.add_options()("gpuBufferManagerPoolSize", po::value<uint32_t>(&config->gpuBufferManagerPoolSize)->default_value(config->numThreads+2), "The size of the GPU Buffer Manager.");
+    desc.add_options()("gpuTaskManagerPoolSize", po::value<uint32_t>(&config->gpuTaskManagerPoolSize)->default_value( 2*(config->numThreads)+1 ), "The size of the GPU Task Manager.");
+
     // grab the options
     po::variables_map vm;
     store(parse_command_line(argc, argv, desc), vm);
@@ -175,8 +179,8 @@ int main(int argc, char *argv[]) {
         backEnd.addFunctionality(std::make_shared<pdb::PDBStorageManagerBackend>());
         backEnd.addFunctionality(std::make_shared<pdb::ExecutionServerBackend>());
 
-        setGPUMemoryManager(&gpuMemoryManager, backEnd.getFunctionalityPtr<PDBBufferManagerInterface>(), config->numThreads, config->isManager);
-        setGPUTaskManager(&gpuTaskManager, config->numThreads, config->isManager);
+        setGPUMemoryManager(&gpuMemoryManager, backEnd.getFunctionalityPtr<PDBBufferManagerInterface>(), config->gpuBufferManagerPoolSize, config->isManager);
+        setGPUTaskManager(&gpuTaskManager, config->gpuTaskManagerPoolSize, config->isManager);
 
         // start the backend
         backEnd.startServer(make_shared<pdb::GenericWork>([&](PDBBuzzerPtr callerBuzzer) {

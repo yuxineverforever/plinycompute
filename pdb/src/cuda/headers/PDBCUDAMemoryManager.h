@@ -8,22 +8,19 @@
 #include <PDBBufferManagerInterface.h>
 #include "PDBCUDAUtility.h"
 #include "PDBRamPointer.h"
+#include "PDBCUDAPage.h"
+#include "PDBCUDAConfig.h"
 #include "ReaderWriterLatch.h"
 
 namespace pdb {
-
     class PDBCUDAMemoryManager;
-
     using PDBCUDAMemoryManagerPtr = std::shared_ptr<PDBCUDAMemoryManager>;
-    using page_id_t = int32_t;
-    using frame_id_t  = int32_t;
 
     class PDBCUDAMemoryManager {
     public:
-
         /**
          *
-         * @param buffer
+         * @param buffer - CPU buffer
          */
         PDBCUDAMemoryManager(PDBBufferManagerInterfacePtr buffer, int32_t NumOfthread, bool isManager) {
             if (isManager) {
@@ -31,13 +28,14 @@ namespace pdb {
             }
             clock_hand = 0;
             bufferManager = buffer;
-            poolSize = NumOfthread + 2;
+            poolSize = NumOfthread + 4;
             pageSize = buffer->getMaxPageSize();
+            pages = new PDBCUDAPage[poolSize];
             for (size_t i = 0; i < poolSize; i++) {
                 void *cudaPointer;
                 cudaMalloc((void **) &cudaPointer, pageSize);
                 availablePosition.push_back(cudaPointer);
-                freeList.push_back(static_cast<int32_t>(i));
+                freeList.emplace_back(static_cast<int32_t>(i));
                 recentlyUsed.push_back(false);
             }
         }
@@ -58,21 +56,21 @@ namespace pdb {
          *
          * @param pageAddress
          * @param objectAddress
-         * @return
+         * @return the offset of the object to its cpu page start address
          */
-        size_t getObjectOffset(void *pageAddress, void *objectAddress) {
+        size_t getObjectOffsetWithCPUPage(void *pageAddress, void *objectAddress) {
             return (char *) objectAddress - (char *) pageAddress;
         }
 
         /**
          *
          * @param objectAddress
-         * @return
+         * @return the info of the cpu page containing this object
          */
-        pair<void *, size_t> getObjectPage(void *objectAddress) {
+        pair<void *, size_t> getObjectCPUPage(void *objectAddress) {
             pdb::PDBPagePtr whichPage = bufferManager->getPageForObject(objectAddress);
             if (whichPage == nullptr) {
-                std::cout << "getObjectOffset: cannot get page for this object!\n";
+                std::cout << "getObjectCPUPage: cannot get page for this object!\n";
                 exit(-1);
             }
             void *pageAddress = whichPage->getBytes();
@@ -90,7 +88,7 @@ namespace pdb {
          */
         void* handleInputObject(pair<void *, size_t> pageInfo, void *objectAddress, cudaStream_t cs) {
             //std::cout << (long) pthread_self() << " : pageInfo: " << pageInfo.first << "bytes: "<< pageInfo.second << std::endl;
-            size_t cudaObjectOffset = getObjectOffset(pageInfo.first, objectAddress);
+            size_t cudaObjectOffset = getObjectOffsetWithCPUPage(pageInfo.first, objectAddress);
             if (PageTable.find(pageInfo) != PageTable.end()) {
                 pageTableMutex.RLock();
                 void *cudaObjectAddress = static_cast<char *>(PageTable[pageInfo]) + cudaObjectOffset;
@@ -104,9 +102,12 @@ namespace pdb {
                     return cudaObjectAddress;
                 } else {
                     void* cudaPointer = nullptr;
-                    copyFromHostToDeviceAsync((void **)&cudaPointer, pageInfo.first, pageInfo.second, cs);
+                    frame_id_t  oneframe = getAvailableFrame();
+                    cudaPointer = availablePosition[oneframe];
                     PageTable.insert(std::make_pair(pageInfo, cudaPointer));
                     pageTableMutex.WUnlock();
+
+                    copyFromHostToDeviceAsync(cudaPointer, pageInfo.first, pageInfo.second, cs);
                     void *cudaObjectAddress = static_cast<char *>(cudaPointer) + cudaObjectOffset;
                     return cudaObjectAddress;
                 }
@@ -115,7 +116,7 @@ namespace pdb {
 
         RamPointerReference handleInputObjectWithRamPointer(pair<void *, size_t> pageInfo, void *objectAddress, size_t size, cudaStream_t cs){
 
-            size_t cudaObjectOffset = getObjectOffset(pageInfo.first, objectAddress);
+            size_t cudaObjectOffset = getObjectOffsetWithCPUPage(pageInfo.first, objectAddress);
             if (PageTable.find(pageInfo) != PageTable.end()){
                 pageTableMutex.RLock();
                 void *cudaObjectAddress = static_cast<char *>(PageTable[pageInfo]) + cudaObjectOffset;
@@ -130,10 +131,11 @@ namespace pdb {
                 } else {
                     void* cudaPointer = nullptr;
                     frame_id_t oneframe = getAvailableFrame();
-                    copyFromHostToDeviceAsyncWithOutMalloc(availablePosition[oneframe], pageInfo.first, pageInfo.second, cs);
                     cudaPointer = availablePosition[oneframe];
                     PageTable.insert(std::make_pair(pageInfo, cudaPointer));
                     pageTableMutex.WUnlock();
+
+                    copyFromHostToDeviceAsync(cudaPointer, pageInfo.first, pageInfo.second, cs);
                     void* cudaObjectAddress = static_cast<char *>(cudaPointer) + cudaObjectOffset;
                     return addRamPointerCollection(cudaObjectAddress, objectAddress, size);
                 }
@@ -188,6 +190,7 @@ namespace pdb {
                 recentlyUsed[frame] = true;
                 return frame;
             } else {
+                std::cout << "all the free frames have been used! \n" << std::endl;
                 while (recentlyUsed[clock_hand] == true) {
                     recentlyUsed[clock_hand] = false;
                     incrementIterator(clock_hand);
@@ -195,14 +198,15 @@ namespace pdb {
                 recentlyUsed[clock_hand] = true;
                 frame = clock_hand;
                 incrementIterator(clock_hand);
-                auto iter = std::find_if(frameTable.begin(), frameTable.end(),
-                                         [&](const std::pair<pair<void *, size_t>, frame_id_t> &pair) {
-                                             return pair.second == frame;
+
+                auto iter = std::find_if(PageTable.begin(), PageTable.end(),
+                                         [&](const std::pair<pair<void*, size_t>, void* > &pair) {
+                                             return pair.second == availablePosition[frame];
                                          });
-                if (iter->second < 0 || iter->second > poolSize) {
-                    std::cerr << " frame number is wrong! \n";
+
+                if (iter == PageTable.end()) {
+                    std::cerr << " Cannot find the right frame to kick out from replacer! \n";
                 }
-                frameTable.erase(iter);
                 PageTable.erase(iter->first);
                 return frame;
             }
@@ -256,10 +260,9 @@ namespace pdb {
         std::map<pair<void *, size_t>, void *> PageTable;
 
         /**
-         * framePageTable for mapping CPU bufferManager page address to GPU frame.
+         * array of all the pages
          */
-        std::map<pair<void *, size_t>, frame_id_t> frameTable;
-
+        PDBCUDAPage* pages;
 
         /**
          * one latch to protect the gpuPageTable access
