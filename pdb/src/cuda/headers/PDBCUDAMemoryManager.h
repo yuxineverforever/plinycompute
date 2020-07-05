@@ -130,16 +130,19 @@ namespace pdb {
                 } else {
                     void* cudaPointer = nullptr;
                     frame_id_t oneframe = getAvailableFrame();
-                    copyFromHostToDeviceAsyncWithOutMalloc((void **)&availablePosition[oneframe], pageInfo.first, pageInfo.second, cs);
+                    copyFromHostToDeviceAsyncWithOutMalloc(availablePosition[oneframe], pageInfo.first, pageInfo.second, cs);
+                    cudaPointer = availablePosition[oneframe];
                     PageTable.insert(std::make_pair(pageInfo, cudaPointer));
                     pageTableMutex.WUnlock();
-                    void *cudaObjectAddress = static_cast<char *>(cudaPointer) + cudaObjectOffset;
+                    void* cudaObjectAddress = static_cast<char *>(cudaPointer) + cudaObjectOffset;
                     return addRamPointerCollection(cudaObjectAddress, objectAddress, size);
                 }
             }
         }
 
+        //TODO: operations to memMalloc() should be implemented as thread safe.
         void *memMalloc(size_t memSize) {
+            memMallocMutex.WLock();
             if (allocatorPages.size() == 0 && currFrame == -1) {
                 frame_id_t oneframe = getAvailableFrame();
                 bytesUsed = 0;
@@ -154,6 +157,7 @@ namespace pdb {
             }
             size_t start = bytesUsed;
             bytesUsed += memSize;
+            memMallocMutex.WUnlock();
             return static_cast<char *>(availablePosition[currFrame]) + start;
         }
 
@@ -297,6 +301,11 @@ namespace pdb {
          */
 
         ReaderWriterLatch RamPointerMutex{};
+
+        /**
+         * This latch is for protecting `bytesUsed` and `currFrame` and `allocatorPages`
+         */
+        ReaderWriterLatch memMallocMutex{};
 
         size_t bytesUsed = 0;
 

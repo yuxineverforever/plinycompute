@@ -415,7 +415,7 @@ void pdb::PDBAggregationPipeAlgorithm::cleanup() {
   preaggregationPipelines = nullptr;
   aggregationPipelines = nullptr;
   pageQueues = nullptr;
-  exit(0);
+  //exit(0);
 }
 
 pdb::PDBPhysicalAlgorithmType pdb::PDBAggregationPipeAlgorithm::getAlgorithmType() {

@@ -25,7 +25,7 @@ void copyFromHostToDeviceAsync(void **targetDevice, void *sourceHost, size_t byt
 
 void copyFromDeviceToHostAsync(void *targetHost, void *sourceDevice, size_t bytesNum, cudaStream_t cs);
 
-void copyFromHostToDeviceAsyncWithOutMalloc(void **targetDevice, void *sourceHost, size_t bytesNum, cudaStream_t cs);
+void copyFromHostToDeviceAsyncWithOutMalloc(void *targetDevice, void *sourceHost, size_t bytesNum, cudaStream_t cs);
 
 void printCudaVersion();
 
