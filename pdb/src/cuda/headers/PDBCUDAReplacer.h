@@ -24,7 +24,7 @@ namespace pdb {
          */
         ~ClockReplacer();
 
-        bool Victim(frame_id_t *frame_id);
+        bool Victim(frame_id_t* frame_id);
 
         void Pin(frame_id_t frame_id);
 

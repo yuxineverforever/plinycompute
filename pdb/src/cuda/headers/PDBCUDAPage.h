@@ -2,11 +2,11 @@
 #define PDB_CUDA_PAGE
 
 #include <cstdint>
+#include <PDBCUDAConfig.h>
+#include <cuda_runtime.h>
 
 namespace pdb{
 
-    using page_id_t = int32_t;
-    static constexpr int32_t INVALID_PAGE_ID = -1;
 
     /**
      * NONE: default value
@@ -29,7 +29,11 @@ namespace pdb{
 
         inline char* getBytes() { return data;}
 
+        inline void setDirty(bool isDirty){ is_dirty = isDirty;}
+
         inline bool isDirty() { return is_dirty; }
+
+        inline void setPageID(page_id_t id) { page_id = id;}
 
         /** @return the page id of this page */
         inline page_id_t GetPageId() { return page_id; }
@@ -43,17 +47,24 @@ namespace pdb{
         /** decrease the pin count */
         inline void decrementPinCount() { pin_count--;}
 
-        inline void setPageID(page_id_t id) { page_id = id;}
-
         inline void setPageType(PDBCUDAPageType type) { page_type = type;}
 
-    private:
+        inline void setPageSize(int size) { page_size = size;}
 
+        inline void Reset(){ ResetMemory(); pin_count = 0; is_dirty = false; page_id = INVALID_PAGE_ID;}
+
+    private:
+        inline void ResetMemory() {
+            assert(data != nullptr);
+            assert(page_size != 0);
+            cudaMemset(data, 0, page_size);
+        }
         PDBCUDAPageType page_type = NONE;
         page_id_t page_id = INVALID_PAGE_ID;
         char* data = nullptr;
         bool is_dirty = false;
         int pin_count = 0;
+        int page_size = 0;
     };
 };
 

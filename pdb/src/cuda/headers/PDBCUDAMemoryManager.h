@@ -10,6 +10,9 @@
 #include "PDBRamPointer.h"
 #include "PDBCUDAPage.h"
 #include "PDBCUDAConfig.h"
+#include "PDBCUDAReplacer.h"
+#include "PDBCUDACPUStorageManager.h"
+
 #include "ReaderWriterLatch.h"
 
 namespace pdb {
@@ -22,21 +25,23 @@ namespace pdb {
          *
          * @param buffer - CPU buffer
          */
-        PDBCUDAMemoryManager(PDBBufferManagerInterfacePtr buffer, int32_t NumOfthread, bool isManager) {
+        PDBCUDAMemoryManager(PDBBufferManagerInterfacePtr buffer, int32_t pool_Size, bool isManager) {
             if (isManager) {
                 return;
             }
-            clock_hand = 0;
             bufferManager = buffer;
-            poolSize = NumOfthread + 4;
+            poolSize = pool_Size;
             pageSize = buffer->getMaxPageSize();
+
             pages = new PDBCUDAPage[poolSize];
+            replacer = new ClockReplacer(poolSize);
+
             for (size_t i = 0; i < poolSize; i++) {
                 void *cudaPointer;
                 cudaMalloc((void **) &cudaPointer, pageSize);
-                availablePosition.push_back(cudaPointer);
+                pages[i].setBytes(static_cast<char*>(cudaPointer));
+                pages[i].setPageSize(pageSize);
                 freeList.emplace_back(static_cast<int32_t>(i));
-                recentlyUsed.push_back(false);
             }
         }
 
@@ -44,6 +49,10 @@ namespace pdb {
          *
          */
         ~PDBCUDAMemoryManager() {
+
+            delete[] pages;
+            delete replacer;
+
             for (auto &iter: PageTable) {
                 freeGPUMemory(&iter.second);
             }
@@ -182,36 +191,6 @@ namespace pdb {
         }
 
 
-        frame_id_t getAvailableFrame() {
-            frame_id_t frame;
-            if (!freeList.empty()) {
-                frame = freeList.front();
-                freeList.pop_front();
-                recentlyUsed[frame] = true;
-                return frame;
-            } else {
-                std::cout << "all the free frames have been used! \n" << std::endl;
-                while (recentlyUsed[clock_hand] == true) {
-                    recentlyUsed[clock_hand] = false;
-                    incrementIterator(clock_hand);
-                }
-                recentlyUsed[clock_hand] = true;
-                frame = clock_hand;
-                incrementIterator(clock_hand);
-
-                auto iter = std::find_if(PageTable.begin(), PageTable.end(),
-                                         [&](const std::pair<pair<void*, size_t>, void* > &pair) {
-                                             return pair.second == availablePosition[frame];
-                                         });
-
-                if (iter == PageTable.end()) {
-                    std::cerr << " Cannot find the right frame to kick out from replacer! \n";
-                }
-                PageTable.erase(iter->first);
-                return frame;
-            }
-        }
-
         void DeepCopyD2H(void *startLoc, size_t numBytes) {
             int count = 0;
             for (auto &ramPointerPair : ramPointerCollection) {
@@ -232,19 +211,128 @@ namespace pdb {
             }
         }
 
+        bool SwapPageOut(page_id_t page_id) {
+            // TODO: implement it.
+            return true;
+        }
+
+        void FindFramePlacement(frame_id_t& frame){
+            // Try to find the available frame from free_list, if not, try to get from replacer
+            if (!freeList.empty()) {
+                frame = freeList.front();
+                freeList.pop_front();
+                return;
+            }
+            // find the available frame from replacer
+            if (replacer->Size() > 0) {
+                replacer->Victim(&frame);
+                auto res = std::find_if(pageTable.begin(), pageTable.end(),
+                                        [&](const std::pair<page_id_t, frame_id_t> &it) {
+                                            return it.second == frame;
+                                        });
+                // if page is dirty, write it back to disk
+                page_id_t toWriteBack = res->first;
+                if (pages[frame].isDirty()) {
+                    SwapPageOut(toWriteBack);
+                }
+                pageTable.erase(res);
+            } else {
+                std::cout << "No available memory in FetchPageImpl()!\n";
+                exit(-1);
+            }
+        }
+
+        bool UnpinPageImpl(page_id_t page_id, bool is_dirty) {
+            auto iter = pageTable.find(page_id);
+            if (iter == pageTable.end()){
+                return false;
+            }
+            auto& thisPage = pages[iter->second];
+            auto pincount = thisPage.GetPinCount();
+            if (pincount<=0){
+                return false;
+            }
+            thisPage.setDirty(is_dirty);
+            thisPage.decrementPinCount();
+            if (thisPage.GetPinCount()==0){
+                replacer->Unpin(iter->second);
+            }
+            return true;
+        }
+
+        bool IsAllPagesPinned(){
+            return pageTable.size() == poolSize && replacer->Size() == 0;
+        }
+
+        PDBCUDAPage* FetchPageImpl(page_id_t page_id){
+            auto iter = pageTable.find(page_id);
+            if (iter != pageTable.end()){
+                replacer->Pin(iter->second);
+                pages[iter->second].incrementPinCount();
+                return &pages[iter->second];
+            }
+            if (IsAllPagesPinned()){
+                return nullptr;
+            }
+            // if cannot find the page from page_table, then try to get the page from free_list or replacer.
+            frame_id_t replacement;
+            FindFramePlacement(replacement);
+            //update the page table
+            pageTable[page_id] = replacement;
+            pages[replacement].Reset();
+            pages[replacement].incrementPinCount();
+            pages[replacement].setPageID(page_id);
+            replacer->Pin(replacement);
+
+            //TODO: change cpu_storage_manager
+            cpu_storage_manager->ReadPage(page_id, pages[replacement].getBytes());
+            return &pages[replacement];
+        }
+
+        PDBCUDAPage* NewPageImpl(page_id_t *page_id) {
+            //TODO: change cpu_storage_manager
+            *page_id = cpu_storage_manager->AllocatePage();
+
+            if (IsAllPagesPinned()){
+                return nullptr;
+            }
+            // find a available frame to place the page
+            frame_id_t placement;
+            FindFramePlacement(placement);
+            pageTable[*page_id] = placement;
+            pages[placement].Reset();
+            pages[placement].incrementPinCount();
+            pages[placement].setPageID(*page_id);
+            replacer->Pin(placement);
+            return &pages[placement];
+        }
+
+        bool DeletePageImpl(page_id_t page_id) {
+
+            //TODO: change cpu_storage_manager
+            cpu_storage_manager->DeallocatePage(page_id);
+            auto iter = pageTable.find(page_id);
+            if (iter==pageTable.end()){
+                return true;
+            } else {
+                auto& thisPage = pages[iter->second];
+                auto pincount = thisPage.GetPinCount();
+                if (pincount==0){
+                    freeList.push_back(iter->second);
+                    pageTable.erase(iter);
+                    thisPage.Reset();
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+        }
         /**
         void swapPage(){
             PDBPageHandle cpuPage = bufferManager->getPage();
             cpuPage->getBytes();
         }
         */
-    private:
-        void incrementIterator(int32_t &it) {
-            if (++it == poolSize) {
-                it = 0;
-            }
-            return;
-        }
 
     private:
 
@@ -253,51 +341,33 @@ namespace pdb {
          */
         PDBBufferManagerInterfacePtr bufferManager;
 
-        /**
-         * gpu_page_table for mapping CPU bufferManager page address to GPU bufferManager page address
-         */
-        //std::map<pair<void*,size_t>, void*> PageTable;
-        std::map<pair<void *, size_t>, void *> PageTable;
 
-        /**
-         * array of all the pages
-         */
+        /** Page table for keeping track of buffer pool pages. */
+        std::unordered_map<page_id_t, frame_id_t> pageTable;
+
+        /**  H2DPageMap for mapping CPU bufferManager page info to GPU bufferManager page ids */
+        std::unordered_map<pair<void *, size_t>, page_id_t> H2DPageMap;
+
+        /** array of all the pages */
         PDBCUDAPage* pages;
 
-        /**
-         * one latch to protect the gpuPageTable access
-         */
+        /** one latch to protect the gpuPageTable access */
         ReaderWriterLatch pageTableMutex;
 
-        /**
-         * the size of the pool
-         */
+        /** the size of the pool  */
         size_t poolSize;
 
-        /**
-         * the size of the page in gpu Buffer Manager
-         */
+        /** the size of the page in gpu Buffer Manager  */
         size_t pageSize;
 
-        /**
-         * positions for holding the memory
-         */
-        std::vector<void *> availablePosition;
+        /** here is the replacer for */
+        ClockReplacer *replacer;
 
-        /**
-         * Frames for holding the free memory
-         */
+        /** Frames for holding the free memory */
         std::list<frame_id_t> freeList;
 
-        /**
-         * True if the frame has recently been used
-         */
-        std::vector<bool> recentlyUsed;
 
-        /**
-         * Clock hand for mimic a LRU algorithm
-         */
-        int32_t clock_hand;
+        PDBCUDACPUStorageManager* cpu_storage_manager;
 
         /**
          * === Here is the part for mem allocator ===

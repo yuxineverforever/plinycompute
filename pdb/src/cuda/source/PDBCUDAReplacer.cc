@@ -13,9 +13,7 @@ namespace pdb {
     bool ClockReplacer::Victim(frame_id_t *frame_id) {
 
         while(!replacer.empty()){
-
             auto iter = replacer.find(clock_hand);
-
             if(iter != replacer.end()){
                 if (buffer[clock_hand]==false){
                     replacer.erase(iter);
@@ -27,13 +25,12 @@ namespace pdb {
                     incrementIterator(clock_hand);
                 }
             } else {
-
                 incrementIterator(clock_hand);
-
             }
         }
         return false;
     }
+
     void ClockReplacer::Pin(frame_id_t frame_id) {
         auto iter = replacer.find(frame_id);
         if (iter != replacer.end()){
@@ -43,13 +40,16 @@ namespace pdb {
             buffer[frame_id] = true;
         }
     }
+
     void ClockReplacer::Unpin(frame_id_t frame_id) {
         replacer.insert(frame_id);
         buffer[frame_id] = true;
     }
+
     size_t ClockReplacer::Size() {
         return replacer.size();
     }
+
     void ClockReplacer::incrementIterator(unsigned int& it){
         if (it == totalSize){
             it = 0;
