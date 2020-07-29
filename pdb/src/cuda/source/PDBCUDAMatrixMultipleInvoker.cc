@@ -1,14 +1,15 @@
 #include "PDBCUDAMatrixMultipleInvoker.h"
-#include "PDBCUDATaskManager.h"
+#include "PDBCUDAStreamManager.h"
 
 extern void *gpuMemoryManager;
-extern void *gpuTaskManager;
+extern void *gpuThreadManager;
 
 namespace pdb {
 
     PDBCUDAMatrixMultipleInvoker::PDBCUDAMatrixMultipleInvoker() {
-        auto threadInfo = ((PDBCUDATaskManager *) gpuTaskManager)->getThreadInfoFromPool();
+        auto threadInfo = ((PDBCUDAStreamManager *) gpuThreadManager)->getThreadInfoFromPool();
         cudaStream = threadInfo.first;
+        
         cudaHandle = threadInfo.second;
     }
 

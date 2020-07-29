@@ -25,6 +25,10 @@ namespace pdb{
 
         PDBCUDAPage() = default;
 
+        ~PDBCUDAPage(){
+            cudaFree(data);
+        }
+
         inline void setBytes(char* loc) { data = loc;}
 
         inline char* getBytes() { return data;}
@@ -54,13 +58,16 @@ namespace pdb{
         inline void Reset(){ ResetMemory(); pin_count = 0; is_dirty = false; page_id = INVALID_PAGE_ID;}
 
     private:
+
         inline void ResetMemory() {
             assert(data != nullptr);
             assert(page_size != 0);
             cudaMemset(data, 0, page_size);
         }
+
         PDBCUDAPageType page_type = NONE;
         page_id_t page_id = INVALID_PAGE_ID;
+
         char* data = nullptr;
         bool is_dirty = false;
         int pin_count = 0;

@@ -5,6 +5,7 @@
 #include <list>
 
 namespace pdb {
+
     // TODO: add comment
     // Here is the Ram Pointer which can point to both CPU/GPU RAM
     /**
@@ -73,7 +74,6 @@ namespace pdb {
         int refCount;
         bool isDirty;
     };
-
     using RamPointerPtr = std::shared_ptr<RamPointer>;
 
     /**
@@ -84,19 +84,15 @@ namespace pdb {
         RamPointerBase(RamPointerPtr useMe) {
             ptr = useMe;
         }
-
         ~RamPointerBase(){
             std::cout << "RamPointerBase destructor!\n";
         }
-
         void push_back_cpu_pointer(void *pointer) {
             ptr->push_back_cpu_pointer(pointer);
         }
-
         void delete_cpu_pointer(void *pointer) {
             ptr->delete_cpu_pointer(pointer);
         }
-
         void* get_address() {
             return ptr->ramAddress;
         }

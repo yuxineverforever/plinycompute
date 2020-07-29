@@ -1,13 +1,13 @@
 #include <assert.h>
 #include "PDBCUDAVectorAddInvoker.h"
-#include "PDBCUDATaskManager.h"
+#include "PDBCUDAStreamManager.h"
 
 extern void *gpuMemoryManager;
-extern void *gpuTaskManager;
+extern void *gpuThreadManager;
 
 namespace pdb {
     PDBCUDAVectorAddInvoker::PDBCUDAVectorAddInvoker() {
-        auto threadInfo = (static_cast<PDBCUDATaskManager *>(gpuTaskManager))->getThreadInfoFromPool();
+        auto threadInfo = (static_cast<PDBCUDAStreamManager *>(gpuThreadManager))->getThreadInfoFromPool();
         cudaStream = threadInfo.first;
         cudaHandle = threadInfo.second;
     }

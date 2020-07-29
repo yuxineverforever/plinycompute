@@ -91,7 +91,7 @@ struct NodeConfig {
    /**
     * The size of gpu Task Manager
     */
-    uint32_t  gpuTaskManagerPoolSize = 0;
+    uint32_t  gpuThreadManagerPoolSize = 0;
 
 };
 

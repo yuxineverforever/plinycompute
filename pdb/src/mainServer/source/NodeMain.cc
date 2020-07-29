@@ -35,15 +35,15 @@
 #include <ExecutionServerBackend.h>
 #include <random>
 #include "PDBCUDAMemoryManager.h"
-#include "PDBCUDATaskManager.h"
+#include "PDBCUDAStreamManager.h"
 
 namespace po = boost::program_options;
 namespace fs = boost::filesystem;
 using namespace pdb;
 
 
-void setGPUTaskManager(void ** gpuTaskMgr, uint32_t gpuTaskManagerPoolSize, bool isManager){
-    PDBCUDATaskManager * tmp = new PDBCUDATaskManager(gpuTaskManagerPoolSize, isManager);
+void setGPUThreadManager(void ** gpuTaskMgr, uint32_t gpuThreadManagerPoolSize, bool isManager){
+    PDBCUDAStreamManager * tmp = new PDBCUDAStreamManager(gpuThreadManagerPoolSize, isManager);
     *gpuTaskMgr = (void*)tmp;
 }
 
@@ -99,7 +99,7 @@ pdb::PDBPageHandle createRandomTempPage(pdb::PDBBufferManagerImpl &myMgr, vector
 }
 
 extern void* gpuMemoryManager;
-extern void* gpuTaskManager;
+extern void* gpuThreadManager;
 int main(int argc, char *argv[]) {
 
     // create the program options
@@ -124,7 +124,7 @@ int main(int argc, char *argv[]) {
 
     // These are the options for GPU Buffer Manager / GPU Task Manager, the value may depends on the numThreads
     desc.add_options()("gpuBufferManagerPoolSize", po::value<uint32_t>(&config->gpuBufferManagerPoolSize)->default_value(config->numThreads+2), "The size of the GPU Buffer Manager.");
-    desc.add_options()("gpuTaskManagerPoolSize", po::value<uint32_t>(&config->gpuTaskManagerPoolSize)->default_value( 2*(config->numThreads)+1 ), "The size of the GPU Task Manager.");
+    desc.add_options()("gpuThreadManagerPoolSize", po::value<uint32_t>(&config->gpuThreadManagerPoolSize)->default_value( 4*(config->numThreads)+1 ), "The size of the GPU Task Manager.");
 
     // grab the options
     po::variables_map vm;
@@ -180,7 +180,7 @@ int main(int argc, char *argv[]) {
         backEnd.addFunctionality(std::make_shared<pdb::ExecutionServerBackend>());
 
         setGPUMemoryManager(&gpuMemoryManager, backEnd.getFunctionalityPtr<PDBBufferManagerInterface>(), config->gpuBufferManagerPoolSize, config->isManager);
-        setGPUTaskManager(&gpuTaskManager, config->gpuTaskManagerPoolSize, config->isManager);
+        setGPUThreadManager(&gpuThreadManager, config->gpuThreadManagerPoolSize, config->isManager);
 
         // start the backend
         backEnd.startServer(make_shared<pdb::GenericWork>([&](PDBBuzzerPtr callerBuzzer) {

@@ -4,6 +4,7 @@
 #include <iostream>
 #include <cstdio>
 #include <boost/stacktrace.hpp>
+#include <functional>
 #include "cublas_v2.h"
 #include "cuda_runtime.h"
 #include "helper_cuda.h"
@@ -36,5 +37,6 @@ void initGPUMemoryToZero(void **memdata, size_t bytesNum);
 void freeGPUMemory(void **memdata);
 
 int isDevicePointer(const void *ptr);
+
 
 #endif

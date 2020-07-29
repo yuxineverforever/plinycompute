@@ -18,7 +18,6 @@ namespace pdb {
         * @param num_pages the maximum number of pages the ClockReplacer will be required to store
         */
         explicit ClockReplacer(size_t num_pages);
-
         /**
          * Destroys the ClockReplacer.
          */
@@ -30,7 +29,7 @@ namespace pdb {
 
         void Unpin(frame_id_t frame_id);
 
-        size_t Size() ;
+        size_t Size();
 
     private:
         void incrementIterator(unsigned int& it);
