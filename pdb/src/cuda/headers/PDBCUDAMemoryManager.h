@@ -173,8 +173,22 @@ namespace pdb {
         }
         */
 
+        static void create(PDBBufferManagerInterfacePtr buffer, int32_t pool_Size, bool isManager){
+            cudaMemMgr = new PDBCUDAMemoryManager(buffer, pool_Size, isManager);
+        }
+
+        static PDBCUDAMemoryManager* get(){
+                assert(check()== true);
+                return cudaMemMgr;
+        }
+
+        static inline bool check(){
+            return cudaMemMgr!= nullptr;
+        }
+
     private:
 
+        static PDBCUDAMemoryManager* cudaMemMgr;
         /**
          * the buffer manager to help maintain gpu page table
          */
@@ -185,7 +199,6 @@ namespace pdb {
 
         /** array of all the pages */
         PDBCUDAPage* pages;
-
 
         /** the size of the pool  */
         size_t poolSize;

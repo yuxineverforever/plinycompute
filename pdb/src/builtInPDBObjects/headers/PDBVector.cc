@@ -22,12 +22,12 @@
 #include <cstddef>
 #include <iostream>
 #include <vector>
-#include "PDBCUDAMemoryAllocator.h"
 
 #include <algorithm>
 #include <iterator>
 #include <type_traits>
 #include <cstring>
+#include <PDBCUDADynamicStorage.h>
 
 #include "Handle.h"
 #include "Object.h"
@@ -67,6 +67,7 @@ Vector<TypeContained>::Vector(uint32_t initSize, uint32_t usedSize, bool onGPU) 
     myArray = makeObjectWithExtraStorage<Array<TypeContained>>(sizeof(TypeContained) * initSize, initSize, usedSize);
     isGPU = onGPU;
     if (onGPU){
+        auto instance = PDBCUDADynamicStorage::get();
         void* gpuArray = memMalloc(sizeof(TypeContained)* initSize);
         myArray->alternativeLocation = keepMemAddress(gpuArray, (void*)myArray->c_ptr(),
                                                                               sizeof(TypeContained)*initSize,

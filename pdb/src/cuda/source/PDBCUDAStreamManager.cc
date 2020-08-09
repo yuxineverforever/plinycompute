@@ -44,6 +44,9 @@ namespace pdb {
     }
 
     PDBCUDAStreamManager* PDBCUDAStreamManager::get(){
+
+        // use std::call_once to make sure the singleton initialization is thread-safe
+        std::call_once(initFlag, PDBCUDAStreamManager::create);
         assert(check()==true);
         return streamMgr;
     }
@@ -51,7 +54,4 @@ namespace pdb {
     inline bool PDBCUDAStreamManager::check(){
         return streamMgr != nullptr
     }
-
-
-
 }

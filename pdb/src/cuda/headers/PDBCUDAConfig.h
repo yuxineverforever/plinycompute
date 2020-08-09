@@ -7,6 +7,7 @@
 
 namespace pdb{
 
+
     using page_id_t = int32_t;
     using frame_id_t  = int32_t;
     using ref_bit = bool;
@@ -15,6 +16,6 @@ namespace pdb{
 
     static constexpr int32_t INVALID_PAGE_ID = -1;
     static constexpr int32_t CUDA_STREAM_NUM = 32;
-
+    static constexpr int32_t CUDA_MEM_MAMAGER_PAGE_NUM = 10;
 };
 #endif

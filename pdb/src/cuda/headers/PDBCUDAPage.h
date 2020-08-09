@@ -33,6 +33,8 @@ namespace pdb{
 
         inline char* getBytes() { return data;}
 
+        inline size_t getPageSize(){ return page_size; }
+
         inline void setDirty(bool isDirty){ is_dirty = isDirty;}
 
         inline bool isDirty() { return is_dirty; }
