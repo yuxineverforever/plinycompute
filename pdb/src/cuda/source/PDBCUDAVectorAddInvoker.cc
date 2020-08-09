@@ -29,7 +29,7 @@ namespace pdb {
         const float alpha = 1.0;
         cublasStatus_t cublas_status = cublasSaxpy(cudaHandle, N, &alpha, in1data, 1, outdata, 1);
         cublasErrCheck(cublas_status);
-        //copyFromDeviceToHostAsync((void *) copyBackPara, (void *) outputPara.first, outputPara.second[0] * sizeof(float), cudaStream);
+        //copyFromDeviceToHostAsync((void *) copyBackPara, (void *) outputArgument.first, outputArgument.second[0] * sizeof(float), cudaStream);
     }
 
     void PDBCUDAVectorAddInvoker::setInput(T *input, std::vector<size_t> &inputDim) {

@@ -8,7 +8,14 @@
  * StaticStorage is for handling all the static space allocation. (input parameters)
  * The allocation unit is page
  */
+
+//TODO: let invoke remember the input pages/output page
 namespace pdb{
+
+enum GPUPageCreateStatus{
+    CREATED_PAGE,
+    NOT_CREATED_PAGE
+};
 
 class PDBCUDAStaticStorage{
 
@@ -16,11 +23,15 @@ public:
 
     PDBCUDAStaticStorage() = default;
 
-    static size_t getObjectOffsetWithCPUPage(void* pageAddress, void* objectAddress);
+    inline size_t getObjectOffsetWithCPUPage(void* pageAddress, void* objectAddress);
 
-    static pair<void*, size_t> getObjectCPUPage(void* objectAddress);
+    pair<void*, size_t> getCPUPageFromObjectAddress(void* objectAddress);
 
-    static void* handleInputObject(pair<void *, size_t> pageInfo, void *objectAddress, cudaStream_t cs);
+    pair<page_id_t, GPUPageCreateStatus> getGPUPageFromCPUPage(pair<void*, size_t> pageInfo);
+
+    inline bool IsCPUPageMovedToGPU(pair<void*, size_t> pageInfo);
+
+    bool IsObjectOnGPU(void* objectAddress);
 
     static void create();
 

@@ -39,6 +39,11 @@ namespace pdb {
         unUsedStreams.push_back(toRelease);
     }
 
+
+    void PDBCUDAStreamManager::bindCPUThreadToStream(){
+        return
+    }
+
     void PDBCUDAStreamManager::create(){
         streamMgr = new PDBCUDAStreamManager;
     }

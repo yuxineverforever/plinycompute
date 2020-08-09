@@ -2,12 +2,26 @@
 
 namespace pdb{
 
+    // TODO: we should have someway to "remember" input pages and unpin them.
+    // TODO: principle: make sure when the computation is on, input/ouput pages are pinned. otherwise, pages should be unpinned.
 
-    size_t PDBCUDAStaticStorage::getObjectOffsetWithCPUPage(void* pageAddress, void* objectAddress) {
+    inline size_t PDBCUDAStaticStorage::getObjectOffsetWithCPUPage(void* pageAddress, void* objectAddress) {
         return (char *) objectAddress - (char *) pageAddress;
     }
 
-    pair<void*, size_t> PDBCUDAStaticStorage::getObjectCPUPage(void* objectAddress) {
+    inline bool PDBCUDAStaticStorage::IsCPUPageMovedToGPU(pair<void*, size_t> pageInfo){
+        return H2DPageMap.find(pageInfo) != H2DPageMap.end();
+    }
+
+    bool PDBCUDAStaticStorage::IsObjectOnGPU(void* objectAddress){
+        auto pageInfo = getCPUPageFromObjectAddress(objectAddress);
+        return H2DPageMap.find(pageInfo) != H2DPageMap.end();
+    }
+
+    pair<void*, size_t> PDBCUDAStaticStorage::getCPUPageFromObjectAddress(void* objectAddress) {
+        // objectAddress must be a CPU RAM Pointer
+        assert(isDevicePointer(objectAddress) == 0);
+
         pdb::PDBPagePtr whichPage = PDBCUDAMemoryManager::getCPUBufferManagerInterface()->getPageForObject(objectAddress);
         if (whichPage == nullptr) {
             std::cout << "getObjectCPUPage: cannot get page for this object!\n";
@@ -19,32 +33,21 @@ namespace pdb{
         return pageInfo;
     }
 
-    void* PDBCUDAStaticStorage::handleInputObject(pair<void *, size_t> pageInfo, void *objectAddress, cudaStream_t cs) {
+    pair<page_id_t, GPUPageCreateStatus> PDBCUDAStaticStorage::getGPUPageFromCPUPage(pair<void*, size_t> pageInfo){
 
-        size_t cudaObjectOffset = getObjectOffsetWithCPUPage(pageInfo.first, objectAddress);
+        // If Page has been added, just return it.
+        if (H2DPageMap.find(pageInfo) != H2DPageMap.end()){
 
-        if (H2DPageMap.find(pageInfo) != H2DPageMap.end()) {
-            void *cudaObjectAddress = static_cast<char *>(PDBCUDAMemoryManager::get()->FetchPageImpl(H2DPageMap[pageInfo])->getBytes()) + cudaObjectOffset;
-            return cudaObjectAddress;
-
+            // return false means the GPU page is already created.
+            return std::make_pair(H2DPageMap[pageInfo], GPUPageCreateStatus::CREATED_PAGE);
         } else {
+            // otherwise, grab a new page, insert to map and return pageID.
+            page_id_t newPageID;
+            PDBCUDAMemoryManager::get()->CreateNewPage(&newPageID);
+            H2DPageMap.insert(std::make_pair(pageInfo, newPageID));
 
-            if (H2DPageMap.find(pageInfo) != H2DPageMap.end()) {
-                void *cudaObjectAddress = static_cast<char *>(PDBCUDAMemoryManager::get()->FetchPageImpl(H2DPageMap[pageInfo])->getBytes()) + cudaObjectOffset;
-                return cudaObjectAddress;
-            } else {
-
-                page_id_t newPageID;
-
-                //TODO: pin the static pages for a long time
-                PDBCUDAPage* newPage = PDBCUDAMemoryManager::get()->NewPageImpl(&newPageID);
-                H2DPageMap.insert(std::make_pair(pageInfo, newPageID));
-                char* cudaPointer = newPage->getBytes();
-
-                copyFromHostToDeviceAsync(cudaPointer, pageInfo.first, pageInfo.second, cs);
-                void* cudaObjectAddress = static_cast<char *>(cudaPointer) + cudaObjectOffset;
-                return cudaObjectAddress;
-            }
+            // return true means the GPU page is newly created.
+            return std::make_pair(newPageID, GPUPageCreateStatus::NOT_CREATED_PAGE);
         }
     }
 

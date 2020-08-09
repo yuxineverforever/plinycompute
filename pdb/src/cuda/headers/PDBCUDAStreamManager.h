@@ -32,6 +32,8 @@ namespace pdb {
 
         void releaseUsedStream(const PDBCUDAStreamUtils& toRelease);
 
+        const PDBCUDAStreamUtils bindCPUThreadToStream();
+
         static void create();
         static PDBCUDAStreamManager* get();
         static inline bool check();

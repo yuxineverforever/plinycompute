@@ -142,6 +142,10 @@ namespace pdb {
             return &pages[placement];
         }
 
+        void CreateNewPage(page_id_t *page_id){
+            *page_id = cpu_storage_manager->AllocatePage();
+        }
+
         bool DeletePageImpl(page_id_t page_id) {
             //TODO: change cpu_storage_manager
             cpu_storage_manager->DeallocatePage(page_id);

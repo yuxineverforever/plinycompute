@@ -10,6 +10,7 @@
 #include "PDBCUDAUtility.h"
 #include "PDBCUDAOpType.h"
 #include "PDBCUDAOpInvoker.h"
+#include "PDBCUDAStaticStorage.h"
 
 // simply support two kind of operations
 namespace pdb {
@@ -26,7 +27,7 @@ namespace pdb {
 
         bool invoke();
 
-        void cublasRouting(T *in1data, T *in2data, T *outdata, size_t in1NumRow, size_t in1NumCol, size_t in2NumCol);
+        void kernel(T *in1data, T *in2data, T *outdata, size_t in1NumRow, size_t in1NumCol, size_t in2NumCol);
 
         void setInput(T *input, std::vector<size_t> &inputDim);
 
@@ -36,19 +37,12 @@ namespace pdb {
 
     public:
 
-        /**
-         * input para for computation on device
-         */
-        std::vector<std::pair<T *, std::vector<size_t> >> inputParas;
+        std::vector<std::pair<T *, std::vector<size_t> >> inputArguments;
 
-        /**
-         * output para for computation on device
-         */
-        std::pair<T *, std::vector<size_t> > outputPara;
+        std::vector<page_id_t> inputPages;
 
-        /**
-         * copyBackPara on host
-         */
+        std::pair<T *, std::vector<size_t> > outputArguments;
+
         T *copyBackPara;
 
         PDBCUDAOpType op = PDBCUDAOpType::MatrixMultiple;
@@ -56,6 +50,11 @@ namespace pdb {
         cublasHandle_t cudaHandle;
 
         cudaStream_t cudaStream;
+
+        PDBCUDAStaticStorage* sstore_instance;
+
+        PDBCUDAMemoryManager* memmgr_instance;
+
     };
 }
 #endif
