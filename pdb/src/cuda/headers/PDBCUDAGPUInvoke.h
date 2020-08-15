@@ -2,8 +2,8 @@
 #define PDB_CUDA_GPU_INVOKE
 
 #include <iostream>
-#include "PDBCUDAMatrixMultipleInvoker.h"
-#include "PDBCUDAVectorAddInvoker.h"
+#include "operators/PDBCUDAMatrixMultipleInvoker.h"
+#include "operators/PDBCUDAVectorAddInvoker.h"
 #include <vector>
 
 std::shared_ptr<pdb::RamPointerBase>
@@ -60,10 +60,10 @@ SimpleTypeGPUInvoke(InvokerType &f, OutputType *Out, std::vector<size_t> &OutDim
  * @param In2 - input param 2
  * @return bool - successful or not
  */
+
 template<typename InvokerType, typename InputType, typename OutputType>
 typename std::enable_if_t<is_base_of<pdb::PDBCUDAOpInvoker, InvokerType>::value, bool>
 GPUInvoke(InvokerType &f, pdb::Handle<OutputType> Output, pdb::Handle<InputType> In1, pdb::Handle<InputType> In2);
-
 
 /**
  * GPUInvoke for handling the case that dimensions for all the input/output params are 1 dimensional array
@@ -149,7 +149,6 @@ bool GPUInvoke(pdb::PDBCUDAOpType &op, pdb::Handle<pdb::Vector<float>> Out, std:
  * @param In2Dim
  * @return
  */
-
 bool GPUInvoke(pdb::PDBCUDAOpType &op, pdb::Handle<pdb::Vector<float>> Out, std::vector<size_t> &OutDim,
                pdb::Handle<pdb::Vector<float>> In1, std::vector<size_t> &In1Dim, pdb::Handle<pdb::Vector<float> > In2,
                std::vector<size_t> &In2Dim);

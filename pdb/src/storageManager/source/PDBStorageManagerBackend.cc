@@ -16,7 +16,7 @@
 #include <StoMaterializePageResult.h>
 #include <PDBBufferManagerBackEnd.h>
 #include <StoStartFeedingPageSetRequest.h>
-#include <PDBCUDAMemoryManager.h>
+#include <storage/PDBCUDAMemoryManager.h>
 
 void pdb::PDBStorageManagerBackend::init() {
 

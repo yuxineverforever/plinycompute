@@ -308,19 +308,16 @@ int main(int argc, char *argv[]) {
 
   /* Main training loops */
   for (int n = 0; n < iter; n++) {
-
     /* [1] Set up the join that will assign all of the words in the corpus to topics */
     Handle<Computation> myDocWordTopicJoin = makeObject<LDADocWordTopicJoin>(numWord);
     myDocWordTopicJoin->setInput(0, myInitialScanSet);
     myDocWordTopicJoin->setInput(1, input1);
     myDocWordTopicJoin->setInput(2, input2);
-
     /* Do an identity selection */
     Handle<Computation> myIdentitySelection = makeObject<LDADocWordTopicAssignmentIdentity>();
     myIdentitySelection->setInput(myDocWordTopicJoin);
 
     /* [2] Set up the sequence of actions that re-compute the topic probabilities for each document */
-
     /* Get the set of topics assigned for each doc */
     Handle<Computation> myDocWordTopicCount = makeObject<LDADocAssignmentMultiSelection>();
     myDocWordTopicCount->setInput(myIdentitySelection);
@@ -334,7 +331,6 @@ int main(int argc, char *argv[]) {
     myDocTopicProb->setInput(myDocTopicCountAgg);
 
     /* [3] Set up the sequence of actions that re-compute the word probs for each topic */
-
     /* Get the set of words assigned for each topic in each doc */
     Handle<Computation> myTopicWordCount = makeObject<LDATopicAssignmentMultiSelection>();
     myTopicWordCount->setInput(myIdentitySelection);

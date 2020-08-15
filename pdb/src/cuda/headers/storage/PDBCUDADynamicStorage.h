@@ -2,7 +2,7 @@
 #define PDB_CUDA_RAM_POINTER_MANAGER
 
 #include <iostream>
-#include <PDBCUDAMemoryManager.h>
+#include <storage/PDBCUDAMemoryManager.h>
 #include <PDBCUDAConfig.h>
 
 /**

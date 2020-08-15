@@ -2,9 +2,9 @@
 #include <LambdaCreationFunctions.h>
 #include "JoinComp.h"
 #include "MatrixBlock.h"
-#include "PDBCUDAUtility.h"
-#include "PDBCUDAOpInvoker.h"
-#include "PDBCUDAMatrixMultipleInvoker.h"
+#include "utility/PDBCUDAUtility.h"
+#include "operators/PDBCUDAOpInvoker.h"
+#include "operators/PDBCUDAMatrixMultipleInvoker.h"
 #include "PDBCUDAGPUInvoke.h"
 #include <mkl.h>
 

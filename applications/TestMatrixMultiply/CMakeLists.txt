@@ -6,13 +6,13 @@ add_pdb_integration_test(TestMatrixMultiply)
 add_dependencies(build-integration-tests TestMatrixMultiply)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/tools/cmake")
-set(CMAKE_CUDA_COMPILER "/usr/local/cuda-10.0/bin/nvcc")
+set(CMAKE_CUDA_COMPILER "/usr/local/cuda-10.2/bin/nvcc")
 set(CMAKE_CUDA_FLAGS "-arch=sm_75")
 
 # set CUDA path
 set (CUDA_INCLUDE_DIR "/usr/local/cuda/include")
-set (CUDA_BLAS_LIB "/usr/local/cuda-10.0/lib64/libcublas.so")
-set (CUDA_DART_LIB "/usr/local/cuda-10.0/lib64/libcudart.so")
+set (CUDA_BLAS_LIB "/usr/local/cuda-10.2/lib64/libcublas.so")
+set (CUDA_DART_LIB "/usr/local/cuda-10.2/lib64/libcudart.so")
 
 # use MKL and CUBLAS
 set(USE_MKL Yes)
@@ -23,7 +23,7 @@ find_package(MKL REQUIRED)
 include_directories(${MKL_INCLUDE_DIR})
 include_directories(${CUDA_INCLUDE_DIR})
 link_directories(${/home/yuxin/snap/intel/mkl/include/})
-include_directories("/usr/local/cuda-10.0/samples/common/inc/")
+include_directories("/usr/local/cuda-10.2/samples/common/inc/")
 include_directories("${PROJECT_SOURCE_DIR}/pdb/src/cuda/headers/")
 message("as ${MKL_LIBRARIES}")
 

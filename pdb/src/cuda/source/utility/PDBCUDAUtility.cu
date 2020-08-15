@@ -1,5 +1,5 @@
 #include <assert.h>
-#include "PDBCUDAUtility.h"
+#include "utility/PDBCUDAUtility.h"
 
 void printCudaVersion() {
     std::cout << "CUDA Compiled version: " << __CUDACC_VER__ << std::endl;

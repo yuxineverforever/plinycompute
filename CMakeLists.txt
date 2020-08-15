@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.5.1)
 # set clang as the default compiler
 set(CMAKE_C_COMPILER "clang")
 set(CMAKE_CXX_COMPILER "clang++")
-set(CMAKE_CUDA_COMPILER "/usr/local/cuda-10.0/bin/nvcc")
+set(CMAKE_CUDA_COMPILER "/usr/local/cuda-10.2/bin/nvcc")
 set(CMAKE_CUDA_FLAGS "-arch=sm_75")
 set(BOOST_POSSIBLE_LOCATIONS
         /home/yuxin/snap/boost
@@ -31,8 +31,8 @@ endforeach()
 
 set (CUDA_INCLUDE_DIR "/usr/local/cuda/include")
 set (CUDA_HELPER_INCLUDE_DIR "/usr/local/cuda/samples/common/inc")
-set (CUDA_BLAS_LIB "/usr/local/cuda-10.0/lib64/libcublas.so")
-set (CUDA_DART_LIB "/usr/local/cuda-10.0/lib64/libcudart.so")
+set (CUDA_BLAS_LIB "/usr/local/cuda-10.2/lib64/libcublas.so")
+set (CUDA_DART_LIB "/usr/local/cuda-10.2/lib64/libcudart.so")
 
 option(USE_CUDA "Use CUDA" ON)
 

@@ -6,14 +6,18 @@
 #include "PDBVector.h"
 #include <functional>
 #include <numeric>
-#include "PDBCUDAUtility.h"
+#include "utility/PDBCUDAUtility.h"
 #include "PDBCUDAOpType.h"
 #include "PDBCUDAOpInvoker.h"
+#include "storage/PDBCUDAStaticStorage.h"
+#include "stream/PDBCUDAStreamManager.h"
 
 namespace pdb {
 
     // simply support vector-add operation and vector-add kernel for GPU
+
     class PDBCUDAVectorAddInvoker : public PDBCUDAOpInvoker {
+
         using T = float;
 
     public:
@@ -34,12 +38,19 @@ namespace pdb {
 
     public:
         // raw pointer and the dimension for the vector
-        std::vector<std::pair<T *, std::vector<size_t> >> inputParas;
-        std::pair<T *, std::vector<size_t> > outputPara;
+        std::vector<std::pair<T *, std::vector<size_t> >> inputArguments;
+        std::pair<T *, std::vector<size_t> > outputArguments;
+        std::vector<page_id_t> inputPages;
         T *copyBackPara;
         PDBCUDAOpType op = PDBCUDAOpType::VectorAdd;
         cublasHandle_t cudaHandle;
         cudaStream_t cudaStream;
+
+
+
+        PDBCUDAStreamManager* stream_instance;
+        PDBCUDAStaticStorage* sstore_instance;
+        PDBCUDAMemoryManager* memmgr_instance;
     };
 }
 #endif

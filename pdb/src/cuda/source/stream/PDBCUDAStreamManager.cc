@@ -1,8 +1,7 @@
 #include <assert.h>
-#include "PDBCUDAStreamManager.h"
+#include "stream/PDBCUDAStreamManager.h"
 
 namespace pdb {
-
 
     PDBCUDAStreamManager::PDBCUDAStreamManager(uint32_t streamNumInPool, bool isManager) : streamNum(streamNumInPool) {
         if (isManager) {
@@ -40,8 +39,13 @@ namespace pdb {
     }
 
 
-    void PDBCUDAStreamManager::bindCPUThreadToStream(){
-        return
+    const PDBCUDAStreamUtils PDBCUDAStreamManager::bindCPUThreadToStream(std::thread::id& tID){
+        if (bindMap.find(tID)){
+            return bindMap[tID];
+        }
+        PDBCUDAStreamUtils utils = PDBCUDAStreamManager::get()->getUnUsedStream();
+        bindMap.insert(tID, utils);
+        return utils;
     }
 
     void PDBCUDAStreamManager::create(){
@@ -49,7 +53,6 @@ namespace pdb {
     }
 
     PDBCUDAStreamManager* PDBCUDAStreamManager::get(){
-
         // use std::call_once to make sure the singleton initialization is thread-safe
         std::call_once(initFlag, PDBCUDAStreamManager::create);
         assert(check()==true);
@@ -57,6 +60,6 @@ namespace pdb {
     }
 
     inline bool PDBCUDAStreamManager::check(){
-        return streamMgr != nullptr
+        return streamMgr != nullptr;
     }
 }

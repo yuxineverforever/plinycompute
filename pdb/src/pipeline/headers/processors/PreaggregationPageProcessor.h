@@ -10,7 +10,7 @@
 #include <PageProcessor.h>
 #include <PDBPageHandle.h>
 #include <PDBBufferManagerInterface.h>
-#include <PDBCUDAMemoryManager.h>
+#include <storage/PDBCUDAMemoryManager.h>
 
 extern void* gpuMemoryManager;
 namespace pdb {

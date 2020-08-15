@@ -2,7 +2,7 @@
 
 #include <Object.h>
 #include <PDBVector.h>
-#include <PDBCUDAVectorAddInvoker.h>
+#include <operators/PDBCUDAVectorAddInvoker.h>
 #include <PDBCUDAGPUInvoke.h>
 
 namespace pdb {

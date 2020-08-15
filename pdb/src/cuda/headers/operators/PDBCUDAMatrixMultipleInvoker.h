@@ -7,10 +7,10 @@
 #include <numeric>
 #include <utility>
 #include "PDBVector.h"
-#include "PDBCUDAUtility.h"
+#include "utility/PDBCUDAUtility.h"
 #include "PDBCUDAOpType.h"
 #include "PDBCUDAOpInvoker.h"
-#include "PDBCUDAStaticStorage.h"
+#include "storage/PDBCUDAStaticStorage.h"
 
 // simply support two kind of operations
 namespace pdb {
@@ -20,14 +20,13 @@ namespace pdb {
  */
     class PDBCUDAMatrixMultipleInvoker : public PDBCUDAOpInvoker {
         using T = float;
-
     public:
 
         PDBCUDAMatrixMultipleInvoker();
 
         bool invoke();
 
-        void kernel(T *in1data, T *in2data, T *outdata, size_t in1NumRow, size_t in1NumCol, size_t in2NumCol);
+        void kernel(T* in1data, T* in2data, T *outdata, size_t in1NumRow, size_t in1NumCol, size_t in2NumCol);
 
         void setInput(T *input, std::vector<size_t> &inputDim);
 
@@ -43,18 +42,9 @@ namespace pdb {
 
         std::pair<T *, std::vector<size_t> > outputArguments;
 
-        T *copyBackPara;
-
-        PDBCUDAOpType op = PDBCUDAOpType::MatrixMultiple;
-
-        cublasHandle_t cudaHandle;
-
-        cudaStream_t cudaStream;
-
+        PDBCUDAStreamManager* stream_instance;
         PDBCUDAStaticStorage* sstore_instance;
-
         PDBCUDAMemoryManager* memmgr_instance;
-
     };
 }
 #endif

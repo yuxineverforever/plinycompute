@@ -6,7 +6,7 @@
 #include <set>
 #include <assert.h>
 #include <PDBBufferManagerInterface.h>
-#include "PDBCUDAUtility.h"
+#include "utility/PDBCUDAUtility.h"
 #include "PDBRamPointer.h"
 #include "PDBCUDAPage.h"
 #include "PDBCUDAConfig.h"

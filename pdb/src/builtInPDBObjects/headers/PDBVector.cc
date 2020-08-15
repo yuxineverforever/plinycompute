@@ -27,7 +27,7 @@
 #include <iterator>
 #include <type_traits>
 #include <cstring>
-#include <PDBCUDADynamicStorage.h>
+#include <storage/PDBCUDADynamicStorage.h>
 
 #include "Handle.h"
 #include "Object.h"

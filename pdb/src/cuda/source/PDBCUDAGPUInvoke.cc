@@ -1,5 +1,5 @@
 #include "PDBCUDAGPUInvoke.h"
-#include "PDBRamPointer.h"
+#include "storage/PDBRamPointer.h"
 
 /** SimpleTypeGPUInvoke deals with all the primitive types and invoke the gpu kernel for the input/output
  * `Out` vector should be reserved before passing as parameter

@@ -34,8 +34,8 @@
 #include <PDBBufferManagerDebugFrontend.h>
 #include <ExecutionServerBackend.h>
 #include <random>
-#include "PDBCUDAMemoryManager.h"
-#include "PDBCUDAStreamManager.h"
+#include "storage/PDBCUDAMemoryManager.h"
+#include "stream/PDBCUDAStreamManager.h"
 
 namespace po = boost::program_options;
 namespace fs = boost::filesystem;

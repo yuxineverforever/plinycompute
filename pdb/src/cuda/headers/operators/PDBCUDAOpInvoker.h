@@ -5,21 +5,23 @@
 #include <Handle.h>
 #include <vector>
 #include "PDBVector.h"
-#include "PDBCUDAUtility.h"
+#include "utility/PDBCUDAUtility.h"
 #include "PDBCUDAOpType.h"
 #include "PDBBufferManagerImpl.h"
-#include "PDBCUDAMemoryManager.h"
+#include "storage/PDBCUDAMemoryManager.h"
+
 // simply support two kind of operations
 namespace pdb{
 
-class PDBCUDAOpInvoker{
+class PDBCUDAInvoker{
 public:
-    PDBCUDAOpInvoker(){};
+    PDBCUDAOpInvoker();
     void setInput(float* input, std::vector<size_t>& inputDim);
     void setOutput(float* output, std::vector<size_t>& outputDim);
     bool invoke();
-public:
-    PDBCUDAOpType op;
 };
+
+
+
 }
 #endif

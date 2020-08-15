@@ -1,7 +1,7 @@
 #ifndef PDB_CUDA_STATIC_STORAGE
 #define PDB_CUDA_STATIC_STORAGE
 
-#include <PDBCUDAMemoryManager.h>
+#include <storage/PDBCUDAMemoryManager.h>
 #include <PDBCUDAConfig.h>
 
 /**
@@ -20,7 +20,6 @@ enum GPUPageCreateStatus{
 class PDBCUDAStaticStorage{
 
 public:
-
     PDBCUDAStaticStorage() = default;
 
     inline size_t getObjectOffsetWithCPUPage(void* pageAddress, void* objectAddress);
@@ -30,13 +29,10 @@ public:
     pair<page_id_t, GPUPageCreateStatus> getGPUPageFromCPUPage(pair<void*, size_t> pageInfo);
 
     inline bool IsCPUPageMovedToGPU(pair<void*, size_t> pageInfo);
-
     bool IsObjectOnGPU(void* objectAddress);
 
     static void create();
-
     static PDBCUDAStaticStorage* get();
-
     static inline bool check();
 
 private:

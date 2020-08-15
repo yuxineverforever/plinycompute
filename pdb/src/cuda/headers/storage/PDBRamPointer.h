@@ -12,8 +12,6 @@ namespace pdb {
     /**
      *
      */
-
-
     class RamPointer {
 
     public:
@@ -151,8 +149,8 @@ namespace pdb {
             ptr->delete_cpu_pointer(pointer);
         }
 
-        void* get_address() {
-            return ptr->ramAddress;
+        std::size_t get_offset() {
+            return ptr->offset;
         }
 
     private:
