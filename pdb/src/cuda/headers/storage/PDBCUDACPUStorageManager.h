@@ -3,8 +3,11 @@
 
 #include <PDBCUDAConfig.h>
 #include <list>
+#include <map>
+#include <stdexcept>
 #include "cuda_runtime.h"
 #include "helper_cuda.h"
+#include "PDBCUDAUtility.h"
 
 namespace pdb{
 
@@ -36,9 +39,15 @@ namespace pdb{
 
         std::atomic<page_id_t>  next_page_id_;
 
+        size_t pageSize;
+
+        size_t pageNum;
+
         std::list<void*> freeList;
 
         std::map<page_id_t, void*> storageMap;
+
+
     };
 }
 #endif
