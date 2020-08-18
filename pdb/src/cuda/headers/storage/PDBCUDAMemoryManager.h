@@ -69,7 +69,7 @@ namespace pdb {
                 // if page is dirty, write it back to disk
                 page_id_t toWriteBack = res->first;
                 if (pages[frame].isDirty()) {
-                    SwapPageOut(toWriteBack);
+                    FlushPageImpl(toWriteBack);
                 }
                 pageTable.erase(res);
             } else {
@@ -164,6 +164,19 @@ namespace pdb {
                     return false;
                 }
             }
+        }
+
+        bool FlushPageImpl(page_id_t page_id) {
+            // if page_id is not valid
+            assert(page_id != INVALID_PAGE_ID);
+            // if page_id cannot be find from page_table
+            auto iter = pageTable.find(page_id);
+            if (iter == pageTable.end()){
+                return false;
+            }
+            cpu_storage_manager->WritePage(page_id, pages[iter->second].getBytes());
+            // Make sure you call DiskManager::WritePage!
+            return true;
         }
 
         static PDBBufferManagerInterfacePtr getCPUBufferManagerInterface(){

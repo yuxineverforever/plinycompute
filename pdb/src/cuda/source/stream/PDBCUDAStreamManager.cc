@@ -13,7 +13,6 @@ namespace pdb {
             checkCudaErrors(cudaStreamCreate(&streams[i]));
             checkCudaErrors(cublasCreate(&handles[i]));
             checkCudaErrors(cublasSetStream(handles[i], streams[i]));
-            unUsedStreams.push_back(std::make_pair(&streams[i], &handles[i]));
         }
     }
 
@@ -24,28 +23,17 @@ namespace pdb {
         }
     }
 
-    const PDBCUDAStreamUtils PDBCUDAStreamManager::getUnUsedStream() {
-        if (unUsedStreams.size() == 0){
-            //TODO: someway to wait for available resouces
-            std::cerr << "ERROR: No stream available in stream manager!\n";
+    PDBCUDAStreamUtils PDBCUDAStreamManager::bindCPUThreadToStream() {
+        long threadID = (long) pthread_self();
+        if (bindMap.count(threadID) != 0) {
+            //std::cout << "thread ID: " << threadID << " find in map! stream: " << streams[threadStreamMap[threadID]] << std::endl;
+            return std::make_pair(streams[bindMap[threadID]], handles[bindMap[threadID]]);
+        } else {
+            uint64_t counter = bindMap.size();
+            bindMap.insert(std::make_pair(threadID, counter));
+            //std::cout << "thread ID: " << threadID << " not find in map stream: " << streams[counter] << std::endl;
+            return std::make_pair(streams[counter], handles[counter]);
         }
-        PDBCUDAStreamUtils stream = unUsedStreams.front();
-        unUsedStreams.pop_front();
-        return stream;
-    }
-
-    void PDBCUDAStreamManager::releaseUsedStream(const PDBCUDAStreamUtils& toRelease){
-        unUsedStreams.push_back(toRelease);
-    }
-
-
-    const PDBCUDAStreamUtils PDBCUDAStreamManager::bindCPUThreadToStream(std::thread::id& tID){
-        if (bindMap.find(tID)){
-            return bindMap[tID];
-        }
-        PDBCUDAStreamUtils utils = PDBCUDAStreamManager::get()->getUnUsedStream();
-        bindMap.insert(tID, utils);
-        return utils;
     }
 
     void PDBCUDAStreamManager::create(){

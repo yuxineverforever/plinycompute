@@ -15,13 +15,11 @@ namespace pdb{
 
 class PDBCUDAInvoker{
 public:
-    PDBCUDAOpInvoker();
+    PDBCUDAInvoker() = default;
     void setInput(float* input, std::vector<size_t>& inputDim);
     void setOutput(float* output, std::vector<size_t>& outputDim);
     bool invoke();
 };
-
-
 
 }
 #endif

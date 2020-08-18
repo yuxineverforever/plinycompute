@@ -3,10 +3,8 @@
 #include <iostream>
 #include <memory>
 #include <list>
-#include "PDBCUDAConfig.h"
 
 namespace pdb {
-
     // TODO: add comment
     // Here is the Ram Pointer which can point to both CPU/GPU RAM
     /**
@@ -16,9 +14,9 @@ namespace pdb {
 
     public:
 
-        RamPointer(void *physicalAddress, size_t numbytes, size_t headerBytes) : ramAddress(physicalAddress),
+        RamPointer(void *physicalAddress, size_t numbytes, size_t headerbytes) : ramAddress(physicalAddress),
                                                                                  numBytes(numbytes),
-                                                                                 headerBytes(headerBytes) {
+                                                                                 headerBytes(headerbytes) {
             refCount = 0;
             isDirty = false;
         }
@@ -66,7 +64,6 @@ namespace pdb {
         }
 
     public:
-
         // if the ramAddress == nullptr, it means the space is lazy allocated
         // and the ramAddress will be changed in the future
         void* ramAddress;
@@ -77,62 +74,13 @@ namespace pdb {
         bool isDirty;
     };
 
-
-    class RamPointerWithOffset {
-
-    public:
-
-        RamPointerWithOffset(size_t offsetToPage, page_id_t pageID, size_t numBytes, size_t headerBytes) : offset(offsetToPage),
-                                                                                 whichPage(pageID),
-                                                                                 numBytes(numBytes),
-                                                                                 headerBytes(headerBytes) {
-            refCount = 0;
-            isDirty = false;
-        }
-
-        ~RamPointerWithOffset() {
-            std::cout << "RamPointerWithOffset destructor!\n";
-        }
-
-        void push_back_cpu_pointer(void *pointer) {
-            cpuPointers.push_back(pointer);
-        }
-
-        void delete_cpu_pointer(void* pointer) {
-            cpuPointers.remove(pointer);
-        }
-
-        void set_ram_pointer(size_t newOffset){
-            offset = newOffset;
-        }
-
-        void setDirty() {
-            isDirty = true;
-        }
-
-    public:
-
-        // if the ramAddress == nullptr, it means the space is lazy allocated
-        // and the ramAddress will be changed in the future
-        size_t offset;
-        page_id_t whichPage;
-
-        size_t numBytes;
-        size_t headerBytes;
-
-        std::list<void *> cpuPointers;
-        int refCount;
-        bool isDirty;
-    };
-
-    using RamPointerPtr = std::shared_ptr<RamPointerWithOffset>;
+    using RamPointerPtr = std::shared_ptr<RamPointer>;
 
     /**
      * This is just one simple wrapper for the RamPointer Class
      */
     class RamPointerBase {
     public:
-
         RamPointerBase(RamPointerPtr useMe) {
             ptr = useMe;
         }
@@ -149,8 +97,8 @@ namespace pdb {
             ptr->delete_cpu_pointer(pointer);
         }
 
-        std::size_t get_offset() {
-            return ptr->offset;
+        void* get_address() {
+            return ptr->ramAddress;
         }
 
     private:

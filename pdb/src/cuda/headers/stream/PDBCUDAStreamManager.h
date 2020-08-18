@@ -20,7 +20,8 @@ namespace pdb {
      * It is better to keep the each PDB worker thread only mapped to one cuda stream. So that a thread can only manipulate one stream and push all the operations to that stream.
      * This can make sure that, there is no need to explicit sync between stream. (e.g. one stream for a different UDF)
      */
-    using PDBCUDAStreamUtils = std::pair<cudaStream_t*, cublasHandle_t*>;
+
+    using PDBCUDAStreamUtils = std::pair<cudaStream_t, cublasHandle_t>;
 
     class PDBCUDAStreamManager {
 
@@ -30,11 +31,7 @@ namespace pdb {
 
         ~PDBCUDAStreamManager();
 
-        const PDBCUDAStreamUtils getUnUsedStream();
-
-        void releaseUsedStream(const PDBCUDAStreamUtils& toRelease);
-
-        static const PDBCUDAStreamUtils bindCPUThreadToStream(std::thread::id& tID);
+        PDBCUDAStreamUtils bindCPUThreadToStream();
 
         static void create();
 
@@ -48,16 +45,14 @@ namespace pdb {
 
         static std::once_flag initFlag;
 
-        static std::map<std::thread::id, PDBCUDAStreamUtils> bindMap;
+        std::map<long, uint64_t> bindMap;
 
         cudaStream_t* streams;
 
         cublasHandle_t* handles;
 
         uint32_t streamNum;
+
         std::mutex m;
-
-        std::list<PDBCUDAStreamUtils> unUsedStreams;
-
     };
 }

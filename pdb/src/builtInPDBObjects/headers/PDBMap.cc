@@ -21,7 +21,6 @@
 
 #include "InterfaceFunctions.h"
 #include "PDBMap.h"
-#include "PDBCUDAMemoryAllocator.h"
 
 
 namespace pdb {

@@ -15,10 +15,7 @@
 namespace pdb {
 
     // simply support vector-add operation and vector-add kernel for GPU
-
-    class PDBCUDAVectorAddInvoker : public PDBCUDAOpInvoker {
-
-        using T = float;
+    class PDBCUDAVectorAddInvoker : public PDBCUDAInvoker {
 
     public:
 
@@ -26,11 +23,11 @@ namespace pdb {
 
         bool invoke();
 
-        void cublasRouting(T *in1data, T *in2data, size_t N);
+        void kernel(float* in1data, float* in2data, size_t N);
 
-        void setInput(T *input, std::vector<size_t> &inputDim);
+        void setInput(float* input, std::vector<size_t> &inputDim);
 
-        void setOutput(T *output, std::vector<size_t> &outputDim);
+        void setOutput(float* output, std::vector<size_t> &outputDim);
 
         void cleanup();
 
@@ -38,16 +35,16 @@ namespace pdb {
 
     public:
         // raw pointer and the dimension for the vector
-        std::vector<std::pair<T *, std::vector<size_t> >> inputArguments;
-        std::pair<T *, std::vector<size_t> > outputArguments;
-        std::vector<page_id_t> inputPages;
-        T *copyBackPara;
-        PDBCUDAOpType op = PDBCUDAOpType::VectorAdd;
+        std::vector<std::pair<float*, std::vector<size_t> >> inputArguments;
+
+        std::pair<float*, std::vector<size_t> > outputArguments;
+        float *copyBackPara;
+
         cublasHandle_t cudaHandle;
         cudaStream_t cudaStream;
 
-
-
+        std::vector<page_id_t> inputPages;
+        PDBCUDAOpType op = PDBCUDAOpType::VectorAdd;
         PDBCUDAStreamManager* stream_instance;
         PDBCUDAStaticStorage* sstore_instance;
         PDBCUDAMemoryManager* memmgr_instance;

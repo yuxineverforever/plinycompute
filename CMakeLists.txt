@@ -144,6 +144,11 @@ include_directories("${PROJECT_SOURCE_DIR}/pdb/src/sharedLibraries/headers")
 include_directories("${PROJECT_SOURCE_DIR}/pdb/src/storageManager/headers")
 include_directories("${PROJECT_SOURCE_DIR}/pdb/src/work/headers")
 include_directories("${PROJECT_SOURCE_DIR}/pdb/src/cuda/headers")
+include_directories("${PROJECT_SOURCE_DIR}/pdb/src/cuda/headers/operators")
+include_directories("${PROJECT_SOURCE_DIR}/pdb/src/cuda/headers/storage")
+include_directories("${PROJECT_SOURCE_DIR}/pdb/src/cuda/headers/stream")
+include_directories("${PROJECT_SOURCE_DIR}/pdb/src/cuda/headers/utility")
+
 # add the third party libraries as includes
 include_directories("${PROJECT_SOURCE_DIR}/third-party/mustache/headers")
 include_directories("${PROJECT_SOURCE_DIR}/third-party/qunit/headers")
@@ -160,7 +165,7 @@ file(GLOB SERVER_SOURCE "${PROJECT_SOURCE_DIR}/pdb/src/server/source/*.cc")
 file(GLOB OBJECT_MODEL_SOURCE "${PROJECT_SOURCE_DIR}/pdb/src/objectModel/source/*.cc")
 file(GLOB WORK_SOURCE "${PROJECT_SOURCE_DIR}/pdb/src/work/source/*.cc")
 file(GLOB STORAGE_MANAGER_SOURCE "${PROJECT_SOURCE_DIR}/pdb/src/storageManager/source/*.cc")
-file(GLOB BUILT_OBJECTS_SOURCE "${PROJECT_SOURCE_DIR}/pdb/src/builtInPDBObjects/source/*.cc" "${PROJECT_SOURCE_DIR}/pdb/src/cuda/source/*.cc")
+file(GLOB BUILT_OBJECTS_SOURCE "${PROJECT_SOURCE_DIR}/pdb/src/builtInPDBObjects/source/*.cc")
 
 file(GLOB PIPELINE_SOURCE "${PROJECT_SOURCE_DIR}/pdb/src/pipeline/source/*.cc" "${PROJECT_SOURCE_DIR}/pdb/src/pipeline/source/pipeline/*.cc")
 
@@ -173,8 +178,10 @@ file(GLOB COMPUTATION_SERVER_SOURCE "${PROJECT_SOURCE_DIR}/pdb/src/computationSe
 file(GLOB EXECUTION_SERVER_SOURCE "${PROJECT_SOURCE_DIR}/pdb/src/executionServer/sources/*.cc"
                                   "${PROJECT_SOURCE_DIR}/pdb/src/executionServer/sources/physicalAlgorithms/*.cc")
 
-file(GLOB CUDA_SOURCE "${PROJECT_SOURCE_DIR}/pdb/src/cuda/source/*.cu"
-                     "${PROJECT_SOURCE_DIR}/pdb/src/cuda/source/*.cc")
+file(GLOB CUDA_SOURCE "${PROJECT_SOURCE_DIR}/pdb/src/cuda/source/*/*.cu"
+                      "${PROJECT_SOURCE_DIR}/pdb/src/cuda/source/*/*.cc"
+                      "${PROJECT_SOURCE_DIR}/pdb/src/cuda/source/*.cu"
+                      "${PROJECT_SOURCE_DIR}/pdb/src/cuda/source/*.cu")
 
 set(SOURCE_FILES_SQL_LITE ${PROJECT_SOURCE_DIR}/third-party/sqlite/source/sqlite3.c)
 
