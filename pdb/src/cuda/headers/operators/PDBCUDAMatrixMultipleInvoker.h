@@ -24,6 +24,8 @@ namespace pdb {
 
         PDBCUDAMatrixMultipleInvoker();
 
+        ~PDBCUDAMatrixMultipleInvoker();
+
         bool invoke();
 
         void kernel(float* in1data, float* in2data, float *outdata, size_t in1NumRow, size_t in1NumCol, size_t in2NumCol);
@@ -31,8 +33,6 @@ namespace pdb {
         void setInput(float *input, const std::vector<size_t> &inputDim);
 
         void setOutput(float *output, const std::vector<size_t> &outputDim);
-
-        void cleanup();
 
     public:
 

@@ -21,20 +21,26 @@ namespace pdb {
 
         PDBCUDAVectorAddInvoker();
 
+        ~PDBCUDAVectorAddInvoker();
+
         bool invoke();
 
         void kernel(float* in1data, float* in2data, size_t N);
 
-        void setInput(float* input, std::vector<size_t> &inputDim);
+        void setInput(float* input, const std::vector<size_t>& inputDim);
 
-        void setOutput(float* output, std::vector<size_t> &outputDim);
+        void setOutput(float* output, const std::vector<size_t>& outputDim);
 
-        void cleanup();
-
+        //TODO: this function should be added later
         //std::shared_ptr<pdb::RamPointerBase> LazyAllocationHandler(void* pointer, size_t size);
 
     public:
+
         // raw pointer and the dimension for the vector
+        std::vector<std::pair<page_id_t, std::size_t> > inputPages;
+
+        std::vector<std::pair<page_id_t, std::size_t> > outputPages;
+
         std::vector<std::pair<float*, std::vector<size_t> >> inputArguments;
 
         std::pair<float*, std::vector<size_t> > outputArguments;
@@ -44,7 +50,6 @@ namespace pdb {
         cublasHandle_t cudaHandle;
         cudaStream_t cudaStream;
 
-        std::vector<page_id_t> inputPages;
         PDBCUDAOpType op = PDBCUDAOpType::VectorAdd;
 
         PDBCUDAStreamManager* stream_instance;

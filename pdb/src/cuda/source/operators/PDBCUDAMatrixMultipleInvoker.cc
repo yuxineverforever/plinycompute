@@ -79,6 +79,7 @@ namespace pdb {
     }
 
     bool PDBCUDAMatrixMultipleInvoker::invoke() {
+
         //std::cout << (long) pthread_self() << " :PDBCUDAMatrixMultipleInvoker invoke() \n";
         kernel(inputArguments[0].first, inputArguments[1].first, outputArguments.first, inputArguments[0].second[0],
                       inputArguments[0].second[1], inputArguments[1].second[0]);
