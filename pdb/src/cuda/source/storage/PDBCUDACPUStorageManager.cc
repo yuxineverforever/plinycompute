@@ -16,8 +16,8 @@ namespace pdb{
             throw std::runtime_error("Cannot find the require page in CPU storage manager during readPage!");
         }
         void* page = storageMap[page_id];
-        checkCudaErrors(cudaMemcpy(page_data, page, pageSize, cudaMemcpyHostToDevice));
         storageMap.erase(page_id);
+        checkCudaErrors(cudaMemcpy(page_data, page, pageSize, cudaMemcpyHostToDevice));
     }
 
     void PDBCUDACPUStorageManager::WritePage(page_id_t page_id, const char *page_data){
@@ -39,9 +39,5 @@ namespace pdb{
     }
 
     void PDBCUDACPUStorageManager::DeepCopyD2H(void *startLoc, size_t numBytes) {
-
     }
-
-
-
 }

@@ -62,7 +62,7 @@ public:
     // to them.  Thus, after this call, size () will return zero
     Vector(uint32_t initSize);
 
-    Vector(uint32_t initSize, uint32_t usedSize, bool onGPU);
+    //Vector(uint32_t initSize, uint32_t usedSize, bool onGPU);
 
     // these operations all have the same semantics as in std :: vector
     Vector();
@@ -77,11 +77,10 @@ public:
 
 
     TypeContained* c_ptr() const;
-    TypeContained* cpu_ptr() const;
-    bool onGPU();
-    void setGPU(bool where);
-
-    void setRamPointerReference(std::shared_ptr<RamPointerBase> toMe);
+    //TypeContained* cpu_ptr() const;
+    //bool onGPU();
+    //void setGPU(bool where);
+    //void setRamPointerReference(std::shared_ptr<RamPointerBase> toMe);
 
     void resize(uint32_t toMe);
 

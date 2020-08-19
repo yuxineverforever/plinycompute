@@ -12,9 +12,14 @@
 //TODO: let invoke remember the input pages/output page
 namespace pdb{
 
-enum GPUPageCreateStatus{
-    CREATED_PAGE,
-    NOT_CREATED_PAGE
+enum MemAllocateStatus{
+    OLD,
+    NEW
+};
+
+enum MemAllocatePolicy{
+    DYNAMIC,
+    STATIC
 };
 
 class PDBCUDAStaticStorage{
@@ -26,14 +31,18 @@ public:
 
     pair<void*, size_t> getCPUPageFromObjectAddress(void* objectAddress);
 
-    pair<page_id_t, GPUPageCreateStatus> getGPUPageFromCPUPage(pair<void*, size_t> pageInfo);
+    //TODO: the policy of checkGPUPageTable should be decided based on the size of pageInfo
+    // If size == Mgr.PageSize, use STATIC
+    // If size < Mgr.PageSize, use DYNAMIC
 
-    inline bool IsCPUPageMovedToGPU(pair<void*, size_t> pageInfo);
-    bool IsObjectOnGPU(void* objectAddress);
+    std::pair<page_id_t, MemAllocateStatus> checkGPUPageTable(pair<void*, size_t> pageInfo);
 
     static void create();
     static PDBCUDAStaticStorage* get();
     static inline bool check();
+
+    inline bool IsCPUPageMovedToGPU(pair<void*, size_t> pageInfo);
+    bool IsObjectOnGPU(void* objectAddress);
 
 private:
 
@@ -42,10 +51,11 @@ private:
     static std::once_flag initFlag;
 
     /**  H2DPageMap for mapping CPU bufferManager page info to GPU bufferManager page ids */
-    static std::map<pair<void *, size_t>, page_id_t> H2DPageMap;
+    /** Used for static allocation */
+    std::map<pair<void *, size_t>, page_id_t> pageMap;
 
     /** one latch to protect the gpuPageTable access */
-    static ReaderWriterLatch pageTableMutex;
+    ReaderWriterLatch pageTableMutex;
 
     friend class PDBCUDAMemoryManager;
 };

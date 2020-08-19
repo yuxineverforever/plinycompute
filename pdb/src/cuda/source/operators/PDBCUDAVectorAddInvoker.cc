@@ -28,6 +28,8 @@ namespace pdb {
     void PDBCUDAVectorAddInvoker::kernel(float *in1data, float *in2data, size_t N) {
         const float alpha = 1.0;
         cublasErrCheck(cublasSaxpy(cudaHandle, N, &alpha, in2data, 1, in1data, 1));
+        //TODO:
+        copyFromDeviceToHostAsync()
     }
 
     void PDBCUDAVectorAddInvoker::setInput(float *input, std::vector<size_t> &inputDim) {
@@ -38,7 +40,7 @@ namespace pdb {
             inputArguments.push_back(std::make_pair(static_cast<float *>(input), inputDim));
         } else {
             auto cpuPageInfo = sstore_instance->getCPUPageFromObjectAddress(static_cast<void*>(input));
-            auto gpuPageInfo = sstore_instance->getGPUPageFromCPUPage(cpuPageInfo);
+            auto gpuPageInfo = sstore_instance->checkGPUPageTable(cpuPageInfo);
 
             PDBCUDAPage* cudaPage = memmgr_instance->FetchPageImpl(gpuPageInfo.first);
 
@@ -51,15 +53,17 @@ namespace pdb {
         }
     }
 
-    std::shared_ptr<pdb::RamPointerBase> PDBCUDAVectorAddInvoker::LazyAllocationHandler(void* pointer, size_t size){
+    // std::shared_ptr<pdb::RamPointerBase> PDBCUDAVectorAddInvoker::LazyAllocationHandler(void* pointer, size_t size){
     //    pair<void *, size_t> PageInfo = (static_cast<PDBCUDAMemoryManager *>(gpuMemoryManager))->getObjectCPUPage(
     //            (void *) pointer);
     //    return (static_cast<PDBCUDAMemoryManager *>(gpuMemoryManager))->handleInputObjectWithRamPointer(PageInfo, (void*)pointer, size, cudaStream);
-    }
+    // }
 
     void PDBCUDAVectorAddInvoker::setOutput(float *output, std::vector<size_t> &outputDim) {
         // The output pointer should point to an address on GPU
         outputArguments = std::make_pair(static_cast<float *>(output), outputDim);
+        sstore_instance
+
     }
 
     void PDBCUDAVectorAddInvoker::cleanup() {

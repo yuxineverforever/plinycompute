@@ -10,12 +10,12 @@ namespace pdb{
     }
 
     inline bool PDBCUDAStaticStorage::IsCPUPageMovedToGPU(pair<void*, size_t> pageInfo){
-        return H2DPageMap.find(pageInfo) != H2DPageMap.end();
+        return pageMap.find(pageInfo) != pageMap.end();
     }
 
     bool PDBCUDAStaticStorage::IsObjectOnGPU(void* objectAddress){
         auto pageInfo = getCPUPageFromObjectAddress(objectAddress);
-        return H2DPageMap.find(pageInfo) != H2DPageMap.end();
+        return pageMap.find(pageInfo) != pageMap.end();
     }
 
     pair<void*, size_t> PDBCUDAStaticStorage::getCPUPageFromObjectAddress(void* objectAddress) {
@@ -33,21 +33,19 @@ namespace pdb{
         return pageInfo;
     }
 
-    pair<page_id_t, GPUPageCreateStatus> PDBCUDAStaticStorage::getGPUPageFromCPUPage(pair<void*, size_t> pageInfo){
-
+    std::pair<page_id_t, MemAllocateStatus> PDBCUDAStaticStorage::checkGPUPageTable(pair<void*, size_t> pageInfo){
         // If Page has been added, just return it.
-        if (H2DPageMap.find(pageInfo) != H2DPageMap.end()){
-
+        if (pageMap.find(pageInfo) != pageMap.end()){
             // return false means the GPU page is already created.
-            return std::make_pair(H2DPageMap[pageInfo], GPUPageCreateStatus::CREATED_PAGE);
+            return std::make_pair(pageMap[pageInfo], MemAllocateStatus::OLD);
+
         } else {
             // otherwise, grab a new page, insert to map and return pageID.
             page_id_t newPageID;
             PDBCUDAMemoryManager::get()->CreateNewPage(&newPageID);
-            H2DPageMap.insert(std::make_pair(pageInfo, newPageID));
-
+            pageMap.insert(std::make_pair(pageInfo, newPageID));
             // return true means the GPU page is newly created.
-            return std::make_pair(newPageID, GPUPageCreateStatus::NOT_CREATED_PAGE);
+            return std::make_pair(newPageID, MemAllocateStatus::NEW);
         }
     }
 

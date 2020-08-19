@@ -24,7 +24,7 @@ namespace pdb {
         /**
          * @param buffer - CPU buffer
          */
-        PDBCUDAMemoryManager(PDBBufferManagerInterfacePtr buffer, int32_t pool_Size, bool isManager) {
+        PDBCUDAMemoryManager(pdb::PDBBufferManagerInterfacePtr buffer, int32_t pool_Size, bool isManager) {
             if (isManager) {
                 return;
             }

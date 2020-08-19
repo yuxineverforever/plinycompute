@@ -25,7 +25,7 @@ GPULazyAllocationHandler(pdb::PDBCUDAVectorAddInvoker &f, void* pointer, size_t 
  */
 template<typename InvokerType, typename InputType, typename OutputType>
 typename std::enable_if_t<
-        is_base_of<pdb::PDBCUDAOpInvoker, InvokerType>::value && std::is_trivially_copyable<OutputType>::value &&
+        is_base_of<pdb::PDBCUDAInvoker, InvokerType>::value && std::is_trivially_copyable<OutputType>::value &&
         std::is_trivially_copyable<InputType>::value, bool>
 SimpleTypeGPUInvoke(InvokerType &f, OutputType *Out, std::vector<size_t> &OutDim, InputType *In1,
                     std::vector<size_t> &In1Dim, InputType *In2, std::vector<size_t> &In2Dim);
@@ -44,7 +44,7 @@ SimpleTypeGPUInvoke(InvokerType &f, OutputType *Out, std::vector<size_t> &OutDim
  */
 template<typename InvokerType, typename InputType, typename OutputType>
 typename std::enable_if_t<
-        is_base_of<pdb::PDBCUDAOpInvoker, InvokerType>::value && std::is_trivially_copyable<OutputType>::value &&
+        is_base_of<pdb::PDBCUDAInvoker, InvokerType>::value && std::is_trivially_copyable<OutputType>::value &&
         std::is_trivially_copyable<InputType>::value, bool>
 SimpleTypeGPUInvoke(InvokerType &f, OutputType *Out, std::vector<size_t> &OutDim, InputType *In1,
                     std::vector<size_t> &In1Dim);
@@ -62,7 +62,7 @@ SimpleTypeGPUInvoke(InvokerType &f, OutputType *Out, std::vector<size_t> &OutDim
  */
 
 template<typename InvokerType, typename InputType, typename OutputType>
-typename std::enable_if_t<is_base_of<pdb::PDBCUDAOpInvoker, InvokerType>::value, bool>
+typename std::enable_if_t<is_base_of<pdb::PDBCUDAInvoker, InvokerType>::value, bool>
 GPUInvoke(InvokerType &f, pdb::Handle<OutputType> Output, pdb::Handle<InputType> In1, pdb::Handle<InputType> In2);
 
 /**
@@ -77,7 +77,7 @@ GPUInvoke(InvokerType &f, pdb::Handle<OutputType> Output, pdb::Handle<InputType>
  * @return bool - successful or not
  */
 template<typename InvokerType, typename InputType, typename OutputType>
-typename std::enable_if_t<is_base_of<pdb::PDBCUDAOpInvoker, InvokerType>::value, bool>
+typename std::enable_if_t<is_base_of<pdb::PDBCUDAInvoker, InvokerType>::value, bool>
 GPUInvoke(InvokerType &f, pdb::Handle<pdb::Vector<OutputType>> Out, pdb::Handle<pdb::Vector<InputType>> In1,
           pdb::Handle<pdb::Vector<InputType>> In2);
 
@@ -95,7 +95,7 @@ GPUInvoke(InvokerType &f, pdb::Handle<pdb::Vector<OutputType>> Out, pdb::Handle<
  *
 */
 template<typename InvokerType, typename InputType, typename OutputType>
-typename std::enable_if_t<is_base_of<pdb::PDBCUDAOpInvoker, InvokerType>::value, bool>
+typename std::enable_if_t<is_base_of<pdb::PDBCUDAInvoker, InvokerType>::value, bool>
 GPUInvoke(InvokerType &f, pdb::Handle<pdb::Vector<OutputType>> Out, std::vector<size_t> &OutDim,
           pdb::Handle<pdb::Vector<InputType>> In1, std::vector<size_t> &In1Dim);
 
@@ -115,7 +115,7 @@ GPUInvoke(InvokerType &f, pdb::Handle<pdb::Vector<OutputType>> Out, std::vector<
  * @return bool - successful or not
  */
 template<typename InvokerType, typename InputType, typename OutputType>
-typename std::enable_if_t<is_base_of<pdb::PDBCUDAOpInvoker, InvokerType>::value, bool>
+typename std::enable_if_t<is_base_of<pdb::PDBCUDAInvoker, InvokerType>::value, bool>
 GPUInvoke(InvokerType &f, pdb::Handle<pdb::Vector<OutputType>> Out, std::vector<size_t> &OutDim,
           pdb::Handle<pdb::Vector<InputType>> In1, std::vector<size_t> &In1Dim,
           pdb::Handle<pdb::Vector<InputType> > In2, std::vector<size_t> &In2Dim);

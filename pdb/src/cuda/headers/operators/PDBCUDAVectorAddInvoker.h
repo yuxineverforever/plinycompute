@@ -31,20 +31,22 @@ namespace pdb {
 
         void cleanup();
 
-        std::shared_ptr<pdb::RamPointerBase> LazyAllocationHandler(void* pointer, size_t size);
+        //std::shared_ptr<pdb::RamPointerBase> LazyAllocationHandler(void* pointer, size_t size);
 
     public:
         // raw pointer and the dimension for the vector
         std::vector<std::pair<float*, std::vector<size_t> >> inputArguments;
 
         std::pair<float*, std::vector<size_t> > outputArguments;
-        float *copyBackPara;
+
+        float* copyBackArgument;
 
         cublasHandle_t cudaHandle;
         cudaStream_t cudaStream;
 
         std::vector<page_id_t> inputPages;
         PDBCUDAOpType op = PDBCUDAOpType::VectorAdd;
+
         PDBCUDAStreamManager* stream_instance;
         PDBCUDAStaticStorage* sstore_instance;
         PDBCUDAMemoryManager* memmgr_instance;

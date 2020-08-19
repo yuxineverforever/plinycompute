@@ -273,7 +273,7 @@ bool pdb::PDBStorageManagerBackend::materializePageSet(const pdb::PDBAbstractPag
     // repin the page
     page->repin();
 
-    ((PDBCUDAMemoryManager*)gpuMemoryManager)->DeepCopyD2H(page->getBytes(),page->getSize());
+    //((PDBCUDAMemoryManager*)gpuMemoryManager)->DeepCopyD2H(page->getBytes(),page->getSize());
 
     // grab a page
     auto setPage = bufferManager->expectPage(comm);

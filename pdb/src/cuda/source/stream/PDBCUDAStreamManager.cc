@@ -10,9 +10,9 @@ namespace pdb {
         streams = new cudaStream_t[streamNumInPool];
         handles = new cublasHandle_t[streamNumInPool];
         for (uint32_t i = 0; i < streamNum; i++) {
-            checkCudaErrors(cudaStreamCreate(&streams[i]));
-            checkCudaErrors(cublasCreate(&handles[i]));
-            checkCudaErrors(cublasSetStream(handles[i], streams[i]));
+            cudaStreamCreate(&streams[i]);
+            cublasCreate(&handles[i]);
+            cublasSetStream(handles[i], streams[i]);
         }
     }
 

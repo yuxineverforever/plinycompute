@@ -28,9 +28,9 @@ namespace pdb {
 
         void kernel(float* in1data, float* in2data, float *outdata, size_t in1NumRow, size_t in1NumCol, size_t in2NumCol);
 
-        void setInput(float *input, std::vector<size_t> &inputDim);
+        void setInput(float *input, const std::vector<size_t> &inputDim);
 
-        void setOutput(float *output, std::vector<size_t> &outputDim);
+        void setOutput(float *output, const std::vector<size_t> &outputDim);
 
         void cleanup();
 
@@ -38,9 +38,15 @@ namespace pdb {
 
         std::vector<std::pair<float*, std::vector<size_t> >> inputArguments;
 
-        std::vector<page_id_t> inputPages;
+        // Book-keep all the input pages and the actually bytes used.
+        std::vector<std::pair<page_id_t, size_t> > inputPages;
 
+        std::vector<std::pair<page_id_t, size_t> > outputPages;
+
+        //TODO: should make it into a vector
         std::pair<float*, std::vector<size_t> > outputArguments;
+
+        float* copyBackArgument;
 
         cudaStream_t cudaStream;
         cublasHandle_t cudaHandle;

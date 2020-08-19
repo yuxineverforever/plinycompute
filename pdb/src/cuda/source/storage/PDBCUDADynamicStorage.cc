@@ -1,5 +1,6 @@
 
 #include "storage/PDBCUDADynamicStorage.h"
+#include <storage/PDBCUDAMemoryManager.h>
 
 namespace pdb{
 
@@ -29,10 +30,13 @@ namespace pdb{
         //TODO: to be implemented
     }
 
+    /*
     pdb::RamPointerReference PDBCUDADynamicStorage::keepMemAddress(void *gpuAddress, void *cpuAddress, size_t numBytes, size_t headerBytes){
         return addRamPointerCollection(gpuAddress, cpuAddress, numBytes,headerBytes);
     }
+     */
 
+    /*
     RamPointerReference PDBCUDADynamicStorage::addRamPointerCollection(void *gpuAddress, void *cpuAddress, size_t numBytes = 0, size_t headerBytes = 0) {
 
         if (ramPointerCollection.count(gpuAddress) != 0) {
@@ -48,6 +52,7 @@ namespace pdb{
             return std::make_shared<RamPointerBase>(ptr);
         }
     }
+     */
 
     void PDBCUDADynamicStorage::create(){
         d_store = new PDBCUDADynamicStorage;

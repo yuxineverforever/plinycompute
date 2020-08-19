@@ -5,9 +5,11 @@
 #include <list>
 #include <map>
 #include <stdexcept>
+#include <atomic>
 #include "cuda_runtime.h"
 #include "helper_cuda.h"
 #include "PDBCUDAUtility.h"
+#include "PDBRamPointer.h"
 
 namespace pdb{
 
@@ -29,7 +31,7 @@ namespace pdb{
 
         void WritePage(page_id_t page_id, const char *page_data);
 
-        RamPointerReference handleInputObjectWithRamPointer(pair<void *, size_t> pageInfo, void *objectAddress, size_t size, cudaStream_t cs);
+        RamPointerReference handleInputObjectWithRamPointer(std::pair<void *, size_t> pageInfo, void *objectAddress, size_t size, cudaStream_t cs);
 
         RamPointerReference addRamPointerCollection(void *gpuaddress, void *cpuaddress, size_t numbytes = 0, size_t headerbytes = 0);
 
@@ -46,8 +48,6 @@ namespace pdb{
         std::list<void*> freeList;
 
         std::map<page_id_t, void*> storageMap;
-
-
     };
 }
 #endif

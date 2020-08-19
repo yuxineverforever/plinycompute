@@ -3,6 +3,7 @@
 #include <iostream>
 #include <stdint.h>
 #include <list>
+#include <map>
 #include "thread"
 #include "ReaderWriterLatch.h"
 #include "cuda_runtime.h"

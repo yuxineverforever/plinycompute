@@ -2,8 +2,10 @@
 #define PDB_CUDA_RAM_POINTER_MANAGER
 
 #include <iostream>
-#include <storage/PDBCUDAMemoryManager.h>
 #include <PDBCUDAConfig.h>
+#include <mutex>
+#include <vector>
+#include <map>
 
 /**
  * DynamicStorage is for handling all the dynamic space allocation. (e.g. RamPointer)
@@ -27,9 +29,9 @@ public:
 
     void memFree(void *ptr);
 
-    pdb::RamPointerReference keepMemAddress(void *gpuaddress, void *cpuaddress, size_t numbytes, size_t headerbytes);
+    //pdb::RamPointerReference keepMemAddress(void *gpuaddress, void *cpuaddress, size_t numbytes, size_t headerbytes);
 
-    RamPointerReference addRamPointerCollection(void *gpuaddress, void *cpuaddress, size_t numbytes = 0, size_t headerbytes = 0);
+    //RamPointerReference addRamPointerCollection(void *gpuaddress, void *cpuaddress, size_t numbytes = 0, size_t headerbytes = 0);
 
     static void create();
 
@@ -52,7 +54,7 @@ private:
     /**
      * This is a map between page_id and the RamPointer object. It keeps all the ramPointers we create on certain page
      */
-    std::map<page_id_t, pdb::RamPointerPtr> ramPointerCollection;
+    //std::map<page_id_t, pdb::RamPointerPtr> ramPointerCollection;
 
     friend class PDBCUDAMemoryManager;
 };

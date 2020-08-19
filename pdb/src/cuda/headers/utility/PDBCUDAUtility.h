@@ -28,8 +28,7 @@ void copyFromDeviceToHostAsync(void *targetHost, void *sourceDevice, size_t byte
 
 void printCudaVersion();
 
-void
-launchKernel(float *in1data, unsigned int in1NumRow, unsigned int in1NumCol, float *in2data, unsigned int in2NumRow,
+void launchKernel(float *in1data, unsigned int in1NumRow, unsigned int in1NumCol, float *in2data, unsigned int in2NumRow,
              unsigned int in2NumCol, float *outdataGPU);
 
 void initGPUMemoryToZero(void **memdata, size_t bytesNum);

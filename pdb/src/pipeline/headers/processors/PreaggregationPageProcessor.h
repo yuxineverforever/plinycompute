@@ -35,14 +35,11 @@ public:
                                                                             bufferManager(std::move(bufferManager)) {}
 
   bool process(const MemoryHolderPtr &memory) override {
-
     // if we do not have a sink just finish
     if (memory->outputSink == nullptr) {
       return true;
     }
-
-    ((PDBCUDAMemoryManager*)gpuMemoryManager)->DeepCopyD2H(memory->pageHandle->getBytes(), memory->pageHandle->getSize());
-
+    //((PDBCUDAMemoryManager*)gpuMemoryManager)->DeepCopyD2H(memory->pageHandle->getBytes(), memory->pageHandle->getSize());
     // cast the thing to the maps of maps
     pdb::Handle<pdb::Vector<pdb::Handle<pdb::Map<pdb::Nothing>>>> allMaps = unsafeCast<pdb::Vector<pdb::Handle<pdb::Map<pdb::Nothing>>>>(memory->outputSink);
 

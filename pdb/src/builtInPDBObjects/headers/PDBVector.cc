@@ -56,8 +56,9 @@ Vector<TypeContained>::Vector(uint32_t initSize, uint32_t usedSize) {
     myArray = makeObjectWithExtraStorage<Array<TypeContained>>(sizeof(TypeContained) * initSize, initSize, usedSize);
 }
 
+/*
 template <class TypeContained>
-Vector<TypeContained>::Vector(uint32_t initSize, uint32_t usedSize, bool onGPU) {
+Vector<TypeContained>::Vector(uint32_t initSize, uint32_t usedSize) {
 
     // This way, we'll allocate extra bytes on the end of the array
     // std :: cout << "sizeof(TypeContained)=" << sizeof(TypeContained) << std :: endl;
@@ -65,16 +66,18 @@ Vector<TypeContained>::Vector(uint32_t initSize, uint32_t usedSize, bool onGPU) 
     // std :: cout << "sizeof(HandleBase)=" << sizeof(HandleBase) << std :: endl;
     // std :: cout << "initSize=" << initSize << std :: endl;
     myArray = makeObjectWithExtraStorage<Array<TypeContained>>(sizeof(TypeContained) * initSize, initSize, usedSize);
+
     isGPU = onGPU;
     if (onGPU){
         auto instance = PDBCUDADynamicStorage::get();
-        void* gpuArray = memMalloc(sizeof(TypeContained)* initSize);
-        myArray->alternativeLocation = keepMemAddress(gpuArray, (void*)myArray->c_ptr(),
+        void* gpuArray = instance->memMalloc(sizeof(TypeContained)* initSize);
+        myArray->alternativeLocation = instance->keepMemAddress(gpuArray, (void*)myArray->c_ptr(),
                                                                               sizeof(TypeContained)*initSize,
                                                                               sizeof(Array<TypeContained>));
         //std::cout << "header bytes: " << sizeof(Array<TypeContained>) << std::endl;
     }
-}
+
+}*/
 
 template <class TypeContained>
 Vector<TypeContained>::Vector() {
@@ -137,25 +140,33 @@ TypeContained* Vector<TypeContained>::c_ptr() const {
      return myArray->c_ptr();
 }
 
+/*
 template <class TypeContained>
 TypeContained* Vector<TypeContained>::cpu_ptr() const{
     return myArray->cpu_ptr();
 }
+*/
 
+/*
 template <class TypeContained>
 bool Vector<TypeContained>::onGPU() {
     return isGPU;
 }
+ */
 
+/*
 template <class TypeContained>
 void Vector<TypeContained>::setGPU(bool where) {
     isGPU = where;
 }
+ */
 
+/*
 template <class TypeContained>
 void Vector<TypeContained>::setRamPointerReference(std::shared_ptr<RamPointerBase> toMe){
     myArray->alternativeLocation = toMe;
 }
+ */
 
 // Add by Shangyu;
 // Use std::cout to print out the elements in a Vector
