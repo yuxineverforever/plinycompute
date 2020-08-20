@@ -3,12 +3,10 @@
 
 namespace pdb {
 
-    PDBCUDAStreamManager::PDBCUDAStreamManager(uint32_t streamNumInPool, bool isManager) : streamNum(streamNumInPool) {
-        if (isManager) {
-            return;
-        }
-        streams = new cudaStream_t[streamNumInPool];
-        handles = new cublasHandle_t[streamNumInPool];
+    PDBCUDAStreamManager::PDBCUDAStreamManager() {
+        streamNum = CUDA_STREAM_NUM;
+        streams = new cudaStream_t[streamNum];
+        handles = new cublasHandle_t[streamNum];
         for (uint32_t i = 0; i < streamNum; i++) {
             cudaStreamCreate(&streams[i]);
             cublasCreate(&handles[i]);
@@ -34,20 +32,5 @@ namespace pdb {
             //std::cout << "thread ID: " << threadID << " not find in map stream: " << streams[counter] << std::endl;
             return std::make_pair(streams[counter], handles[counter]);
         }
-    }
-
-    void PDBCUDAStreamManager::create(){
-        streamMgr = new PDBCUDAStreamManager;
-    }
-
-    PDBCUDAStreamManager* PDBCUDAStreamManager::get(){
-        // use std::call_once to make sure the singleton initialization is thread-safe
-        std::call_once(initFlag, PDBCUDAStreamManager::create);
-        assert(check()==true);
-        return streamMgr;
-    }
-
-    inline bool PDBCUDAStreamManager::check(){
-        return streamMgr != nullptr;
     }
 }

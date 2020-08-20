@@ -10,6 +10,15 @@ namespace pdb{
         next_page_id_ = 0;
     }
 
+    PDBCUDACPUStorageManager::~PDBCUDACPUStorageManager() {
+        for (const auto& toDelete: storageMap){
+            free(toDelete.second);
+        }
+        for (const auto& toDelete: freeList){
+            free(toDelete);
+        }
+    }
+
     void PDBCUDACPUStorageManager::ReadPage(page_id_t page_id, char* page_data){
         assert(isDevicePointer(page_data)==1);
         if (storageMap.find(page_id) == storageMap.end()){

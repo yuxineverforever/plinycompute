@@ -164,10 +164,13 @@ bool GPUInvoke(pdb::PDBCUDAVectorAddInvoker &f, pdb::Handle<pdb::Vector<float>> 
     return SimpleTypeGPUInvoke(f, OutObject, OutDim, In1Object, In1Dim);
 }
 
+//TODO: this should be added later
+/*
 std::shared_ptr<pdb::RamPointerBase>
 GPULazyAllocationHandler(pdb::PDBCUDAVectorAddInvoker &f, void* pointer, size_t size) {
     return f.LazyAllocationHandler(pointer, size);
 }
+ */
 
 
 /** By default, this GPUInvoke will handle the matrix multiple case for join.
@@ -179,6 +182,8 @@ GPULazyAllocationHandler(pdb::PDBCUDAVectorAddInvoker &f, void* pointer, size_t 
  * @return
  */
 
+//TODO: this should be added back later
+/*
 bool GPUInvoke(pdb::PDBCUDAOpType &op, pdb::Handle<pdb::Vector<float>> Out, std::vector<size_t> &OutDim,
                pdb::Handle<pdb::Vector<float>> In1, std::vector<size_t> &In1Dim) {
     if (op != pdb::PDBCUDAOpType::VectorAdd) {
@@ -208,6 +213,7 @@ bool GPUInvoke(pdb::PDBCUDAOpType &op, pdb::Handle<pdb::Vector<float>> Out, std:
 
     return SimpleTypeGPUInvoke(vectorAddInvoker, OutPtr, OutDim, In1Ptr, In1Dim);
 }
+ */
 
 /** By default, this GPUInvoke will handle the vector add case for aggregation.
  * @param op
@@ -233,3 +239,12 @@ bool GPUInvoke(pdb::PDBCUDAOpType &op, pdb::Handle<pdb::Vector<float>> Out, std:
     return SimpleTypeGPUInvoke(matrixMultipleInvoker, OutObject, OutDim, In1Object, In1Dim, In2Object, In2Dim);
 }
 
+bool GPUInvoke(pdb::PDBCUDAOpType& op, pdb::Handle<pdb::Vector<float>> Out, std::vector<size_t>& OutDim, pdb::Handle<pdb::Vector<float>> In1, std::vector<size_t>& In1Dim){
+    if (op!=pdb::PDBCUDAOpType::VectorAdd){
+        exit(-1);
+    }
+    pdb::PDBCUDAVectorAddInvoker vectorAddInvoker;
+    auto In1Object = In1->c_ptr();
+    auto OutObject = Out->c_ptr();
+    return SimpleTypeGPUInvoke(vectorAddInvoker, OutObject, OutDim, In1Object, In1Dim);
+}

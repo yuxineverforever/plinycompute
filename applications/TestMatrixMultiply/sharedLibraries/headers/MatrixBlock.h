@@ -36,9 +36,14 @@ public:
    * @param numRows - the number of rows the block has
    * @param numCols - the number of columns the block has
    */
+  //TODO: this should be added back later
+  /*
   MatrixBlock(uint32_t rowID, uint32_t colID, uint32_t numRows, uint32_t numCols, bool onGPU) : metaData(rowID, colID),
                                                                                     data(numRows, numCols, onGPU) {}
+    */
 
+  MatrixBlock(uint32_t rowID, uint32_t colID, uint32_t numRows, uint32_t numCols) : metaData(rowID, colID),
+                                                                                                data(numRows, numCols) {}
   ENABLE_DEEP_COPY
 
   /**

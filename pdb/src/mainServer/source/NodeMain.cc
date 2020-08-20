@@ -34,22 +34,38 @@
 #include <PDBBufferManagerDebugFrontend.h>
 #include <ExecutionServerBackend.h>
 #include <random>
+#include <storage/PDBCUDAStaticStorage.h>
+#include "PDBCUDAConfig.h"
 #include "storage/PDBCUDAMemoryManager.h"
-#include "stream/PDBCUDAStreamManager.h"
+#include "PDBCUDAStreamManager.h"
+
 
 namespace po = boost::program_options;
 namespace fs = boost::filesystem;
 using namespace pdb;
 
-
-void setGPUThreadManager(void ** gpuTaskMgr, uint32_t gpuThreadManagerPoolSize, bool isManager){
-    PDBCUDAStreamManager * tmp = new PDBCUDAStreamManager(gpuThreadManagerPoolSize, isManager);
-    *gpuTaskMgr = (void*)tmp;
+void setGPUMemoryManager(void ** gpuMgr, pdb::PDBBufferManagerInterfacePtr myMgr, bool isManager){
+    if (isManager) return;
+    PDBCUDAMemoryManager* tmp = new PDBCUDAMemoryManager(myMgr);
+    *gpuMgr = static_cast<void*>(tmp);
 }
 
-void setGPUMemoryManager(void ** gpuMgr, pdb::PDBBufferManagerInterfacePtr myMgr, uint32_t gpuBufferManagerPoolSize, bool isManager){
-    PDBCUDAMemoryManager* tmp = new PDBCUDAMemoryManager(myMgr, gpuBufferManagerPoolSize, isManager);
-    *gpuMgr = (void*)tmp;
+void setGPUStreamManager(void ** streamMgr, bool isManager){
+    if (isManager) return;
+    PDBCUDAStreamManager * tmp = new PDBCUDAStreamManager();
+    *streamMgr = static_cast<void*>(tmp);
+}
+
+void setGPUStaticStorage(void** staticStorage, bool isManager){
+    if (isManager) return;
+    PDBCUDAStaticStorage* tmp = new PDBCUDAStaticStorage();
+    *staticStorage = static_cast<void*>(tmp);
+}
+
+void setGPUDynamicStorage(void** dynamicStorage, bool isManager){
+    if (isManager) return;
+    PDBCUDADynamicStorage* tmp = new PDBCUDADynamicStorage();
+    *dynamicStorage = static_cast<void*>(tmp);
 }
 
 void writeBytes(int fileName, int pageNum, int pageSize, char *toMe) {
@@ -99,7 +115,10 @@ pdb::PDBPageHandle createRandomTempPage(pdb::PDBBufferManagerImpl &myMgr, vector
 }
 
 extern void* gpuMemoryManager;
-extern void* gpuThreadManager;
+extern void* gpuStreamManager;
+extern void* gpuStaticStorage;
+extern void* gpuDynamicStorage;
+
 int main(int argc, char *argv[]) {
 
     // create the program options
@@ -118,13 +137,9 @@ int main(int argc, char *argv[]) {
     desc.add_options()("managerPort,o", po::value<int32_t>(&config->managerPort)->default_value(8108), "Port of the manager");
     desc.add_options()("sharedMemSize,s", po::value<size_t>(&config->sharedMemSize)->default_value(20480), "The size of the shared memory (MB)");
     desc.add_options()("pageSize,e", po::value<size_t>(&config->pageSize)->default_value(1024l * 1024l * 1024l), "The size of a page (bytes)");
-    desc.add_options()("numThreads,t", po::value<int32_t>(&config->numThreads)->default_value(4) , "The number of threads we want to use");
+    desc.add_options()("numThreads,t", po::value<int32_t>(&config->numThreads)->default_value(1) , "The number of threads we want to use");
     desc.add_options()("rootDirectory,r", po::value<std::string>(&config->rootDirectory)->default_value("./pdbRoot"), "The root directory we want to use.");
     desc.add_options()("maxRetries", po::value<uint32_t>(&config->maxRetries)->default_value(5), "The maximum number of retries before we give up.");
-
-    // These are the options for GPU Buffer Manager / GPU Task Manager, the value may depends on the numThreads
-    desc.add_options()("gpuBufferManagerPoolSize", po::value<uint32_t>(&config->gpuBufferManagerPoolSize)->default_value(config->numThreads+2), "The size of the GPU Buffer Manager.");
-    desc.add_options()("gpuThreadManagerPoolSize", po::value<uint32_t>(&config->gpuThreadManagerPoolSize)->default_value( 4*(config->numThreads)+1 ), "The size of the GPU Task Manager.");
 
     // grab the options
     po::variables_map vm;
@@ -179,8 +194,10 @@ int main(int argc, char *argv[]) {
         backEnd.addFunctionality(std::make_shared<pdb::PDBStorageManagerBackend>());
         backEnd.addFunctionality(std::make_shared<pdb::ExecutionServerBackend>());
 
-        setGPUMemoryManager(&gpuMemoryManager, backEnd.getFunctionalityPtr<PDBBufferManagerInterface>(), config->gpuBufferManagerPoolSize, config->isManager);
-        setGPUThreadManager(&gpuThreadManager, config->gpuThreadManagerPoolSize, config->isManager);
+        setGPUMemoryManager(&gpuMemoryManager, backEnd.getFunctionalityPtr<PDBBufferManagerInterface>(),config->isManager);
+        setGPUStreamManager(&gpuStreamManager, config->isManager);
+        setGPUStaticStorage(&gpuStaticStorage, config->isManager);
+        setGPUDynamicStorage(&gpuDynamicStorage, config->isManager);
 
         // start the backend
         backEnd.startServer(make_shared<pdb::GenericWork>([&](PDBBuzzerPtr callerBuzzer) {

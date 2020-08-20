@@ -1,11 +1,12 @@
 #include "storage/PDBCUDAStaticStorage.h"
 
+extern void* gpuMemoryManager;
 namespace pdb{
 
     // TODO: we should have someway to "remember" input pages and unpin them.
     // TODO: principle: make sure when the computation is on, input/ouput pages are pinned. otherwise, pages should be unpinned.
 
-    inline size_t PDBCUDAStaticStorage::getObjectOffsetWithCPUPage(void* pageAddress, void* objectAddress) {
+    size_t PDBCUDAStaticStorage::getObjectOffsetWithCPUPage(void* pageAddress, void* objectAddress) {
         return (char *) objectAddress - (char *) pageAddress;
     }
 
@@ -22,7 +23,7 @@ namespace pdb{
         // objectAddress must be a CPU RAM Pointer
         assert(isDevicePointer(objectAddress) == 0);
 
-        pdb::PDBPagePtr whichPage = PDBCUDAMemoryManager::getCPUBufferManagerInterface()->getPageForObject(objectAddress);
+        pdb::PDBPagePtr whichPage = static_cast<PDBCUDAMemoryManager*>(gpuMemoryManager)->getCPUBufferManagerInterface()->getPageForObject(objectAddress);
         if (whichPage == nullptr) {
             std::cout << "getObjectCPUPage: cannot get page for this object!\n";
             exit(-1);
@@ -42,24 +43,11 @@ namespace pdb{
         } else {
             // otherwise, grab a new page, insert to map and return pageID.
             page_id_t newPageID;
-            PDBCUDAMemoryManager::get()->CreateNewPage(&newPageID);
+            static_cast<PDBCUDAMemoryManager*>(gpuMemoryManager)->CreateNewPage(&newPageID);
             pageMap.insert(std::make_pair(pageInfo, newPageID));
             // return true means the GPU page is newly created.
             return std::make_pair(newPageID, MemAllocateStatus::NEW);
         }
     }
 
-    void PDBCUDAStaticStorage::create(){
-        s_store = new PDBCUDAStaticStorage;
-    }
-
-    PDBCUDAStaticStorage* PDBCUDAStaticStorage::get(){
-        std::call_once(initFlag, PDBCUDAStaticStorage::create);
-        assert(check() == true);
-        return s_store;
-    }
-
-    bool PDBCUDAStaticStorage::check(){
-        return s_store!= nullptr;
-    }
 }

@@ -2,11 +2,16 @@
 #include "operators/PDBCUDAVectorAddInvoker.h"
 #include "stream/PDBCUDAStreamManager.h"
 
+extern void* gpuMemoryManager;
+extern void* gpuStreamManager;
+extern void* gpuStaticStorage;
+extern void* gpuDynamicStorage;
 namespace pdb {
     PDBCUDAVectorAddInvoker::PDBCUDAVectorAddInvoker() {
-        sstore_instance = PDBCUDAStaticStorage::get();
-        memmgr_instance = PDBCUDAMemoryManager::get();
-        stream_instance = PDBCUDAStreamManager::get();
+
+        sstore_instance = static_cast<PDBCUDAStaticStorage*>(gpuStaticStorage);
+        memmgr_instance = static_cast<PDBCUDAMemoryManager*>(gpuMemoryManager);
+        stream_instance = static_cast<PDBCUDAStreamManager*>(gpuStreamManager);
 
         PDBCUDAStreamUtils util = stream_instance->bindCPUThreadToStream();
 

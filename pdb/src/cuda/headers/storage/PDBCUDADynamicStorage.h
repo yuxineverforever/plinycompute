@@ -25,25 +25,15 @@ public:
 
     ~PDBCUDADynamicStorage() = default;
 
-    void* memMalloc(size_t size);
+    // void* memMalloc(size_t size);
 
-    void memFree(void *ptr);
+    // void memFree(void *ptr);
 
     //pdb::RamPointerReference keepMemAddress(void *gpuaddress, void *cpuaddress, size_t numbytes, size_t headerbytes);
 
     //RamPointerReference addRamPointerCollection(void *gpuaddress, void *cpuaddress, size_t numbytes = 0, size_t headerbytes = 0);
 
-    static void create();
-
-    static PDBCUDADynamicStorage* get();
-
-    static inline bool check();
-
-private:
-
-    static PDBCUDADynamicStorage* d_store;
-
-    static std::once_flag initFlag;
+public:
 
     std::vector<page_id_t> dynamicPages;
 
@@ -58,6 +48,7 @@ private:
 
     friend class PDBCUDAMemoryManager;
 };
+
 }
 
 #endif

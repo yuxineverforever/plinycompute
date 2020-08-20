@@ -27,7 +27,7 @@ class PDBCUDAStaticStorage{
 public:
     PDBCUDAStaticStorage() = default;
 
-    inline size_t getObjectOffsetWithCPUPage(void* pageAddress, void* objectAddress);
+    size_t getObjectOffsetWithCPUPage(void* pageAddress, void* objectAddress);
 
     pair<void*, size_t> getCPUPageFromObjectAddress(void* objectAddress);
 
@@ -37,18 +37,11 @@ public:
 
     std::pair<page_id_t, MemAllocateStatus> checkGPUPageTable(pair<void*, size_t> pageInfo);
 
-    static void create();
-    static PDBCUDAStaticStorage* get();
-    static inline bool check();
 
     inline bool IsCPUPageMovedToGPU(pair<void*, size_t> pageInfo);
     bool IsObjectOnGPU(void* objectAddress);
 
-private:
-
-    static PDBCUDAStaticStorage* s_store;
-
-    static std::once_flag initFlag;
+public:
 
     /**  H2DPageMap for mapping CPU bufferManager page info to GPU bufferManager page ids */
     /** Used for static allocation */
@@ -59,7 +52,6 @@ private:
 
     friend class PDBCUDAMemoryManager;
 };
-
 }
 
 #endif

@@ -11,7 +11,7 @@ set(CMAKE_CUDA_FLAGS "-arch=sm_75")
 
 # set CUDA path
 set (CUDA_INCLUDE_DIR "/usr/local/cuda/include")
-set (CUDA_BLAS_LIB "/usr/local/cuda-10.2/lib64/libcublas.so")
+set (CUDA_BLAS_LIB "/usr/lib/x86_64-linux-gnu/libcublas.so")
 set (CUDA_DART_LIB "/usr/local/cuda-10.2/lib64/libcudart.so")
 
 # use MKL and CUBLAS
@@ -29,7 +29,10 @@ message("as ${MKL_LIBRARIES}")
 
 # compile all the objects
 file(GLOB files "${PROJECT_SOURCE_DIR}/applications/TestMatrixMultiply/sharedLibraries/source/*.cc")
-file(GLOB cuda_source_files "${PROJECT_SOURCE_DIR}/pdb/src/cuda/source/*.cu" "${PROJECT_SOURCE_DIR}/pdb/src/cuda/source/*.cc")
+file(GLOB cuda_source_files "${PROJECT_SOURCE_DIR}/pdb/src/cuda/source/*/*.cu"
+                            "${PROJECT_SOURCE_DIR}/pdb/src/cuda/source/*/*.cc"
+                            "${PROJECT_SOURCE_DIR}/pdb/src/cuda/source/*.cu"
+                            "${PROJECT_SOURCE_DIR}/pdb/src/cuda/source/*.cc")
 
 # add all libraries
 foreach(file ${files})

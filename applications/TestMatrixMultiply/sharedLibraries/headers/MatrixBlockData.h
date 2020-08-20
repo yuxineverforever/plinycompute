@@ -21,10 +21,16 @@ public:
       isGPU = true;
   };
 
+    MatrixBlockData(uint32_t numRows, uint32_t numCols) : numRows(numRows), numCols(numCols){
+        // allocate the data
+        data = makeObject<Vector<float>>(numRows * numCols, numRows * numCols);
+    }
+  /*
   MatrixBlockData(uint32_t numRows, uint32_t numCols, bool onGPU) : numRows(numRows), numCols(numCols), isGPU(onGPU){
     // allocate the data
     data = makeObject<Vector<float>>(numRows * numCols, numRows * numCols, onGPU);
   }
+   */
 
   ENABLE_DEEP_COPY
 

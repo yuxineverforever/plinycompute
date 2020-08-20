@@ -4,6 +4,7 @@
 
 namespace pdb{
 
+    /*
     void* PDBCUDADynamicStorage::memMalloc(size_t size){
         if (dynamicPages.size() == 0) {
             page_id_t newPageID;
@@ -29,6 +30,7 @@ namespace pdb{
     void PDBCUDADynamicStorage::memFree(void *ptr){
         //TODO: to be implemented
     }
+    */
 
     /*
     pdb::RamPointerReference PDBCUDADynamicStorage::keepMemAddress(void *gpuAddress, void *cpuAddress, size_t numBytes, size_t headerBytes){
@@ -53,21 +55,4 @@ namespace pdb{
         }
     }
      */
-
-    void PDBCUDADynamicStorage::create(){
-        d_store = new PDBCUDADynamicStorage;
-    }
-
-    PDBCUDADynamicStorage* PDBCUDADynamicStorage::get(){
-
-        // use std::call_once to make sure the singleton initialization is thread-safe
-        std::call_once(initFlag, PDBCUDADynamicStorage::create);
-        assert(check()==true);
-        return d_store;
-    }
-
-    bool PDBCUDADynamicStorage::check(){
-        return d_store != nullptr;
-    }
-
 }

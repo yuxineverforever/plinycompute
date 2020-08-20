@@ -12,7 +12,7 @@
 #include "PDBCUDAConfig.h"
 #include "PDBCUDAReplacer.h"
 #include "PDBCUDACPUStorageManager.h"
-
+#include "PDBCUDAConfig.h"
 #include "ReaderWriterLatch.h"
 
 namespace pdb {
@@ -24,12 +24,9 @@ namespace pdb {
         /**
          * @param buffer - CPU buffer
          */
-        PDBCUDAMemoryManager(pdb::PDBBufferManagerInterfacePtr buffer, int32_t pool_Size, bool isManager) {
-            if (isManager) {
-                return;
-            }
+        PDBCUDAMemoryManager(pdb::PDBBufferManagerInterfacePtr buffer) {
             bufferManager = buffer;
-            poolSize = pool_Size;
+            poolSize = CUDA_MEM_MAMAGER_PAGE_NUM;
             pageSize = buffer->getMaxPageSize();
             pages = new PDBCUDAPage[poolSize];
             replacer = new ClockReplacer(poolSize);
@@ -40,16 +37,13 @@ namespace pdb {
                 pages[i].setPageSize(pageSize);
                 freeList.emplace_back(static_cast<int32_t>(i));
             }
+            cpu_storage_manager = new PDBCUDACPUStorageManager();
         }
 
         ~PDBCUDAMemoryManager() {
             delete[] pages;
             delete replacer;
-        }
-
-        bool SwapPageOut(page_id_t page_id) {
-            // TODO: implement it.
-            return true;
+            delete cpu_storage_manager;
         }
 
         void FindFramePlacement(frame_id_t& frame){
@@ -100,7 +94,12 @@ namespace pdb {
             return pageTable.size() == poolSize && replacer->Size() == 0;
         }
 
-        PDBCUDAPage* FetchPageImpl(page_id_t page_id){
+        /**
+         * Similar to @FetchPageImpl, except read from CPU RAM.
+         * @param page_id
+         * @return
+         */
+        PDBCUDAPage* FetchPageImplFromCPU(page_id_t page_id){
             auto iter = pageTable.find(page_id);
             if (iter != pageTable.end()){
                 replacer->Pin(iter->second);
@@ -121,6 +120,31 @@ namespace pdb {
             replacer->Pin(replacement);
             //TODO: change cpu_storage_manager
             cpu_storage_manager->ReadPage(page_id, pages[replacement].getBytes());
+            return &pages[replacement];
+        }
+
+
+        PDBCUDAPage* FetchPageImpl(page_id_t page_id){
+            auto iter = pageTable.find(page_id);
+            if (iter != pageTable.end()){
+                replacer->Pin(iter->second);
+                pages[iter->second].incrementPinCount();
+                return &pages[iter->second];
+            }
+            if (IsAllPagesPinned()){
+                return nullptr;
+            }
+            // if cannot find the page from page_table, then try to get the page from free_list or replacer.
+            frame_id_t replacement;
+            FindFramePlacement(replacement);
+            //update the page table
+            pageTable[page_id] = replacement;
+            pages[replacement].Reset();
+            pages[replacement].incrementPinCount();
+            pages[replacement].setPageID(page_id);
+            replacer->Pin(replacement);
+            // TODO: change cpu_storage_manager
+            // cpu_storage_manager->ReadPage(page_id, pages[replacement].getBytes());
             return &pages[replacement];
         }
 
@@ -179,7 +203,7 @@ namespace pdb {
             return true;
         }
 
-        static PDBBufferManagerInterfacePtr getCPUBufferManagerInterface(){
+        PDBBufferManagerInterfacePtr getCPUBufferManagerInterface(){
             return bufferManager;
         }
 
@@ -190,26 +214,27 @@ namespace pdb {
         }
         */
 
+        /*
         static void create(PDBBufferManagerInterfacePtr buffer, int32_t pool_Size, bool isManager){
             cudaMemMgr = new PDBCUDAMemoryManager(buffer, pool_Size, isManager);
         }
 
         static PDBCUDAMemoryManager* get(){
-                assert(check()== true);
-                return cudaMemMgr;
+            assert(check()== true);
+            return cudaMemMgr;
         }
 
         static inline bool check(){
             return cudaMemMgr!= nullptr;
         }
+         */
 
-    private:
+    public:
 
-        static PDBCUDAMemoryManager* cudaMemMgr;
         /**
          * the buffer manager to help maintain gpu page table
          */
-        static PDBBufferManagerInterfacePtr bufferManager;
+        PDBBufferManagerInterfacePtr bufferManager;
 
         /** Page table for keeping track of buffer pool pages. */
         std::unordered_map<page_id_t, frame_id_t> pageTable;
@@ -234,13 +259,13 @@ namespace pdb {
         /**
          * === Here is the part for mem allocator ===
          */
-
         ReaderWriterLatch RamPointerMutex{};
 
         /** This is a vector of all the pages for out parameter */
         std::vector<frame_id_t> allocatorPages;
 
     };
+
 }
 
 #endif

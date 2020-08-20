@@ -17,11 +17,9 @@ namespace pdb{
 
     public:
 
-        PDBCUDACPUStorageManager() = default;
+        PDBCUDACPUStorageManager(int32_t PageNum = CPU_STORAGE_MANAGER_PAGE_NUM, size_t PageSize = CPU_STORAGE_MANAGER_PAGE_SIZE);
 
-        PDBCUDACPUStorageManager(int32_t PageNum = CPU_STORAGE_MANAGER_PAGE_NUM, size_t PageSize = 1024*1024*1024);
-
-        ~PDBCUDACPUStorageManager() = default;
+        ~PDBCUDACPUStorageManager();
 
         void ReadPage(page_id_t page_id, char* page_data);
 

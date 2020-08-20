@@ -1,14 +1,18 @@
 #include "operators/PDBCUDAMatrixMultipleInvoker.h"
 #include "stream/PDBCUDAStreamManager.h"
 
+extern void* gpuMemoryManager;
+extern void* gpuStreamManager;
+extern void* gpuStaticStorage;
+extern void* gpuDynamicStorage;
 
 namespace pdb {
 
     PDBCUDAMatrixMultipleInvoker::PDBCUDAMatrixMultipleInvoker() {
 
-        sstore_instance = PDBCUDAStaticStorage::get();
-        memmgr_instance = PDBCUDAMemoryManager::get();
-        stream_instance = PDBCUDAStreamManager::get();
+        sstore_instance = static_cast<PDBCUDAStaticStorage*>(gpuStaticStorage);
+        memmgr_instance = static_cast<PDBCUDAMemoryManager*>(gpuMemoryManager);
+        stream_instance = static_cast<PDBCUDAStreamManager*>(gpuStreamManager);
 
         PDBCUDAStreamUtils util = stream_instance->bindCPUThreadToStream();
 
@@ -28,7 +32,7 @@ namespace pdb {
     void PDBCUDAMatrixMultipleInvoker::setInput(float* input, const std::vector<size_t> &inputDim) {
         int isDevice = isDevicePointer((void *) input);
         if (isDevice) {
-            inputArguments.push_back(std::make_pair(input, inputDim);
+            inputArguments.push_back(std::make_pair(input, inputDim));
             return;
         }
         // get CPU page for this object
@@ -38,12 +42,15 @@ namespace pdb {
         pair<page_id_t, MemAllocateStatus> gpuPageInfo = sstore_instance->checkGPUPageTable(cpuPageInfo);
 
         // fetch GPU page
-        PDBCUDAPage* cudaPage = memmgr_instance->FetchPageImpl(gpuPageInfo.first);
+        PDBCUDAPage* cudaPage;
 
         // if page is never written, move the content from CPU page to GPU page.
         // Notice, here, the size of GPU page may be larger than CPU page. Some smart way for De-fragmentation is needed.
         if (gpuPageInfo.second == MemAllocateStatus::NEW){
+            cudaPage = memmgr_instance->FetchPageImpl(gpuPageInfo.first);
             checkCudaErrors(cudaMemcpyAsync(cudaPage->getBytes(), cpuPageInfo.first, cpuPageInfo.second, cudaMemcpyKind::cudaMemcpyHostToDevice, cudaStream));
+        } else {
+            cudaPage = memmgr_instance->FetchPageImplFromCPU(gpuPageInfo.first);
         }
 
         // get the object address on GPU page

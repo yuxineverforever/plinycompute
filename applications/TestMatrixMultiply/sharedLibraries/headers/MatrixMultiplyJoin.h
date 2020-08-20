@@ -32,10 +32,10 @@ public:
       uint32_t K = in1->data.numCols;
 
       // mark the Matrix Block on GPU
-      bool onGPU = true;
+      //bool onGPU = true;
 
       // make the output block
-      Handle <MatrixBlock> out = makeObject<MatrixBlock>(in1->getRowID(), in2->getColID(), I, J, onGPU);
+      Handle <MatrixBlock> out = makeObject<MatrixBlock>(in1->getRowID(), in2->getColID(), I, J);
       vector<size_t> outdim = {I,J};
       vector<size_t> in1dim = {I,K};
       vector<size_t> in2dim = {K,J};

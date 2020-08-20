@@ -31,7 +31,7 @@ endforeach()
 
 set (CUDA_INCLUDE_DIR "/usr/local/cuda/include")
 set (CUDA_HELPER_INCLUDE_DIR "/usr/local/cuda/samples/common/inc")
-set (CUDA_BLAS_LIB "/usr/local/cuda-10.2/lib64/libcublas.so")
+set (CUDA_BLAS_LIB "/usr/lib/x86_64-linux-gnu/libcublas.so")
 set (CUDA_DART_LIB "/usr/local/cuda-10.2/lib64/libcudart.so")
 
 option(USE_CUDA "Use CUDA" ON)
@@ -181,7 +181,7 @@ file(GLOB EXECUTION_SERVER_SOURCE "${PROJECT_SOURCE_DIR}/pdb/src/executionServer
 file(GLOB CUDA_SOURCE "${PROJECT_SOURCE_DIR}/pdb/src/cuda/source/*/*.cu"
                       "${PROJECT_SOURCE_DIR}/pdb/src/cuda/source/*/*.cc"
                       "${PROJECT_SOURCE_DIR}/pdb/src/cuda/source/*.cu"
-                      "${PROJECT_SOURCE_DIR}/pdb/src/cuda/source/*.cu")
+                      "${PROJECT_SOURCE_DIR}/pdb/src/cuda/source/*.cc")
 
 set(SOURCE_FILES_SQL_LITE ${PROJECT_SOURCE_DIR}/third-party/sqlite/source/sqlite3.c)
 

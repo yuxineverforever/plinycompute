@@ -28,24 +28,13 @@ namespace pdb {
 
     public:
 
-        PDBCUDAStreamManager(uint32_t streamNumInPool = CUDA_STREAM_NUM, bool isManager = false);
+        PDBCUDAStreamManager();
 
         ~PDBCUDAStreamManager();
 
         PDBCUDAStreamUtils bindCPUThreadToStream();
 
-        static void create();
-
-        static PDBCUDAStreamManager* get();
-
-        static inline bool check();
-
-    private:
-
-        static PDBCUDAStreamManager* streamMgr;
-
-        static std::once_flag initFlag;
-
+    public:
         std::map<long, uint64_t> bindMap;
 
         cudaStream_t* streams;
