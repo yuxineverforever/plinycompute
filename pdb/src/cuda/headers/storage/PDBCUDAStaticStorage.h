@@ -37,7 +37,6 @@ public:
 
     std::pair<page_id_t, MemAllocateStatus> checkGPUPageTable(pair<void*, size_t> pageInfo);
 
-
     inline bool IsCPUPageMovedToGPU(pair<void*, size_t> pageInfo);
     bool IsObjectOnGPU(void* objectAddress);
 
@@ -48,7 +47,7 @@ public:
     std::map<pair<void *, size_t>, page_id_t> pageMap;
 
     /** one latch to protect the gpuPageTable access */
-    ReaderWriterLatch pageTableMutex;
+    ReaderWriterLatch pageMapLatch;
 
     friend class PDBCUDAMemoryManager;
 };

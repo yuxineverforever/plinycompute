@@ -9,13 +9,10 @@ extern void* gpuDynamicStorage;
 namespace pdb {
 
     PDBCUDAMatrixMultipleInvoker::PDBCUDAMatrixMultipleInvoker() {
-
         sstore_instance = static_cast<PDBCUDAStaticStorage*>(gpuStaticStorage);
         memmgr_instance = static_cast<PDBCUDAMemoryManager*>(gpuMemoryManager);
         stream_instance = static_cast<PDBCUDAStreamManager*>(gpuStreamManager);
-
         PDBCUDAStreamUtils util = stream_instance->bindCPUThreadToStream();
-
         cudaStream = util.first;
         cudaHandle = util.second;
     }
@@ -47,9 +44,10 @@ namespace pdb {
         // if page is never written, move the content from CPU page to GPU page.
         // Notice, here, the size of GPU page may be larger than CPU page. Some smart way for De-fragmentation is needed.
         if (gpuPageInfo.second == MemAllocateStatus::NEW){
-            cudaPage = memmgr_instance->FetchPageImpl(gpuPageInfo.first);
+            cudaPage = memmgr_instance->FetchEmptyPageImpl(gpuPageInfo.first);
             checkCudaErrors(cudaMemcpyAsync(cudaPage->getBytes(), cpuPageInfo.first, cpuPageInfo.second, cudaMemcpyKind::cudaMemcpyHostToDevice, cudaStream));
         } else {
+            // if page has been swapped out of gpu
             cudaPage = memmgr_instance->FetchPageImplFromCPU(gpuPageInfo.first);
         }
 
@@ -73,7 +71,7 @@ namespace pdb {
 
         pair<page_id_t, MemAllocateStatus> gpuPageInfo = sstore_instance->checkGPUPageTable(cpuPageInfo);
 
-        PDBCUDAPage* cudaPage = memmgr_instance->FetchPageImpl(gpuPageInfo.first);
+        PDBCUDAPage* cudaPage = memmgr_instance->FetchEmptyPageImpl(gpuPageInfo.first);
 
         void* cudaObjectPointer = static_cast<char*>(cudaPage->getBytes()) + sstore_instance->getObjectOffsetWithCPUPage(cpuPageInfo.first, output);
 

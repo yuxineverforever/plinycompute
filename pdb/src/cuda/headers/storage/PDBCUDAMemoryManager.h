@@ -67,12 +67,15 @@ namespace pdb {
                 }
                 pageTable.erase(res);
             } else {
-                std::cout << "No available memory in FetchPageImpl()!\n";
+                std::cout << "No available memory in FindFramePlacement()!\n";
                 exit(-1);
             }
         }
 
         bool UnpinPageImpl(page_id_t page_id, bool is_dirty) {
+
+            std::lock_guard<std::mutex> guard(latch);
+
             auto iter = pageTable.find(page_id);
             if (iter == pageTable.end()){
                 return false;
@@ -100,6 +103,7 @@ namespace pdb {
          * @return
          */
         PDBCUDAPage* FetchPageImplFromCPU(page_id_t page_id){
+            std::lock_guard<std::mutex> guard(latch);
             auto iter = pageTable.find(page_id);
             if (iter != pageTable.end()){
                 replacer->Pin(iter->second);
@@ -124,7 +128,9 @@ namespace pdb {
         }
 
 
-        PDBCUDAPage* FetchPageImpl(page_id_t page_id){
+        PDBCUDAPage* FetchEmptyPageImpl(page_id_t page_id){
+            std::lock_guard<std::mutex> guard(latch);
+
             auto iter = pageTable.find(page_id);
             if (iter != pageTable.end()){
                 replacer->Pin(iter->second);
@@ -148,10 +154,10 @@ namespace pdb {
             return &pages[replacement];
         }
 
+        /*
         PDBCUDAPage* NewPageImpl(page_id_t *page_id) {
             //TODO: change cpu_storage_manager
             *page_id = cpu_storage_manager->AllocatePage();
-
             if (IsAllPagesPinned()){
                 return nullptr;
             }
@@ -165,12 +171,15 @@ namespace pdb {
             replacer->Pin(placement);
             return &pages[placement];
         }
+         */
 
         void CreateNewPage(page_id_t *page_id){
             *page_id = cpu_storage_manager->AllocatePage();
         }
 
         bool DeletePageImpl(page_id_t page_id) {
+
+            std::lock_guard<std::mutex> guard(latch);
             //TODO: change cpu_storage_manager
             cpu_storage_manager->DeallocatePage(page_id);
             auto iter = pageTable.find(page_id);
@@ -191,6 +200,8 @@ namespace pdb {
         }
 
         bool FlushPageImpl(page_id_t page_id) {
+
+            std::lock_guard<std::mutex> guard(latch);
             // if page_id is not valid
             assert(page_id != INVALID_PAGE_ID);
             // if page_id cannot be find from page_table
@@ -207,27 +218,6 @@ namespace pdb {
             return bufferManager;
         }
 
-        /**
-        void swapPage(){
-            PDBPageHandle cpuPage = bufferManager->getPage();
-            cpuPage->getBytes();
-        }
-        */
-
-        /*
-        static void create(PDBBufferManagerInterfacePtr buffer, int32_t pool_Size, bool isManager){
-            cudaMemMgr = new PDBCUDAMemoryManager(buffer, pool_Size, isManager);
-        }
-
-        static PDBCUDAMemoryManager* get(){
-            assert(check()== true);
-            return cudaMemMgr;
-        }
-
-        static inline bool check(){
-            return cudaMemMgr!= nullptr;
-        }
-         */
 
     public:
 
@@ -256,14 +246,7 @@ namespace pdb {
 
         PDBCUDACPUStorageManager* cpu_storage_manager;
 
-        /**
-         * === Here is the part for mem allocator ===
-         */
-        ReaderWriterLatch RamPointerMutex{};
-
-        /** This is a vector of all the pages for out parameter */
-        std::vector<frame_id_t> allocatorPages;
-
+        std::mutex latch;
     };
 
 }

@@ -23,7 +23,7 @@ namespace pdb{
         }
         size_t start = bytesUsed;
         bytesUsed += size;
-        PDBCUDAPage* currentPage = PDBCUDAMemoryManager::get()->FetchPageImpl(dynamicPages.back());
+        PDBCUDAPage* currentPage = PDBCUDAMemoryManager::get()->FetchEmptPageImpl(dynamicPages.back());
         return static_cast<void *>(currentPage->getBytes() + start) ;
     }
 

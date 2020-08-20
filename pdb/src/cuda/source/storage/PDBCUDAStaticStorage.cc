@@ -36,15 +36,28 @@ namespace pdb{
 
     std::pair<page_id_t, MemAllocateStatus> PDBCUDAStaticStorage::checkGPUPageTable(pair<void*, size_t> pageInfo){
         // If Page has been added, just return it.
+        pageMapLatch.RLock();
+
         if (pageMap.find(pageInfo) != pageMap.end()){
             // return false means the GPU page is already created.
+            pageMapLatch.RUnlock();
             return std::make_pair(pageMap[pageInfo], MemAllocateStatus::OLD);
 
         } else {
+            pageMapLatch.RUnlock();
+
+            pageMapLatch.WLock();
+            if (pageMap.find(pageInfo) != pageMap.end()){
+                pageMapLatch.WUnlock();
+                return std::make_pair(pageMap[pageInfo], MemAllocateStatus::OLD);
+            }
+
             // otherwise, grab a new page, insert to map and return pageID.
             page_id_t newPageID;
             static_cast<PDBCUDAMemoryManager*>(gpuMemoryManager)->CreateNewPage(&newPageID);
             pageMap.insert(std::make_pair(pageInfo, newPageID));
+
+            pageMapLatch.WUnlock();
             // return true means the GPU page is newly created.
             return std::make_pair(newPageID, MemAllocateStatus::NEW);
         }
