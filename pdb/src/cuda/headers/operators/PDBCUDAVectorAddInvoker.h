@@ -56,5 +56,6 @@ namespace pdb {
         PDBCUDAStaticStorage* sstore_instance;
         PDBCUDAMemoryManager* memmgr_instance;
     };
+
 }
 #endif

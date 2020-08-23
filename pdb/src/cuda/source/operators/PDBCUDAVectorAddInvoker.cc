@@ -6,6 +6,8 @@ extern void* gpuMemoryManager;
 extern void* gpuStreamManager;
 extern void* gpuStaticStorage;
 extern void* gpuDynamicStorage;
+extern std::atomic<int> debugger;
+
 namespace pdb {
     PDBCUDAVectorAddInvoker::PDBCUDAVectorAddInvoker() {
 
@@ -45,7 +47,11 @@ namespace pdb {
         const float alpha = 1.0;
         cublasErrCheck(cublasSaxpy(cudaHandle, N, &alpha, in2data, 1, in1data, 1));
         //TODO:
-        checkCudaErrors(cudaMemcpyAsync(static_cast<void*>(copyBackArgument), static_cast<void*>(outputArguments.first), outputArguments.second[0] * sizeof(float), cudaMemcpyDeviceToHost, cudaStream));
+        cudaMemcpyAsync(static_cast<void*>(copyBackArgument), static_cast<void*>(outputArguments.first), outputArguments.second[0] * sizeof(float), cudaMemcpyDeviceToHost, cudaStream);
+        cudaError_t err = cudaGetLastError();
+        if (err!=cudaSuccess){
+            throw std::runtime_error("cuda Error!\n");
+        }
     }
 
     void PDBCUDAVectorAddInvoker::setInput(float *input, const std::vector<size_t> &inputDim) {
@@ -67,14 +73,18 @@ namespace pdb {
         // if page is never written, move the content from CPU page to GPU page.
         // Notice, here, the size of GPU page may be larger than CPU page. Some smart way for De-fragmentation is needed.
         if (gpuPageInfo.second == MemAllocateStatus::NEW){
+            std::cout<< " PDBCUDAVectorAddInvoker: "<< "Mem Allocate Status: " << "new" << std::endl;
             cudaPage = memmgr_instance->FetchEmptyPageImpl(gpuPageInfo.first);
             checkCudaErrors(cudaMemcpyAsync(cudaPage->getBytes(), cpuPageInfo.first, cpuPageInfo.second, cudaMemcpyKind::cudaMemcpyHostToDevice, cudaStream));
         } else {
+
+            std::cout<< " PDBCUDAVectorAddInvoker: "<< "Mem Allocate Status: " << "old" << std::endl;
             // if page has been swapped out of gpu.
             cudaPage = memmgr_instance->FetchPageImplFromCPU(gpuPageInfo.first);
         }
 
         void* cudaObjectPointer = static_cast<char*>(cudaPage->getBytes()) + sstore_instance->getObjectOffsetWithCPUPage(cpuPageInfo.first, input);
+        std::cout << "setInput Argument: " << cudaObjectPointer << std::endl;
         inputArguments.push_back(std::make_pair(static_cast<float*> (cudaObjectPointer), inputDim));
 
         // book keep the page id and the real number of bytes used
@@ -88,6 +98,8 @@ namespace pdb {
     // }
 
     void PDBCUDAVectorAddInvoker::setOutput(float *output, const std::vector<size_t> & outputDim) {
+
+        debugger = debugger+1;
 
         int isDevice = isDevicePointer((void *) output);
         if (isDevice) {
@@ -104,6 +116,12 @@ namespace pdb {
 
         void* cudaObjectPointer = static_cast<char*>(cudaPage->getBytes()) + sstore_instance->getObjectOffsetWithCPUPage(cpuPageInfo.first, output);
 
+        std::cout << "setOutput Argument: " << cudaObjectPointer << std::endl;
+
+        if (cudaObjectPointer == reinterpret_cast<void*>(0x17c)){
+            exit(0);
+        }
+
         outputArguments = std::make_pair(static_cast<float *>(cudaObjectPointer), outputDim);
 
         outputPages.push_back(std::make_pair(gpuPageInfo.first, cpuPageInfo.second));
@@ -111,5 +129,4 @@ namespace pdb {
         // TODO: this should be removed in the future.
         copyBackArgument = output;
     }
-
 };

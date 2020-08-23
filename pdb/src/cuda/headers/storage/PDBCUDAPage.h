@@ -62,7 +62,7 @@ namespace pdb{
     private:
 
         inline void ResetMemory() {
-            //assert(data != nullptr);
+            assert(data != nullptr);
             assert(page_size != 0);
             cudaMemset(data, 0, page_size);
         }

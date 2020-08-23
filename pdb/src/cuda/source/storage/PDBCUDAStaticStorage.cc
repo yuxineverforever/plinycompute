@@ -35,6 +35,11 @@ namespace pdb{
     }
 
     std::pair<page_id_t, MemAllocateStatus> PDBCUDAStaticStorage::checkGPUPageTable(pair<void*, size_t> pageInfo){
+
+
+        //TODO: I believe finally I understand where the problem comes.
+        // the GPU PageTable should also be changed the some page is evicted from GPUPageTable.
+
         // If Page has been added, just return it.
         pageMapLatch.RLock();
 

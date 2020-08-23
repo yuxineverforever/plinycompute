@@ -16,7 +16,6 @@ void pdb::AggregationPipeline::run() {
   // aggregate all hash maps
   PDBPageHandle inputPage;
   while ((inputPage = inputPageSet->getNextPage(workerID)) != nullptr) {
-
     // write out the page
     merger->writeOutPage(inputPage, myRAM->outputSink);
   }

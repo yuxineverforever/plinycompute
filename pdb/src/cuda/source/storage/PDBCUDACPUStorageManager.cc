@@ -22,7 +22,8 @@ namespace pdb{
     void PDBCUDACPUStorageManager::ReadPage(page_id_t page_id, char* page_data){
         assert(isDevicePointer(page_data)==1);
         if (storageMap.find(page_id) == storageMap.end()){
-            throw std::runtime_error("Cannot find the require page in CPU storage manager during readPage!");
+            exit(0);
+            //throw std::runtime_error("Cannot find the require page in CPU storage manager during readPage!");
         }
         void* page = storageMap[page_id];
         storageMap.erase(page_id);

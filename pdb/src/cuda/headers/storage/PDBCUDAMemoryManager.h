@@ -31,7 +31,7 @@ namespace pdb {
             pages = new PDBCUDAPage[poolSize];
             replacer = new ClockReplacer(poolSize);
             for (size_t i = 0; i < poolSize; i++) {
-                void *cudaPointer;
+                void *cudaPointer = nullptr;
                 cudaMalloc((void **) &cudaPointer, pageSize);
                 pages[i].setBytes(static_cast<char*>(cudaPointer));
                 pages[i].setPageSize(pageSize);
@@ -104,6 +104,11 @@ namespace pdb {
          */
         PDBCUDAPage* FetchPageImplFromCPU(page_id_t page_id){
             std::lock_guard<std::mutex> guard(latch);
+
+            std::cout << "print Page Table\n";
+            for (const auto& p: pageTable){
+                std::cout << "page id: "<< p.first << "frame id: " << p.second << std::endl;
+            }
             auto iter = pageTable.find(page_id);
             if (iter != pageTable.end()){
                 replacer->Pin(iter->second);
@@ -151,12 +156,15 @@ namespace pdb {
             replacer->Pin(replacement);
             // TODO: change cpu_storage_manager
             // cpu_storage_manager->ReadPage(page_id, pages[replacement].getBytes());
+            if (pages[replacement].getBytes() == nullptr){
+                exit(-1);
+            }
             return &pages[replacement];
         }
 
         /*
         PDBCUDAPage* NewPageImpl(page_id_t *page_id) {
-            //TODO: change cpu_storage_manager
+            // TODO: change cpu_storage_manager
             *page_id = cpu_storage_manager->AllocatePage();
             if (IsAllPagesPinned()){
                 return nullptr;
