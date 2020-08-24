@@ -35,7 +35,7 @@ public:
     // If size == Mgr.PageSize, use STATIC
     // If size < Mgr.PageSize, use DYNAMIC
 
-    std::pair<page_id_t, MemAllocateStatus> checkGPUPageTable(pair<void*, size_t> pageInfo);
+    PDBCUDAPage* getGPUPageFromCPUPage(const pair<void*, size_t>& pageInfo, page_id_t* gpuPageID);
 
     inline bool IsCPUPageMovedToGPU(pair<void*, size_t> pageInfo);
     bool IsObjectOnGPU(void* objectAddress);
@@ -47,7 +47,7 @@ public:
     std::map<pair<void *, size_t>, page_id_t> pageMap;
 
     /** one latch to protect the gpuPageTable access */
-    ReaderWriterLatch pageMapLatch;
+    std::mutex pageMapLatch;
 
     friend class PDBCUDAMemoryManager;
 };

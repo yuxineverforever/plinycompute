@@ -6,8 +6,6 @@
 #include <cuda_runtime.h>
 
 namespace pdb{
-
-
     /**
      * NONE: default value
      * STATIC_PAGE: usually the page for `in` parameter
@@ -35,6 +33,11 @@ namespace pdb{
 
         inline size_t getPageSize(){ return page_size; }
 
+        inline void setIsMoved(bool isMoved){ is_moved = isMoved; }
+
+        /** @return whether the page has been moved to GPU */
+        inline bool isMoved(){ return is_moved; }
+
         inline void setDirty(bool isDirty){ is_dirty = isDirty;}
 
         inline bool isDirty() { return is_dirty; }
@@ -57,7 +60,7 @@ namespace pdb{
 
         inline void setPageSize(int size) { page_size = size;}
 
-        inline void Reset(){ ResetMemory(); pin_count = 0; is_dirty = false; page_id = INVALID_PAGE_ID;}
+        inline void Reset(){ ResetMemory(); pin_count = 0; is_dirty = false; is_moved = false; page_id = INVALID_PAGE_ID;}
 
     private:
 
@@ -72,6 +75,7 @@ namespace pdb{
 
         char* data = nullptr;
         bool is_dirty = false;
+        bool is_moved = false;
         int pin_count = 0;
         int page_size = 0;
     };

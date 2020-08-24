@@ -162,9 +162,9 @@ namespace pdb {
             return &pages[replacement];
         }
 
-        /*
         PDBCUDAPage* NewPageImpl(page_id_t *page_id) {
-            // TODO: change cpu_storage_manager
+            std::lock_guard<std::mutex> guard(latch);
+            // Note: new page should not read from CPU storage!
             *page_id = cpu_storage_manager->AllocatePage();
             if (IsAllPagesPinned()){
                 return nullptr;
@@ -179,7 +179,7 @@ namespace pdb {
             replacer->Pin(placement);
             return &pages[placement];
         }
-         */
+
 
         void CreateNewPage(page_id_t *page_id){
             *page_id = cpu_storage_manager->AllocatePage();
@@ -208,8 +208,6 @@ namespace pdb {
         }
 
         bool FlushPageImpl(page_id_t page_id) {
-
-            std::lock_guard<std::mutex> guard(latch);
             // if page_id is not valid
             assert(page_id != INVALID_PAGE_ID);
             // if page_id cannot be find from page_table

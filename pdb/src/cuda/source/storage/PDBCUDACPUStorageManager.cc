@@ -21,17 +21,19 @@ namespace pdb{
 
     void PDBCUDACPUStorageManager::ReadPage(page_id_t page_id, char* page_data){
         assert(isDevicePointer(page_data)==1);
+        std::lock_guard<std::mutex> guard(latch);
         if (storageMap.find(page_id) == storageMap.end()){
-            exit(0);
-            //throw std::runtime_error("Cannot find the require page in CPU storage manager during readPage!");
+            throw std::runtime_error("Cannot find the require page in CPU storage manager during readPage!");
         }
         void* page = storageMap[page_id];
         storageMap.erase(page_id);
+        freeList.push_back(page);
         checkCudaErrors(cudaMemcpy(page_data, page, pageSize, cudaMemcpyHostToDevice));
     }
 
     void PDBCUDACPUStorageManager::WritePage(page_id_t page_id, const char *page_data){
-        assert(isDevicePointer(page_data)==0);
+        assert(isDevicePointer(page_data)==1);
+        std::lock_guard<std::mutex> guard(latch);
         if (storageMap.find(page_id) != storageMap.end()){
             throw std::runtime_error("Duplicate page in CPU storage manager during writePage!");
         }

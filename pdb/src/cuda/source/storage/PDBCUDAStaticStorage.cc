@@ -22,7 +22,6 @@ namespace pdb{
     pair<void*, size_t> PDBCUDAStaticStorage::getCPUPageFromObjectAddress(void* objectAddress) {
         // objectAddress must be a CPU RAM Pointer
         assert(isDevicePointer(objectAddress) == 0);
-
         pdb::PDBPagePtr whichPage = static_cast<PDBCUDAMemoryManager*>(gpuMemoryManager)->getCPUBufferManagerInterface()->getPageForObject(objectAddress);
         if (whichPage == nullptr) {
             std::cout << "getObjectCPUPage: cannot get page for this object!\n";
@@ -34,37 +33,26 @@ namespace pdb{
         return pageInfo;
     }
 
-    std::pair<page_id_t, MemAllocateStatus> PDBCUDAStaticStorage::checkGPUPageTable(pair<void*, size_t> pageInfo){
 
+    PDBCUDAPage* PDBCUDAStaticStorage::getGPUPageFromCPUPage(const pair<void*, size_t>& pageInfo, page_id_t* gpuPageID){
+        //TODO: We should change the mutex to a ReadWrite Lock
 
-        //TODO: I believe finally I understand where the problem comes.
-        // the GPU PageTable should also be changed the some page is evicted from GPUPageTable.
-
-        // If Page has been added, just return it.
-        pageMapLatch.RLock();
-
+        std::lock_guard<std::mutex> guard(pageMapLatch);
         if (pageMap.find(pageInfo) != pageMap.end()){
             // return false means the GPU page is already created.
-            pageMapLatch.RUnlock();
-            return std::make_pair(pageMap[pageInfo], MemAllocateStatus::OLD);
+            PDBCUDAPage* cudaPage = static_cast<PDBCUDAMemoryManager*>(gpuMemoryManager)->FetchPageImplFromCPU(pageMap[pageInfo]);
+            *gpuPageID = pageMap[pageInfo];
 
+            return cudaPage;
         } else {
-            pageMapLatch.RUnlock();
-
-            pageMapLatch.WLock();
-            if (pageMap.find(pageInfo) != pageMap.end()){
-                pageMapLatch.WUnlock();
-                return std::make_pair(pageMap[pageInfo], MemAllocateStatus::OLD);
-            }
-
             // otherwise, grab a new page, insert to map and return pageID.
             page_id_t newPageID;
-            static_cast<PDBCUDAMemoryManager*>(gpuMemoryManager)->CreateNewPage(&newPageID);
-            pageMap.insert(std::make_pair(pageInfo, newPageID));
+            PDBCUDAPage* cudaPage = static_cast<PDBCUDAMemoryManager*>(gpuMemoryManager)->NewPageImpl(&newPageID);
 
-            pageMapLatch.WUnlock();
+            *gpuPageID = newPageID;
+            pageMap.insert(std::make_pair(pageInfo, newPageID));
             // return true means the GPU page is newly created.
-            return std::make_pair(newPageID, MemAllocateStatus::NEW);
+            return cudaPage;
         }
     }
 

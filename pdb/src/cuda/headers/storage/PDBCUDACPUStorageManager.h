@@ -6,6 +6,7 @@
 #include <map>
 #include <stdexcept>
 #include <atomic>
+#include <mutex>
 #include "cuda_runtime.h"
 #include "helper_cuda.h"
 #include "PDBCUDAUtility.h"
@@ -46,6 +47,8 @@ namespace pdb{
         std::list<void*> freeList;
 
         std::map<page_id_t, void*> storageMap;
+
+        std::mutex latch;
     };
 }
 #endif
