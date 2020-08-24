@@ -28,7 +28,7 @@ namespace pdb{
 
         void DeallocatePage(page_id_t page_id);
 
-        void WritePage(page_id_t page_id, const char *page_data);
+        void WritePage(page_id_t page_id, void *page_data);
 
         RamPointerReference handleInputObjectWithRamPointer(std::pair<void *, size_t> pageInfo, void *objectAddress, size_t size, cudaStream_t cs);
 

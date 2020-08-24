@@ -15,7 +15,7 @@ namespace pdb{
 
     static constexpr int32_t INVALID_PAGE_ID = -1;
     static constexpr int32_t CUDA_STREAM_NUM = 32;
-    static constexpr int32_t CUDA_MEM_MAMAGER_PAGE_NUM = 8;
+    static constexpr int32_t CUDA_MEM_MAMAGER_PAGE_NUM = 9;
     static constexpr int32_t CPU_STORAGE_MANAGER_PAGE_NUM = 7;
     static constexpr size_t  CPU_STORAGE_MANAGER_PAGE_SIZE = 1024*1024*1024;
 }

@@ -32,7 +32,7 @@ namespace pdb {
             replacer = new ClockReplacer(poolSize);
             for (size_t i = 0; i < poolSize; i++) {
                 void *cudaPointer = nullptr;
-                cudaMalloc((void **) &cudaPointer, pageSize);
+                checkCudaErrors(cudaMalloc((void **) &cudaPointer, pageSize));
                 pages[i].setBytes(static_cast<char*>(cudaPointer));
                 pages[i].setPageSize(pageSize);
                 freeList.emplace_back(static_cast<int32_t>(i));
@@ -116,7 +116,8 @@ namespace pdb {
                 return &pages[iter->second];
             }
             if (IsAllPagesPinned()){
-                return nullptr;
+                throw std::runtime_error("Not enough GPU Memory! All cuda pages have been pinned!\n");
+                exit(-1);
             }
             // if cannot find the page from page_table, then try to get the page from free_list or replacer.
             frame_id_t replacement;

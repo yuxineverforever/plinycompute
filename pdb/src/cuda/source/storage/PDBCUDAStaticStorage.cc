@@ -42,13 +42,11 @@ namespace pdb{
             // return false means the GPU page is already created.
             PDBCUDAPage* cudaPage = static_cast<PDBCUDAMemoryManager*>(gpuMemoryManager)->FetchPageImplFromCPU(pageMap[pageInfo]);
             *gpuPageID = pageMap[pageInfo];
-
             return cudaPage;
         } else {
             // otherwise, grab a new page, insert to map and return pageID.
             page_id_t newPageID;
             PDBCUDAPage* cudaPage = static_cast<PDBCUDAMemoryManager*>(gpuMemoryManager)->NewPageImpl(&newPageID);
-
             *gpuPageID = newPageID;
             pageMap.insert(std::make_pair(pageInfo, newPageID));
             // return true means the GPU page is newly created.

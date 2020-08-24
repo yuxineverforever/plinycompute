@@ -31,7 +31,7 @@ namespace pdb{
         checkCudaErrors(cudaMemcpy(page_data, page, pageSize, cudaMemcpyHostToDevice));
     }
 
-    void PDBCUDACPUStorageManager::WritePage(page_id_t page_id, const char *page_data){
+    void PDBCUDACPUStorageManager::WritePage(page_id_t page_id, void *page_data){
         assert(isDevicePointer(page_data)==1);
         std::lock_guard<std::mutex> guard(latch);
         if (storageMap.find(page_id) != storageMap.end()){
