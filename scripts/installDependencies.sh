@@ -28,7 +28,6 @@
 if [[ "$OSTYPE" == "darwin"* ]]; then
 
     brew install ossp-uuid
-    brew install gsl
     brew install snappy
     brew install bison
     brew install flex
@@ -38,7 +37,6 @@ elif [[ "$OSTYPE" == "linux-gnu" ]]; then
 	
     sudo apt-get -y install uuid-dev
     sudo apt-get -y install libeigen3-dev
-    sudo apt-get -y install libgsl-dev
     sudo apt-get -y install libsnappy1v5 libsnappy-dev
     sudo apt-get -y install libboost-dev libboost-program-options-dev libboost-filesystem-dev libboost-system-dev
     sudo apt-get -y install bison flex
